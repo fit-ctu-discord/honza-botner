@@ -1,4 +1,4 @@
-namespace OsBot.Core
+namespace HonzaBotner.Discord
 {
     public class DiscordConfig
     {

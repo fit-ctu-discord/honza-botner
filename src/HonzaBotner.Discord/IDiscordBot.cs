@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OsBot.Core
+namespace HonzaBotner.Discord
 {
     public interface IDiscordBot
     {

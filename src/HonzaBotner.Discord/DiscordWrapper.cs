@@ -3,7 +3,7 @@ using DSharpPlus.EventArgs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace OsBot.Core
+namespace HonzaBotner.Discord
 {
     public class DiscordWrapper
     {
