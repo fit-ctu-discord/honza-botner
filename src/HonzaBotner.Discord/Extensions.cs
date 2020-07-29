@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Extensions.Logging;
 
-namespace OsBot.Core
+namespace HonzaBotner.Discord
 {
     internal static class Extensions
     {

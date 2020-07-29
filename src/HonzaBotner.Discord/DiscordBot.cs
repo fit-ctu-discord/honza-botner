@@ -5,9 +5,9 @@ using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OsBot.Core.Command;
+using HonzaBotner.Discord.Command;
 
-namespace OsBot.Core
+namespace HonzaBotner.Discord
 {
     internal class DiscordBot : IDiscordBot
     {

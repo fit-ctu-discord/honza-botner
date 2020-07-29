@@ -2,7 +2,7 @@ using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace OsBot.Core
+namespace HonzaBotner.Discord
 {
     public static class ServiceCollectionExtensions
     {

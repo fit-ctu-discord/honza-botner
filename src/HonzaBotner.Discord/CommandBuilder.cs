@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
-using OsBot.Core.Command;
+using HonzaBotner.Discord.Command;
 
-namespace OsBot.Core
+namespace HonzaBotner.Discord
 {
     public class CommandBuilder
     {

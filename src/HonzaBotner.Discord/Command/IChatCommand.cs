@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 
-namespace OsBot.Core.Command
+namespace HonzaBotner.Discord.Command
 {
     public interface IChatCommand
     {

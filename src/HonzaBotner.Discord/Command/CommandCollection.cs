@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace OsBot.Core.Command
+namespace HonzaBotner.Discord.Command
 {
     public class CommandCollection
     {

@@ -2,7 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 
-namespace OsBot.Core
+namespace HonzaBotner.Discord
 {
     public class DiscordWorker : BackgroundService
     {
