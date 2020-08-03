@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,8 +8,8 @@ namespace HonzaBotner.Discord.Command
 {
     public interface IChatCommand
     {
-        List<string> RequiredPermissions { get; }
+        IEnumerable<string> RequiredPermissions { get; }
 
-        Task Execute(DiscordClient client, DiscordMessage message, CancellationToken cancellationToken);
+        Task ExecuteAsync(DiscordClient client, DiscordMessage message, CancellationToken cancellationToken);
     }
 }

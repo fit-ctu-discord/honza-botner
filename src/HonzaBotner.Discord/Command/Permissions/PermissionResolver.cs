@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord.Command.Permissions.Entities;
-using HonzaBotner.Discord.Command.Permissions.Repositories;
+using HonzaBotner.Discord.Command.Permissions.Data;
 
 namespace HonzaBotner.Discord.Command.Permissions
 {
-    public class PermissionResolver
+    internal class PermissionResolver : IPermissionResolver
     {
         private readonly IPermissionEntriesRepository _repository;
 
@@ -17,12 +16,12 @@ namespace HonzaBotner.Discord.Command.Permissions
             _repository = repository;
         }
 
-        public Task<bool> IsUserEligibleToRun(DiscordMember user, IChatCommand command)
+        public Task<bool> IsUserEligibleToRunAsync(DiscordMember user, IChatCommand command)
         {
-            return IsUserEligibleToRun(user, command.RequiredPermissions);
+            return IsUserEligibleToRunAsync(user, command.RequiredPermissions);
         }
 
-        public async Task<bool> IsUserEligibleToRun(DiscordMember user, List<string> permissions)
+        public async Task<bool> IsUserEligibleToRunAsync(DiscordMember user, IEnumerable<string> requiredPermissions)
         {
             // Administrators are always allowed to run any command inside their guild
             if (IsAdministrator(user))
@@ -30,6 +29,7 @@ namespace HonzaBotner.Discord.Command.Permissions
                 return true;
             }
 
+            IEnumerable<string> permissions = requiredPermissions.ToList();
             var relevantEntries = await _repository.GetPermissionEntriesByPermissionsAsync(permissions);
             var denials = relevantEntries.Where(entry => entry.Type == PermissionEntryType.Denial);
 
@@ -47,7 +47,7 @@ namespace HonzaBotner.Discord.Command.Permissions
                 grants.Any(entry => entry.Permission == permission && EntryMatchesUser(entry, user)));
         }
 
-        private static bool EntryMatchesUser(PermissionEntry entry, DiscordMember user)
+        private static bool EntryMatchesUser(IPermissionEntry entry, DiscordMember user)
         {
             return entry.Target switch
             {
