@@ -5,6 +5,6 @@ namespace HonzaBotner.Discord.Command.Permissions.Data
 {
     public interface IPermissionEntriesRepository
     {
-         Task<IList<IPermissionEntry>> GetPermissionEntriesByPermissionsAsync(IEnumerable<string> permissions);
+         Task<IList<PermissionEntry>> GetPermissionEntriesByPermissionsAsync(IEnumerable<string> permissions);
     }
 }

@@ -47,7 +47,7 @@ namespace HonzaBotner.Discord.Command.Permissions
                 grants.Any(entry => entry.Permission == permission && EntryMatchesUser(entry, user)));
         }
 
-        private static bool EntryMatchesUser(IPermissionEntry entry, DiscordMember user)
+        private static bool EntryMatchesUser(PermissionEntry entry, DiscordMember user)
         {
             return entry.Target switch
             {
