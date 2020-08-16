@@ -7,7 +7,7 @@ using HonzaBotner.Discord.Command.Permissions.Data;
 
 namespace HonzaBotner.Discord.Command.Permissions
 {
-    internal class PermissionResolver : IPermissionResolver
+    internal sealed class PermissionResolver : IPermissionResolver
     {
         private readonly IPermissionEntriesRepository _repository;
 

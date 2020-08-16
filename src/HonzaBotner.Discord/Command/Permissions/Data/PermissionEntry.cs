@@ -4,6 +4,15 @@ namespace HonzaBotner.Discord.Command.Permissions.Data
 {
     public sealed class PermissionEntry
     {
+        public PermissionEntry(Guid id, PermissionEntryType type, PermissionEntryTarget target, ulong targetId, string permission)
+        {
+            Id = id;
+            Type = type;
+            Target = target;
+            TargetId = targetId;
+            Permission = permission;
+        }
+
         public Guid Id { get; set; }
 
         public PermissionEntryType Type { get; set; }
@@ -12,6 +21,6 @@ namespace HonzaBotner.Discord.Command.Permissions.Data
 
         public ulong TargetId { get; set; }
 
-        public string Permission { get; set; } = null!;
+        public string Permission { get; set; };
     }
 }
