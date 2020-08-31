@@ -73,7 +73,7 @@ namespace HonzaBotner.Discord
             
             if (!GetCommand(args, out var commandProvider, scope)) return Task.CompletedTask;
 
-            var _ = commandProvider.Execute(Client, args.Message, cancellationToken)
+            var _ = commandProvider.ExecuteAsync(Client, args.Message, cancellationToken)
                 .ContinueWith(t => _logger.LogError(t.Exception!.ToString()),
                     TaskContinuationOptions.OnlyOnFaulted);
 

@@ -19,7 +19,12 @@
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.0-preview.8.20414.8" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.0-preview.8.20419.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.0-preview8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HonzaBotner.Discord\HonzaBotner.Discord.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Security.Claims;
+using HonzaBotner.Commands;
 using HonzaBotner.Data;
 using HonzaBotner.Discord;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -32,7 +33,7 @@ namespace HonzaBotner
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddAuthentication("CVUT")
-               .AddOAuth("CVUT", options =>
+               .AddOAuth("CVUT", "CVUT Login", options =>
                {
                    options.AuthorizationEndpoint = "https://auth.fit.cvut.cz/oauth/authorize";
                    options.TokenEndpoint = "https://auth.fit.cvut.cz/oauth/token";
@@ -77,6 +78,7 @@ namespace HonzaBotner
             services.AddDiscordBot(config =>
             {
                 // TODO: Commands here
+                config.AddCommand<HiCommand>(HiCommand.ChatCommand);
             });
         }
 
