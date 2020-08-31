@@ -1,17 +1,20 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Net.Http;
+using System.Security.Claims;
+using HonzaBotner.Data;
 using HonzaBotner.Discord;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace HonzaBotner
 {
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -24,11 +27,56 @@ namespace HonzaBotner
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(Configuration["CVUT:ConnectionString"]));
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddAuthentication("CVUT")
+               .AddOAuth("CVUT", options =>
+               {
+                   options.AuthorizationEndpoint = "https://auth.fit.cvut.cz/oauth/authorize";
+                   options.TokenEndpoint = "https://auth.fit.cvut.cz/oauth/token";
+                   options.UserInformationEndpoint = "https://auth.fit.cvut.cz/oauth/check_token";
+
+                   options.CallbackPath = "/signin-oidc";
+
+                   options.Scope.Add("urn:ctu:oauth:umapi.read");
+                   options.Scope.Add("cvut:umapi:read");
+
+                   options.ClientId = Configuration["CVUT:ClientId"];
+                   options.ClientSecret = Configuration["CVUT:ClientSecret"];
+
+                   var innerHandler = new HttpClientHandler();
+                   options.BackchannelHttpHandler = new AuthorizingHandler(innerHandler, options);
+
+                   options.Events = new OAuthEvents
+                   {
+                       OnCreatingTicket = async context =>
+                       {
+                           var uriBuilder = new UriBuilder(context.Options.UserInformationEndpoint);
+                           uriBuilder.Query = $"token={context.AccessToken}";
+                           var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
+
+                           HttpResponseMessage response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+                           response.EnsureSuccessStatusCode();
+
+                           var user = System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+
+                           string? userName = user.RootElement.GetProperty("user_name").GetString();
+                           if (userName == null)
+                               throw new InvalidOperationException();
+
+                           context.Identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userName));
+                           context.Identity.AddClaim(new Claim(ClaimTypes.Email, $"{userName}@fit.cvut.cz")); // HACK: FIX IT
+                       }
+                   };
+               });
             services.AddRazorPages();
+
             services.AddDiscordOptions(Configuration);
-            services.AddDiscordBot(c =>
+            services.AddDiscordBot(config =>
             {
-                // Add commands here
+                // TODO: Commands here
             });
         }
 
@@ -38,6 +86,7 @@ namespace HonzaBotner
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
             }
             else
             {
@@ -51,6 +100,7 @@ namespace HonzaBotner
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
