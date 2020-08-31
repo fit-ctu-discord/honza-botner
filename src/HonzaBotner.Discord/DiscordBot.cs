@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -33,6 +34,8 @@ namespace HonzaBotner.Discord
 
             Client.MessageCreated += (args) => OnClientOnMessageCreated(args, cancellationToken);
 
+            Client.MessageReactionAdded += (args) => OnClientOnMessageReactionAdded(args, cancellationToken);
+
             await Task.Delay(-1, cancellationToken);
         }
 
@@ -41,8 +44,10 @@ namespace HonzaBotner.Discord
         {
             var provider = scope == null ? _provider : scope.ServiceProvider;
 
-            var message = args.Message.Content.Substring(1);
+            string message = args.Message.Content.Substring(1).Split(" ")[0]!;
+            _logger.LogInformation(message);
             var command = _commands.GetCommandType(message);
+            _logger.LogInformation(command?.ToString());
 
             if (command == null)
             {
@@ -70,12 +75,30 @@ namespace HonzaBotner.Discord
             if (!args.Message.Content.StartsWith("!")) return Task.CompletedTask;
 
             using var scope = _provider.CreateScope();
-            
+
             if (!GetCommand(args, out var commandProvider, scope)) return Task.CompletedTask;
 
             var _ = commandProvider.ExecuteAsync(Client, args.Message, cancellationToken)
                 .ContinueWith(t => _logger.LogError(t.Exception!.ToString()),
                     TaskContinuationOptions.OnlyOnFaulted);
+
+            return Task.CompletedTask;
+        }
+
+        private Task OnClientOnMessageReactionAdded(MessageReactionAddEventArgs args,
+            CancellationToken cancellationToken)
+        {
+            var emoji = DiscordEmoji.FromName(Client, ":pushpin:");
+            int pinLimit = 1;
+
+            if (args.Emoji.Id == emoji.Id)
+            {
+                int count = args.Message.GetReactionsAsync(emoji).Result.Count;
+                if (count >= pinLimit)
+                {
+                    args.Channel.GetMessageAsync(args.Message.Id).Result.PinAsync();
+                }
+            }
 
             return Task.CompletedTask;
         }
