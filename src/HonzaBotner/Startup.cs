@@ -80,6 +80,7 @@ namespace HonzaBotner
                 // TODO: Commands here
                 config.AddCommand<HiCommand>(HiCommand.ChatCommand);
                 config.AddCommand<SendMessageCommand>(SendMessageCommand.ChatCommand);
+                config.AddCommand<SendImageCommand>(SendImageCommand.ChatCommand);
             });
         }
 

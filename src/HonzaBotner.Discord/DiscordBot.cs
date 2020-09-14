@@ -63,7 +63,6 @@ namespace HonzaBotner.Discord
                 return true;
             }
 
-
             // Shouldn't happen at all
             _logger.LogError("Couldn't find {0} in DI context", command.Name);
             commandProvider = null!;
