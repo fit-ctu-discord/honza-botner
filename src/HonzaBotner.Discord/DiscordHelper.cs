@@ -7,6 +7,11 @@ namespace HonzaBotner.Discord
             return $"<@{authorId}>";
         }
 
+        public static string GetChannel(ulong channelId)
+        {
+            return $"<#{channelId}>";
+        }
+
         public static string GetMessageLink(ulong guild, ulong channel, ulong message)
         {
             return $"https://discordapp.com/channels/{guild}/{channel}/{message}";
