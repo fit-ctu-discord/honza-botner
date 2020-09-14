@@ -71,7 +71,7 @@ namespace HonzaBotner.Discord
 
         private Task OnClientOnMessageCreated(MessageCreateEventArgs args, CancellationToken cancellationToken)
         {
-            if (!args.Message.Content.StartsWith("!")) return Task.CompletedTask;
+            if (!args.Message.Content.StartsWith(";")) return Task.CompletedTask;
 
             using var scope = _provider.CreateScope();
 

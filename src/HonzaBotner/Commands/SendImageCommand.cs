@@ -41,7 +41,7 @@ namespace HonzaBotner.Commands
 
             // Remove command and channel mention from message.
             // TODO: maybe remove command part to utils?
-            string pattern = @"^.\w+\s+<#\w+>\s+(http(s)?:\/\/([\w-]+.)+[\w-]+(\/[\w- .\/?%&=])?\/?)\s+";
+            string pattern = @"^.\w+\s+<#\w+>\s+[^\s]*\s+";
             string text = message.Content;
             string sendMessage = Regex.Replace(text, pattern, "");
             await client.SendMessageAsync(channel, sendMessage,
