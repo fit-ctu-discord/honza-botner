@@ -30,7 +30,12 @@ namespace HonzaBotner
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration["CVUT:ConnectionString"]));
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<IdentityUser>(options =>
+            {
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedAccount = false;
+                options.SignIn.RequireConfirmedPhoneNumber = false;
+            })
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddAuthentication("CVUT")
                .AddOAuth("CVUT", "CVUT Login", options =>
@@ -49,7 +54,6 @@ namespace HonzaBotner
 
                    var innerHandler = new HttpClientHandler();
                    options.BackchannelHttpHandler = new AuthorizingHandler(innerHandler, options);
-
                    options.Events = new OAuthEvents
                    {
                        OnCreatingTicket = async context =>
@@ -67,18 +71,25 @@ namespace HonzaBotner
                            if (userName == null)
                                throw new InvalidOperationException();
 
-                           context.Identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userName));
+                           context.Identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, $"{userName}@fit.cvut.cz"));
                            context.Identity.AddClaim(new Claim(ClaimTypes.Email, $"{userName}@fit.cvut.cz")); // HACK: FIX IT
+                           context.Identity.AddClaim(new Claim(ClaimTypes.Name, userName));
+
+                           context.RunClaimActions();
                        }
                    };
                });
-            services.AddRazorPages();
+            services.AddRazorPages(config =>
+            {
+                //config.Conventions.AuthorizePage("Auth");
+            });
 
             services.AddDiscordOptions(Configuration);
             services.AddDiscordBot(config =>
             {
                 // TODO: Commands here
                 config.AddCommand<HiCommand>(HiCommand.ChatCommand);
+                config.AddCommand<AuthorizeCommand>(AuthorizeCommand.CommandText);
             });
         }
 
