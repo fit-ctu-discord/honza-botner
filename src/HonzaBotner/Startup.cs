@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Security.Claims;
 using HonzaBotner.Commands;
 using HonzaBotner.Commands.Messages;
+using HonzaBotner.Commands.Pools;
 using HonzaBotner.Data;
 using HonzaBotner.Discord;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -88,13 +89,16 @@ namespace HonzaBotner
             services.AddDiscordOptions(Configuration);
             services.AddDiscordBot(config =>
             {
-                // TODO: Commands here
                 config.AddCommand<HiCommand>(HiCommand.ChatCommand);
+                config.AddCommand<AuthorizeCommand>(AuthorizeCommand.CommandText);
+                // Messages
                 config.AddCommand<SendMessage>(SendMessage.ChatCommand);
                 config.AddCommand<EditMessage>(EditMessage.ChatCommand);
                 config.AddCommand<SendImage>(SendImage.ChatCommand);
                 config.AddCommand<EditImage>(EditImage.ChatCommand);
-                config.AddCommand<AuthorizeCommand>(AuthorizeCommand.CommandText);
+                // Pools
+                config.AddCommand<YesNo>(YesNo.ChatCommand);
+                config.AddCommand<Abc>(Abc.ChatCommand);
             });
         }
 
