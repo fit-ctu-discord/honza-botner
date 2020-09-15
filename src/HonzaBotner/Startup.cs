@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Security.Claims;
 using HonzaBotner.Commands;
+using HonzaBotner.Commands.Messages;
 using HonzaBotner.Data;
 using HonzaBotner.Discord;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -79,8 +80,10 @@ namespace HonzaBotner
             {
                 // TODO: Commands here
                 config.AddCommand<HiCommand>(HiCommand.ChatCommand);
-                config.AddCommand<SendMessageCommand>(SendMessageCommand.ChatCommand);
-                config.AddCommand<SendImageCommand>(SendImageCommand.ChatCommand);
+                config.AddCommand<SendMessage>(SendMessage.ChatCommand);
+                config.AddCommand<EditMessage>(EditMessage.ChatCommand);
+                config.AddCommand<SendImage>(SendImage.ChatCommand);
+                config.AddCommand<EditImage>(EditImage.ChatCommand);
             });
         }
 

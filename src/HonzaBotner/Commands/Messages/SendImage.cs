@@ -1,29 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord;
 using HonzaBotner.Discord.Command;
-using Microsoft.AspNetCore.DataProtection.Repositories;
-using Microsoft.Extensions.Logging;
 
-namespace HonzaBotner.Commands
+namespace HonzaBotner.Commands.Messages
 {
-    public class SendMessageCommand : IChatCommand
+    public class SendImage : IChatCommand
     {
-        public const string ChatCommand = "send";
-        // ;send #general <message>
+        public const string ChatCommand = "sendImage";
+        // ;sendImage <channel> <image-url> <message>
 
         public async Task ExecuteAsync(DiscordClient client, DiscordMessage message,
             CancellationToken cancellationToken)
         {
             if (message.Author.IsBot) return;
             if (message.MentionedChannels.Count.Equals(0)) return;
-            if (message.Content.Split(" ").Length < 3) return;
+            if (message.Content.Split(" ").Length < 4) return;
 
             var channel = message.MentionedChannels[0];
             string channelMention = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[1];
@@ -35,12 +30,15 @@ namespace HonzaBotner.Commands
                 return;
             }
 
+            string imageUrl = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[2];
+
             // Remove command and channel mention from message.
             // TODO: maybe remove command part to utils?
-            string pattern = @"^.\w+\s+<#\w+>\s+";
+            const string pattern = @"^.\w+\s+<#\w+>\s+[^\s]+\s+";
             string text = message.Content;
             string sendMessage = Regex.Replace(text, pattern, "");
-            await client.SendMessageAsync(channel, sendMessage);
+            await client.SendMessageAsync(channel, sendMessage,
+                embed: new DiscordEmbedBuilder {ImageUrl = imageUrl}.Build());
         }
     }
 }
