@@ -90,7 +90,8 @@ namespace HonzaBotner
             services.AddDiscordBot(config =>
             {
                 config.AddCommand<HiCommand>(HiCommand.ChatCommand);
-                config.AddCommand<AuthorizeCommand>(AuthorizeCommand.CommandText);
+                config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
+                config.AddCommand<Activity>(Activity.ChatCommand);
                 // Messages
                 config.AddCommand<SendMessage>(SendMessage.ChatCommand);
                 config.AddCommand<EditMessage>(EditMessage.ChatCommand);
