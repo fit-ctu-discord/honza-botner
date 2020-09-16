@@ -40,11 +40,11 @@ namespace HonzaBotner.Commands.Pools
             ":regional_indicator_t:"
         };
 
-        public async Task ExecuteAsync(DiscordClient client, DiscordMessage message,
+        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
             CancellationToken cancellationToken)
         {
-            if (message.Author.IsBot) return;
-            if (message.Content.Split(" ").Length < 3) return;
+            if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
+            if (message.Content.Split(" ").Length < 3) return ChatCommendExecutedResult.WrongSyntax;
 
             const string commandPattern = @"^.\w+\s+";
             string text = Regex.Replace(message.Content, commandPattern, "");
@@ -54,7 +54,7 @@ namespace HonzaBotner.Commands.Pools
             List<string> arguments = matches.Cast<Match>()
                 .Select(match => match.Groups[1].Value != "" ? match.Groups[1].Value : match.Value).ToList();
 
-            if (arguments.Count == 0) return; // TODO
+            if (arguments.Count == 0) return ChatCommendExecutedResult.WrongSyntax;
 
             string question = arguments.First();
             string authorNickName = message.Channel.Guild.GetMemberAsync(message.Author.Id).Result.Nickname;
@@ -73,7 +73,7 @@ namespace HonzaBotner.Commands.Pools
 
             foreach (var answer in arguments.Skip(1))
             {
-                if (answer.Trim() == "") return; // TODO
+                if (answer.Trim() == "") return ChatCommendExecutedResult.WrongSyntax;
 
                 embed.AddField(
                     DiscordEmoji.FromName(client, _optionsEmoji[optionIndex]).ToString(),
@@ -96,8 +96,10 @@ namespace HonzaBotner.Commands.Pools
             }
             catch
             {
-                // TODO: handle some error
+                return ChatCommendExecutedResult.InternalError;
             }
+
+            return ChatCommendExecutedResult.Ok;
         }
     }
 }

@@ -14,11 +14,11 @@ namespace HonzaBotner.Commands.Pools
         public const string ChatCommand = "yesno";
         // ;yesno <question>
 
-        public async Task ExecuteAsync(DiscordClient client, DiscordMessage message,
+        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
             CancellationToken cancellationToken)
         {
-            if (message.Author.IsBot) return;
-            if (message.Content.Split(" ").Length < 2) return;
+            if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
+            if (message.Content.Split(" ").Length < 2) return ChatCommendExecutedResult.WrongSyntax;
 
             const string pattern = @"^.\w+\s+";
             string text = message.Content;
@@ -44,9 +44,10 @@ namespace HonzaBotner.Commands.Pools
             }
             catch
             {
-                // TODO: handle some error
+                return ChatCommendExecutedResult.InternalError;
             }
 
+            return ChatCommendExecutedResult.Ok;
         }
     }
 }

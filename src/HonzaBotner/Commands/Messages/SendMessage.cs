@@ -18,12 +18,12 @@ namespace HonzaBotner.Commands.Messages
         public const string ChatCommand = "send";
         // ;send #general <message>
 
-        public async Task ExecuteAsync(DiscordClient client, DiscordMessage message,
+        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
             CancellationToken cancellationToken)
         {
-            if (message.Author.IsBot) return;
-            if (message.MentionedChannels.Count.Equals(0)) return;
-            if (message.Content.Split(" ").Length < 3) return;
+            if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
+            if (message.MentionedChannels.Count.Equals(0)) return ChatCommendExecutedResult.WrongSyntax;
+            if (message.Content.Split(" ").Length < 3) return ChatCommendExecutedResult.WrongSyntax;
 
             var channel = message.MentionedChannels[0];
             string channelMention = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[1];
@@ -31,8 +31,7 @@ namespace HonzaBotner.Commands.Messages
             // First argument isn't a channel mention.
             if ($"<#{channel.Id}>" != channelMention)
             {
-                await client.SendMessageAsync(channel, $"wrong format"); // TODO
-                return;
+                return ChatCommendExecutedResult.WrongSyntax;
             }
 
             // Remove command and channel mention from message.
@@ -41,6 +40,8 @@ namespace HonzaBotner.Commands.Messages
             string text = message.Content;
             string sendMessage = Regex.Replace(text, pattern, "");
             await client.SendMessageAsync(channel, sendMessage);
+
+            return ChatCommendExecutedResult.Ok;
         }
     }
 }

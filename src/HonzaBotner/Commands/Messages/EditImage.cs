@@ -14,20 +14,20 @@ namespace HonzaBotner.Commands.Messages
         public const string ChatCommand = "editImage";
         // ;editImage <message-link> <new-image-url> <new-message>
 
-        public async Task ExecuteAsync(DiscordClient client, DiscordMessage message,
+        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
             CancellationToken cancellationToken)
         {
-            if (message.Author.IsBot) return;
-            if (message.Content.Split(" ").Length < 3) return;
+            if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
+            if (message.Content.Split(" ").Length < 3) return ChatCommendExecutedResult.WrongSyntax;
 
             DiscordMessage? oldMessage = await
                 DiscordHelper.FindMessageFromLink(message.Channel.Guild,
                     message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[1]);
 
-            // TODO: message not found.
+            // Message not found.
             if (oldMessage == null)
             {
-                return;
+                return ChatCommendExecutedResult.InternalError;
             }
 
             string imageUrl = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[2];
@@ -45,8 +45,10 @@ namespace HonzaBotner.Commands.Messages
             }
             catch
             {
-                //TODO: some error; do you edit your (bot's) message?
+                return ChatCommendExecutedResult.InternalError;
             }
+
+            return ChatCommendExecutedResult.Ok;
         }
     }
 }

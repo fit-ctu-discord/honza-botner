@@ -14,11 +14,11 @@ namespace HonzaBotner.Commands.Messages
         public const string ChatCommand = "edit";
         // ;edit <message-link> <new-message>
 
-        public async Task ExecuteAsync(DiscordClient client, DiscordMessage message,
+        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
             CancellationToken cancellationToken)
         {
-            if (message.Author.IsBot) return;
-            if (message.Content.Split(" ").Length < 3) return;
+            if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
+            if (message.Content.Split(" ").Length < 3) return ChatCommendExecutedResult.WrongSyntax;
 
             DiscordMessage? oldMessage = await
                 DiscordHelper.FindMessageFromLink(message.Channel.Guild,
@@ -27,7 +27,7 @@ namespace HonzaBotner.Commands.Messages
             // TODO: message not found.
             if (oldMessage == null)
             {
-                return;
+                return ChatCommendExecutedResult.InternalError;
             }
 
             const string pattern = @"^.\w+\s+[^\s]*\s+";
@@ -40,8 +40,10 @@ namespace HonzaBotner.Commands.Messages
             }
             catch
             {
-                //TODO: some error; do you edit your (bot's) message?
+                return ChatCommendExecutedResult.InternalError;
             }
+
+            return ChatCommendExecutedResult.Ok;
         }
     }
 }

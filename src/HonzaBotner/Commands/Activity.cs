@@ -14,15 +14,17 @@ namespace HonzaBotner.Commands
         public const string ChatCommand = "activity";
         // ;activity {play, watch, listen} <name>
 
-        public async Task ExecuteAsync(DiscordClient client, DiscordMessage message, CancellationToken cancellationToken)
+        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message, CancellationToken cancellationToken)
         {
-            if (message.Author.IsBot) return;
-            if (message.Content.Split(" ").Length < 3) return;
+            if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
+            if (message.Content.Split(" ").Length < 3) return ChatCommendExecutedResult.WrongSyntax;
 
             string type = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[1];
             string name = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[2];
 
             await client.UpdateStatusAsync(new DiscordGame(name));
+
+            return ChatCommendExecutedResult.Ok;
         }
     }
 }
