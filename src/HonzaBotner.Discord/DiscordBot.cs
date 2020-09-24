@@ -69,19 +69,40 @@ namespace HonzaBotner.Discord
             return false;
         }
 
-        private Task OnClientOnMessageCreated(MessageCreateEventArgs args, CancellationToken cancellationToken)
+        private async Task OnClientOnMessageCreated(MessageCreateEventArgs args, CancellationToken cancellationToken)
         {
-            if (!args.Message.Content.StartsWith(";")) return Task.CompletedTask;
+            if (!args.Message.Content.StartsWith(";")) return;
 
             using var scope = _provider.CreateScope();
 
-            if (!GetCommand(args, out var commandProvider, scope)) return Task.CompletedTask;
+            if (!GetCommand(args, out var commandProvider, scope)) return;
 
-            var _ = commandProvider.ExecuteAsync(Client, args.Message, cancellationToken)
-                .ContinueWith(t => _logger.LogError(t.Exception!.ToString()),
-                    TaskContinuationOptions.OnlyOnFaulted);
+            try
+            {
+                var commandResult = await commandProvider.ExecuteAsync(Client, args.Message, cancellationToken);
 
-            return Task.CompletedTask;
+                switch (commandResult)
+                {
+                    case ChatCommendExecutedResult.Ok:
+                        await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":white_check_mark:"));
+                        break;
+                    case ChatCommendExecutedResult.InternalError:
+                        await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":x:"));
+                        break;
+                    case ChatCommendExecutedResult.CannotBeUsedByBot:
+                        await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":robot:"));
+                        break;
+                    case ChatCommendExecutedResult.WrongSyntax:
+                    default:
+                        await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":warning:"));
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e!.ToString());
+                await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":no_entry:"));
+            }
         }
 
         private Task OnClientOnMessageReactionAdded(MessageReactionAddEventArgs args,
