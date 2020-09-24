@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -8,7 +7,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Command;
 
-namespace HonzaBotner.Commands.Pools
+namespace HonzaBotner.Discord.Services.Pools
 {
     public class Abc : IChatCommand
     {
@@ -52,7 +51,7 @@ namespace HonzaBotner.Commands.Pools
             const string tokenPattern = @"""([^""]+)""|[\S]+";
             MatchCollection matches = Regex.Matches(text, tokenPattern);
             List<string> arguments = matches.Cast<Match>()
-                .Select(match => match.Groups[1].Value != "" ? match.Groups[1].Value : match.Value).ToList();
+                .Select(match => match!.Groups[1].Value != "" ? match.Groups[1].Value : match.Value).ToList();
 
             if (arguments.Count == 0) return ChatCommendExecutedResult.WrongSyntax;
 

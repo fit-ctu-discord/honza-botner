@@ -19,7 +19,7 @@ namespace HonzaBotner.Pages
             _logger = logger;
         }
 
-        public async Task OnGetAsync()
+        public void OnGetAsync()
         {
         }
     }

@@ -14,7 +14,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HonzaBotner", "src\HonzaBot
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HonzaBotner.Services.Contract", "src\HonzaBotner.Services.Contract\HonzaBotner.Services.Contract.csproj", "{B24FDEA1-8CC9-43F8-89AF-35C2FBFB0A18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HonzaBotner.Commands", "src\HonzaBotner.Commands\HonzaBotner.Commands.csproj", "{5BBB0E54-8471-4DC2-9383-4F943606F5C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HonzaBotner.Discord.Services", "src\HonzaBotner.Discord.Services\HonzaBotner.Discord.Services.csproj", "{5BBB0E54-8471-4DC2-9383-4F943606F5C9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HonzaBotner.Services", "src\HonzaBotner.Services\HonzaBotner.Services.csproj", "{77397E93-7F61-4A54-9096-5AE15462DAC4}"
 EndProject

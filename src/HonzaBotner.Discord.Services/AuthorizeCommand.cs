@@ -7,7 +7,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Command;
 
-namespace HonzaBotner.Commands
+namespace HonzaBotner.Discord.Services
 {
     public class AuthorizeCommand : IChatCommand
     {

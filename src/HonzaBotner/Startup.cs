@@ -3,9 +3,9 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
-using HonzaBotner.Commands;
-using HonzaBotner.Commands.Messages;
-using HonzaBotner.Commands.Pools;
+using HonzaBotner.Discord.Services;
+using HonzaBotner.Discord.Services.Messages;
+using HonzaBotner.Discord.Services.Pools;
 using HonzaBotner.Data;
 using HonzaBotner.Discord;
 using HonzaBotner.Services;
@@ -34,6 +34,7 @@ namespace HonzaBotner
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration["CVUT:ConnectionString"]));
             services.AddDefaultIdentity<IdentityUser>(options =>
@@ -72,12 +73,10 @@ namespace HonzaBotner
                         OnCreatingTicket = OAuthOnCreating
                     };
             });
-            services.AddRazorPages(config =>
-            {
-            });
+            services.AddRazorPages();
 
-            services.AddDiscordOptions(Configuration);
-            services.AddDiscordBot(config =>
+            services.AddDiscordOptions(Configuration)
+                .AddDiscordBot(config =>
             {
                 config.AddCommand<HiCommand>(HiCommand.ChatCommand);
                 config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
@@ -91,6 +90,10 @@ namespace HonzaBotner
                 config.AddCommand<YesNo>(YesNo.ChatCommand);
                 config.AddCommand<Abc>(Abc.ChatCommand);
             });
+
+            services.AddBotnerServicesOptions(Configuration)
+                .AddHttpClient()
+                .AddBotnerServices();
         }
 
         private async Task OAuthOnCreating(OAuthCreatingTicketContext context)
@@ -129,7 +132,7 @@ namespace HonzaBotner
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
+                app.UseMigrationsEndPoint();
             }
             else
             {
