@@ -14,8 +14,9 @@ namespace HonzaBotner.Pages
     [Authorize]
     public class AuthCallbackModel : PageModel
     {
-        private readonly DiscordWrapper _client;
         private readonly IUserMapInfoService _userMapInfoService;
+        private readonly IDiscordRoleManager _roleManager;
+        private readonly DiscordClient _client;
 
         [BindProperty(SupportsGet = true)]
         public ulong Gid { get; set; }
@@ -23,43 +24,37 @@ namespace HonzaBotner.Pages
         [BindProperty(SupportsGet = true)]
         public ulong Uid { get; set; }
 
-        public AuthCallbackModel(DiscordWrapper discordWrapper, IUserMapInfoService userMapInfoService)
+        public AuthCallbackModel(DiscordWrapper discordWrapper, IUserMapInfoService userMapInfoService, IDiscordRoleManager roleManager)
         {
-            _client = discordWrapper;
+            _client = discordWrapper.Client;
             _userMapInfoService = userMapInfoService;
+            _roleManager = roleManager;
         }
 
         public async Task OnGetAsync()
         {
-            // TODO: Do this in service.
-            var guild = await _client.GetGuildAsync(Gid);
-            if (guild == null)
-            {
-                BadRequest();
-            }
-
-            var user = await guild.GetMemberAsync(Uid);
-            if (user == null)
-            {
-                BadRequest();
-            }
-
             string? username = User?.Identity?.Name;
 
             if (username == null)
             {
                 Unauthorized();
+                return;
             }
 
             UsermapPerson? person = await _userMapInfoService.GetUserInfoAsync(username);
             if (person == null)
             {
                 BadRequest();
+                return;
             }
 
+            IEnumerable<DiscordRole> discordRoles = _roleManager.MapUsermapRoles(person.Roles!.ToArray());
+            bool result = await _roleManager.GrantRolesAsync(Gid, Uid, discordRoles);
 
-
-            await dm.SendMessageAsync("Authenticated");
+            if (result)
+            {
+                // TODO: process result
+            }
         }
     }
 }

@@ -1,3 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0-preview.8.20407.11" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HonzaBotner.Core.Contract\HonzaBotner.Core.Contract.csproj" />
+    <ProjectReference Include="..\HonzaBotner.Discord\HonzaBotner.Discord.csproj" />
+    <ProjectReference Include="..\HonzaBotner.Services.Contract\HonzaBotner.Services.Contract.csproj" />
+  </ItemGroup>
 </Project>

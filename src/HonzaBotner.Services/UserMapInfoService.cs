@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using HonzaBotner.Core.Contract;
@@ -14,9 +11,9 @@ namespace HonzaBotner.Services
     public sealed class UserMapInfoService : IUserMapInfoService
     {
         private readonly HttpClient _httpClient;
-        private readonly IAccesTokenProvider _accesTokenProvider;
+        private readonly IAccessTokenProvider _accesTokenProvider;
 
-        public UserMapInfoService(HttpClient httpClient, IAccesTokenProvider accesTokenProvider)
+        public UserMapInfoService(HttpClient httpClient, IAccessTokenProvider accesTokenProvider)
         {
             _httpClient = httpClient;
             _accesTokenProvider = accesTokenProvider;

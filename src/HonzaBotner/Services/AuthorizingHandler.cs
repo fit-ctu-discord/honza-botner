@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.OAuth;
 
-namespace HonzaBotner
+namespace HonzaBotner.Services
 {
     public class AuthorizingHandler : DelegatingHandler
     {
