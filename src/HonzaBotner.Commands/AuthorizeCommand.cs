@@ -13,9 +13,9 @@ namespace HonzaBotner.Commands
     {
         private const string LinkTemplate = "https://localhost:5001/Auth?gid={0}&uid={1}";
 
-        public const string CommandText = "authorize";
+        public const string ChatCommand = "authorize";
 
-        public async Task ExecuteAsync(DiscordClient client, DiscordMessage message, CancellationToken cancellationToken = default)
+        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message, CancellationToken cancellationToken = default)
         {
             DiscordUser user = message.Author;
 
@@ -24,6 +24,8 @@ namespace HonzaBotner.Commands
             string link = string.Format(LinkTemplate, message.Channel.GuildId, user.Id);
 
             await channel.SendMessageAsync($"Hi, authorize by following this link: {link}");
+
+            return ChatCommendExecutedResult.Ok;
         }
     }
 }

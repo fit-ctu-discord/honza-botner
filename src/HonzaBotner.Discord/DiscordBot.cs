@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -33,6 +34,8 @@ namespace HonzaBotner.Discord
 
             Client.MessageCreated += (args) => OnClientOnMessageCreated(args, cancellationToken);
 
+            Client.MessageReactionAdded += (args) => OnClientOnMessageReactionAdded(args, cancellationToken);
+
             await Task.Delay(-1, cancellationToken);
         }
 
@@ -41,8 +44,10 @@ namespace HonzaBotner.Discord
         {
             var provider = scope == null ? _provider : scope.ServiceProvider;
 
-            var message = args.Message.Content.Substring(1);
+            string message = args.Message.Content.Substring(1).Split(" ")[0]!;
+            _logger.LogInformation(message);
             var command = _commands.GetCommandType(message);
+            _logger.LogInformation(command?.ToString());
 
             if (command == null)
             {
@@ -58,24 +63,62 @@ namespace HonzaBotner.Discord
                 return true;
             }
 
-
             // Shouldn't happen at all
             _logger.LogError("Couldn't find {0} in DI context", command.Name);
             commandProvider = null!;
             return false;
         }
 
-        private Task OnClientOnMessageCreated(MessageCreateEventArgs args, CancellationToken cancellationToken)
+        private async Task OnClientOnMessageCreated(MessageCreateEventArgs args, CancellationToken cancellationToken)
         {
-            if (!args.Message.Content.StartsWith("!")) return Task.CompletedTask;
+            if (!args.Message.Content.StartsWith(";")) return;
 
             using var scope = _provider.CreateScope();
-            
-            if (!GetCommand(args, out var commandProvider, scope)) return Task.CompletedTask;
 
-            var _ = commandProvider.ExecuteAsync(Client, args.Message, cancellationToken)
-                .ContinueWith(t => _logger.LogError(t.Exception!.ToString()),
-                    TaskContinuationOptions.OnlyOnFaulted);
+            if (!GetCommand(args, out var commandProvider, scope)) return;
+
+            try
+            {
+                var commandResult = await commandProvider.ExecuteAsync(Client, args.Message, cancellationToken);
+
+                switch (commandResult)
+                {
+                    case ChatCommendExecutedResult.Ok:
+                        await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":white_check_mark:"));
+                        break;
+                    case ChatCommendExecutedResult.InternalError:
+                        await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":x:"));
+                        break;
+                    case ChatCommendExecutedResult.CannotBeUsedByBot:
+                        await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":robot:"));
+                        break;
+                    case ChatCommendExecutedResult.WrongSyntax:
+                    default:
+                        await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":warning:"));
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e!.ToString());
+                await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":no_entry:"));
+            }
+        }
+
+        private Task OnClientOnMessageReactionAdded(MessageReactionAddEventArgs args,
+            CancellationToken cancellationToken)
+        {
+            var emoji = DiscordEmoji.FromName(Client, ":pushpin:");
+            int pinLimit = 1;
+
+            if (args.Emoji.Id == emoji.Id)
+            {
+                int count = args.Message.GetReactionsAsync(emoji).Result.Count;
+                if (count >= pinLimit)
+                {
+                    args.Channel.GetMessageAsync(args.Message.Id).Result.PinAsync();
+                }
+            }
 
             return Task.CompletedTask;
         }

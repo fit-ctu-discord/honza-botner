@@ -13,9 +13,11 @@ namespace HonzaBotner.Commands
     {
         public const string ChatCommand = "hi";
 
-        public async Task ExecuteAsync(DiscordClient client, DiscordMessage message, CancellationToken cancellationToken)
+        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message, CancellationToken cancellationToken)
         {
             await client.SendMessageAsync(message.Channel, "Hi");
+
+            return ChatCommendExecutedResult.Ok;
         }
     }
 }
