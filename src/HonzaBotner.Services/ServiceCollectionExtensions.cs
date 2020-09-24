@@ -15,7 +15,10 @@ namespace HonzaBotner.Discord.Services
         public static IServiceCollection AddBotnerServicesOptions(this IServiceCollection serviceCollection,
                    IConfiguration configuration)
         {
-            serviceCollection.Configure<DiscordRoleConfig>(configuration.GetSection(DiscordRoleConfig.ConfigName));
+            serviceCollection.Configure<DiscordRoleConfig>(settings =>
+            {
+                configuration.GetSection(DiscordRoleConfig.ConfigName).Bind(settings);
+            });
             return serviceCollection;
         }
 

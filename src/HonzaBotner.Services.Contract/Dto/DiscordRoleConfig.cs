@@ -5,7 +5,7 @@ namespace HonzaBotner.Services.Contract
 {
     public class DiscordRoleConfig
     {
-        public const string ConfigName = "DiscordRole";
+        public const string ConfigName = "DiscordRoles";
         public Dictionary<string, ulong> RoleMapping { get; set; }
     }
 }

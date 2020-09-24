@@ -11,17 +11,21 @@ namespace HonzaBotner.Services
     public class AccessTokenProvider : IAccessTokenProvider
     {
         private const string TokenName = "access_token";
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        private readonly HttpContext _httpContext;
-
-        public AccessTokenProvider(HttpContext httpContext)
+        public AccessTokenProvider(IHttpContextAccessor httpContextAccessor)
         {
-            _httpContext = httpContext;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<string?> GetTokenAsync()
         {
-            return await _httpContext.GetTokenAsync(TokenName);
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                return null;
+            }
+
+            return await _httpContextAccessor.HttpContext.GetTokenAsync(TokenName);
         }
     }
 }

@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using HonzaBotner.Core.Contract;
 
 namespace HonzaBotner
 {
@@ -35,6 +36,7 @@ namespace HonzaBotner
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDatabaseDeveloperPageExceptionFilter();
+            services.AddHttpContextAccessor();
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration["CVUT:ConnectionString"]));
             services.AddDefaultIdentity<IdentityUser>(options =>
@@ -91,6 +93,7 @@ namespace HonzaBotner
                 config.AddCommand<Abc>(Abc.ChatCommand);
             });
 
+            services.AddScoped<IAccessTokenProvider, AccessTokenProvider>();
             services.AddBotnerServicesOptions(Configuration)
                 .AddHttpClient()
                 .AddBotnerServices();
