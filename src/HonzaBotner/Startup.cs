@@ -1,9 +1,12 @@
 using System;
 using System.Net.Http;
 using System.Security.Claims;
+using System.Text.Json;
+using System.Threading.Tasks;
 using HonzaBotner.Commands;
 using HonzaBotner.Data;
 using HonzaBotner.Discord;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -37,51 +40,37 @@ namespace HonzaBotner
                 options.SignIn.RequireConfirmedPhoneNumber = false;
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            services.AddAuthentication("CVUT")
-               .AddOAuth("CVUT", "CVUT Login", options =>
-               {
-                   options.AuthorizationEndpoint = "https://auth.fit.cvut.cz/oauth/authorize";
-                   options.TokenEndpoint = "https://auth.fit.cvut.cz/oauth/token";
-                   options.UserInformationEndpoint = "https://auth.fit.cvut.cz/oauth/check_token";
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = "CVUT";
+                })
+                .AddCookie()
+                .AddOAuth("CVUT", "CVUT Login", options =>
+                {
+                    options.AuthorizationEndpoint = "https://auth.fit.cvut.cz/oauth/authorize";
+                    options.TokenEndpoint = "https://auth.fit.cvut.cz/oauth/token";
+                    options.UserInformationEndpoint = "https://auth.fit.cvut.cz/oauth/check_token";
 
-                   options.CallbackPath = "/signin-oidc";
+                    options.CallbackPath = "/signin-oidc";
 
-                   options.Scope.Add("urn:ctu:oauth:umapi.read");
-                   options.Scope.Add("cvut:umapi:read");
+                    options.Scope.Add("urn:ctu:oauth:umapi.read");
+                    options.Scope.Add("cvut:umapi:read");
 
-                   options.ClientId = Configuration["CVUT:ClientId"];
-                   options.ClientSecret = Configuration["CVUT:ClientSecret"];
+                    options.ClientId = Configuration["CVUT:ClientId"];
+                    options.ClientSecret = Configuration["CVUT:ClientSecret"];
 
-                   var innerHandler = new HttpClientHandler();
-                   options.BackchannelHttpHandler = new AuthorizingHandler(innerHandler, options);
-                   options.Events = new OAuthEvents
-                   {
-                       OnCreatingTicket = async context =>
-                       {
-                           var uriBuilder = new UriBuilder(context.Options.UserInformationEndpoint);
-                           uriBuilder.Query = $"token={context.AccessToken}";
-                           var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
-
-                           HttpResponseMessage response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-                           response.EnsureSuccessStatusCode();
-
-                           var user = System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-
-                           string? userName = user.RootElement.GetProperty("user_name").GetString();
-                           if (userName == null)
-                               throw new InvalidOperationException();
-
-                           context.Identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, $"{userName}@fit.cvut.cz"));
-                           context.Identity.AddClaim(new Claim(ClaimTypes.Email, $"{userName}@fit.cvut.cz")); // HACK: FIX IT
-                           context.Identity.AddClaim(new Claim(ClaimTypes.Name, userName));
-
-                           context.RunClaimActions();
-                       }
-                   };
-               });
+                    var innerHandler = new HttpClientHandler();
+                    options.BackchannelHttpHandler = new AuthorizingHandler(innerHandler, options);
+                    options.SaveTokens = true;
+                    options.Events = new OAuthEvents
+                    {
+                        OnCreatingTicket = OAuthOnCreating
+                    };
+            });
             services.AddRazorPages(config =>
             {
-                //config.Conventions.AuthorizePage("Auth");
             });
 
             services.AddDiscordOptions(Configuration);
@@ -91,6 +80,36 @@ namespace HonzaBotner
                 config.AddCommand<HiCommand>(HiCommand.ChatCommand);
                 config.AddCommand<AuthorizeCommand>(AuthorizeCommand.CommandText);
             });
+        }
+
+        private async Task OAuthOnCreating(OAuthCreatingTicketContext context)
+        {
+            string? userName = await GetUserName(context);
+            if (userName == null)
+            {
+                throw new InvalidOperationException();
+            }
+
+            context.Identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, $"{userName}@fit.cvut.cz"));
+            context.Identity.AddClaim(new Claim(ClaimTypes.Email, $"{userName}@fit.cvut.cz")); // HACK: FIX IT
+            context.Identity.AddClaim(new Claim(ClaimTypes.Name, userName));
+
+            context.RunClaimActions();
+        }
+
+        private static async Task<string?> GetUserName(OAuthCreatingTicketContext context)
+        {
+            var uriBuilder = new UriBuilder(context.Options.UserInformationEndpoint);
+            uriBuilder.Query = $"token={context.AccessToken}";
+            var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
+
+            HttpResponseMessage response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+            response.EnsureSuccessStatusCode();
+
+            string responseText = await response.Content.ReadAsStringAsync();
+            var user = JsonDocument.Parse(responseText);
+
+            return user.RootElement.GetProperty("user_name").GetString();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

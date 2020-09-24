@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\HonzaBotner.Discord\HonzaBotner.Discord.csproj" />
+    <ProjectReference Include="..\HonzaBotner.Services.Contract\HonzaBotner.Services.Contract.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,7 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>aspnet-HonzaBotner-BB5C7FC1-EA3A-442E-A565-3F2FCAB7E22D</UserSecretsId>
     <CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
@@ -25,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HonzaBotner.Discord\HonzaBotner.Discord.csproj" />
+    <ProjectReference Include="..\HonzaBotner.Services.Contract\HonzaBotner.Services.Contract.csproj" />
   </ItemGroup>
 
 </Project>
