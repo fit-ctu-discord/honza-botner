@@ -5,10 +5,11 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using HonzaBotner.Core.Contract;
 using HonzaBotner.Services.Contract;
+using HonzaBotner.Services.Contract.Dto;
 
 namespace HonzaBotner.Services
 {
-    public sealed class UserMapInfoService : IUserMapInfoService
+    public sealed class UserMapInfoService : IUsermapInfoService
     {
         private readonly HttpClient _httpClient;
         private readonly IAccessTokenProvider _accesTokenProvider;

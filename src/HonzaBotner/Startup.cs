@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using HonzaBotner.Discord.Services;
 using HonzaBotner.Discord.Services.Messages;
 using HonzaBotner.Discord.Services.Pools;
-using HonzaBotner.Data;
+using HonzaBotner.Database;
 using HonzaBotner.Discord;
 using HonzaBotner.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -37,15 +37,15 @@ namespace HonzaBotner
         {
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddHttpContextAccessor();
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(Configuration["CVUT:ConnectionString"]));
+            services.AddDbContext<HonzaBotnerDbContext>(options =>
+                options.UseNpgsql(Configuration["CVUT:ConnectionString"], b => b.MigrationsAssembly("HonzaBotner")));
             services.AddDefaultIdentity<IdentityUser>(options =>
             {
                 options.SignIn.RequireConfirmedEmail = false;
                 options.SignIn.RequireConfirmedAccount = false;
                 options.SignIn.RequireConfirmedPhoneNumber = false;
             })
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<HonzaBotnerDbContext>();
             services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -82,6 +82,7 @@ namespace HonzaBotner
             {
                 config.AddCommand<HiCommand>(HiCommand.ChatCommand);
                 config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
+                config.AddCommand<CountCommand>(CountCommand.ChatCommand);
                 config.AddCommand<Activity>(Activity.ChatCommand);
                 // Messages
                 config.AddCommand<SendMessage>(SendMessage.ChatCommand);

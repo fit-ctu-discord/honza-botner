@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace HonzaBotner.Services.Contract
+namespace HonzaBotner.Services.Contract.Dto
 {
 
     public class UsermapPerson

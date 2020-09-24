@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HonzaBotner.Services;
 using HonzaBotner.Services.Contract;
+using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,8 +25,8 @@ namespace HonzaBotner.Discord.Services
 
         public static IServiceCollection AddBotnerServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddScoped<IUserMapInfoService, UserMapInfoService>();
-            serviceCollection.AddHttpClient<IUserMapInfoService, UserMapInfoService>();
+            serviceCollection.AddScoped<IUsermapInfoService, UserMapInfoService>();
+            serviceCollection.AddHttpClient<IUsermapInfoService, UserMapInfoService>();
             serviceCollection.AddScoped<IDiscordRoleManager, DiscordRoleManager>();
 
             return serviceCollection;

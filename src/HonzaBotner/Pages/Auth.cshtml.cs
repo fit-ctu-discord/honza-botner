@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using HonzaBotner.Discord;
 using HonzaBotner.Services.Contract;
+using HonzaBotner.Services.Contract.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -14,7 +15,7 @@ namespace HonzaBotner.Pages
     [Authorize]
     public class AuthCallbackModel : PageModel
     {
-        private readonly IUserMapInfoService _userMapInfoService;
+        private readonly IUsermapInfoService _userMapInfoService;
         private readonly IDiscordRoleManager _roleManager;
         private readonly DiscordClient _client;
 
@@ -24,7 +25,7 @@ namespace HonzaBotner.Pages
         [BindProperty(SupportsGet = true)]
         public ulong Uid { get; set; }
 
-        public AuthCallbackModel(DiscordWrapper discordWrapper, IUserMapInfoService userMapInfoService, IDiscordRoleManager roleManager)
+        public AuthCallbackModel(DiscordWrapper discordWrapper, IUsermapInfoService userMapInfoService, IDiscordRoleManager roleManager)
         {
             _client = discordWrapper.Client;
             _userMapInfoService = userMapInfoService;

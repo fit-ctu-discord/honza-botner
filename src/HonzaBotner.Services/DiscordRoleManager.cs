@@ -6,8 +6,9 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord;
 using HonzaBotner.Services.Contract;
+using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Options;
-using DiscordRole = HonzaBotner.Services.Contract.DiscordRole;
+using DiscordRole = HonzaBotner.Services.Contract.Dto.DiscordRole;
 using DRole = DSharpPlus.Entities.DiscordRole;
 
 namespace HonzaBotner.Services
