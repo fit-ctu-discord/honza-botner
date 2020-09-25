@@ -9,7 +9,7 @@ using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace HonzaBotner.Discord.Services
+namespace HonzaBotner.Services
 {
     public static class ServiceCollectionExtensions
     {

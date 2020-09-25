@@ -7,7 +7,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Command;
 
-namespace HonzaBotner.Discord.Services.Pools
+namespace HonzaBotner.Discord.Services.Commands.Pools
 {
     public class YesNo : IChatCommand
     {

@@ -7,7 +7,7 @@ using DSharpPlus.Entities;
 using HonzaBotner.Discord;
 using HonzaBotner.Discord.Command;
 
-namespace HonzaBotner.Discord.Services.Messages
+namespace HonzaBotner.Discord.Services.Commands.Messages
 {
     public class EditMessage : IChatCommand
     {

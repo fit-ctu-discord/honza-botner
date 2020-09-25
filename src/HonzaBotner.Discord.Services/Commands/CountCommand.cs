@@ -7,7 +7,7 @@ using HonzaBotner.Discord.Command;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace HonzaBotner.Discord.Services
+namespace HonzaBotner.Discord.Services.Commands
 {
     public class CountCommand : IChatCommand
     {

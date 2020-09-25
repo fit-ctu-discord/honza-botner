@@ -1,24 +1,28 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using HonzaBotner.Discord;
 using HonzaBotner.Discord.Command;
+using Microsoft.Extensions.Logging;
 
-namespace HonzaBotner.Discord.Services.Messages
+namespace HonzaBotner.Discord.Services.Commands.Messages
 {
-    public class SendImage : IChatCommand
+    public class SendMessage : IChatCommand
     {
-        public const string ChatCommand = "sendImage";
-        // ;sendImage <channel> <image-url> <message>
+        public const string ChatCommand = "send";
+        // ;send #general <message>
 
         public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
             CancellationToken cancellationToken)
         {
             if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
             if (message.MentionedChannels.Count.Equals(0)) return ChatCommendExecutedResult.WrongSyntax;
-            if (message.Content.Split(" ").Length < 4) return ChatCommendExecutedResult.WrongSyntax;
+            if (message.Content.Split(" ").Length < 3) return ChatCommendExecutedResult.WrongSyntax;
 
             var channel = message.MentionedChannels[0];
             string channelMention = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[1];
@@ -29,15 +33,12 @@ namespace HonzaBotner.Discord.Services.Messages
                 return ChatCommendExecutedResult.WrongSyntax;
             }
 
-            string imageUrl = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[2];
-
             // Remove command and channel mention from message.
             // TODO: maybe remove command part to utils?
-            const string pattern = @"^.\w+\s+<#\w+>\s+[^\s]+\s+";
+            string pattern = @"^.\w+\s+<#\w+>\s+";
             string text = message.Content;
             string sendMessage = Regex.Replace(text, pattern, "");
-            await client.SendMessageAsync(channel, sendMessage,
-                embed: new DiscordEmbedBuilder {ImageUrl = imageUrl}.Build());
+            await client.SendMessageAsync(channel, sendMessage);
 
             return ChatCommendExecutedResult.Ok;
         }
