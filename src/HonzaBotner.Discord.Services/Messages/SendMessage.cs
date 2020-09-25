@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord;
 using HonzaBotner.Discord.Command;
-using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Messages
 {
@@ -35,7 +31,7 @@ namespace HonzaBotner.Discord.Services.Messages
 
             // Remove command and channel mention from message.
             // TODO: maybe remove command part to utils?
-            string pattern = @"^.\w+\s+<#\w+>\s+";
+            const string pattern = @"^.\w+\s+<#\w+>\s+";
             string text = message.Content;
             string sendMessage = Regex.Replace(text, pattern, "");
             await client.SendMessageAsync(channel, sendMessage);

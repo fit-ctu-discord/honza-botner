@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -33,8 +32,8 @@ namespace HonzaBotner.Services
                 return false;
             }
 
-            DiscordMember? memebr = await guild.GetMemberAsync(userId);
-            if (memebr == null)
+            DiscordMember? member = await guild.GetMemberAsync(userId);
+            if (member == null)
             {
                 return false;
             }
@@ -53,7 +52,7 @@ namespace HonzaBotner.Services
 
             foreach (DRole role in roles)
             {
-                await memebr.GrantRoleAsync(role, "Auth");
+                await member.GrantRoleAsync(role, "Auth");
             }
 
             return true;

@@ -22,7 +22,6 @@ using HonzaBotner.Core.Contract;
 
 namespace HonzaBotner
 {
-
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -40,11 +39,11 @@ namespace HonzaBotner
             services.AddDbContext<HonzaBotnerDbContext>(options =>
                 options.UseNpgsql(Configuration["CVUT:ConnectionString"], b => b.MigrationsAssembly("HonzaBotner")));
             services.AddDefaultIdentity<IdentityUser>(options =>
-            {
-                options.SignIn.RequireConfirmedEmail = false;
-                options.SignIn.RequireConfirmedAccount = false;
-                options.SignIn.RequireConfirmedPhoneNumber = false;
-            })
+                {
+                    options.SignIn.RequireConfirmedEmail = false;
+                    options.SignIn.RequireConfirmedAccount = false;
+                    options.SignIn.RequireConfirmedPhoneNumber = false;
+                })
                 .AddEntityFrameworkStores<HonzaBotnerDbContext>();
             services.AddAuthentication(options =>
                 {
@@ -70,29 +69,26 @@ namespace HonzaBotner
                     var innerHandler = new HttpClientHandler();
                     options.BackchannelHttpHandler = new AuthorizingHandler(innerHandler, options);
                     options.SaveTokens = true;
-                    options.Events = new OAuthEvents
-                    {
-                        OnCreatingTicket = OAuthOnCreating
-                    };
-            });
+                    options.Events = new OAuthEvents {OnCreatingTicket = OAuthOnCreating};
+                });
             services.AddRazorPages();
 
             services.AddDiscordOptions(Configuration)
                 .AddDiscordBot(config =>
-            {
-                config.AddCommand<HiCommand>(HiCommand.ChatCommand);
-                config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
-                config.AddCommand<CountCommand>(CountCommand.ChatCommand);
-                config.AddCommand<Activity>(Activity.ChatCommand);
-                // Messages
-                config.AddCommand<SendMessage>(SendMessage.ChatCommand);
-                config.AddCommand<EditMessage>(EditMessage.ChatCommand);
-                config.AddCommand<SendImage>(SendImage.ChatCommand);
-                config.AddCommand<EditImage>(EditImage.ChatCommand);
-                // Pools
-                config.AddCommand<YesNo>(YesNo.ChatCommand);
-                config.AddCommand<Abc>(Abc.ChatCommand);
-            });
+                {
+                    config.AddCommand<HiCommand>(HiCommand.ChatCommand);
+                    config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
+                    config.AddCommand<CountCommand>(CountCommand.ChatCommand);
+                    config.AddCommand<Activity>(Activity.ChatCommand);
+                    // Messages
+                    config.AddCommand<SendMessage>(SendMessage.ChatCommand);
+                    config.AddCommand<EditMessage>(EditMessage.ChatCommand);
+                    config.AddCommand<SendImage>(SendImage.ChatCommand);
+                    config.AddCommand<EditImage>(EditImage.ChatCommand);
+                    // Pools
+                    config.AddCommand<YesNo>(YesNo.ChatCommand);
+                    config.AddCommand<Abc>(Abc.ChatCommand);
+                });
 
             services.AddScoped<IAccessTokenProvider, AccessTokenProvider>();
             services.AddBotnerServicesOptions(Configuration)
@@ -100,7 +96,7 @@ namespace HonzaBotner
                 .AddBotnerServices();
         }
 
-        private async Task OAuthOnCreating(OAuthCreatingTicketContext context)
+        private static async Task OAuthOnCreating(OAuthCreatingTicketContext context)
         {
             string? userName = await GetUserName(context);
             if (userName == null)
@@ -117,11 +113,14 @@ namespace HonzaBotner
 
         private static async Task<string?> GetUserName(OAuthCreatingTicketContext context)
         {
-            var uriBuilder = new UriBuilder(context.Options.UserInformationEndpoint);
-            uriBuilder.Query = $"token={context.AccessToken}";
+            var uriBuilder =new UriBuilder(context.Options.UserInformationEndpoint)
+            {
+                Query = $"token={context.AccessToken}"
+            };
             var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
 
-            HttpResponseMessage response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+            HttpResponseMessage response = await context.Backchannel.SendAsync(request,
+                HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
             response.EnsureSuccessStatusCode();
 
             string responseText = await response.Content.ReadAsStringAsync();
@@ -153,10 +152,7 @@ namespace HonzaBotner
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapRazorPages();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapRazorPages(); });
         }
     }
 }

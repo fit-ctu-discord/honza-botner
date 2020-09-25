@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HonzaBotner.Services;
-using HonzaBotner.Services.Contract;
+﻿using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace HonzaBotner.Discord.Services
+namespace HonzaBotner.Services
 {
     public static class ServiceCollectionExtensions
     {

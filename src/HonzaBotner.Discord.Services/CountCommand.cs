@@ -4,7 +4,6 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Database;
 using HonzaBotner.Discord.Command;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace HonzaBotner.Discord.Services

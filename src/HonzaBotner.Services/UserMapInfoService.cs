@@ -31,7 +31,7 @@ namespace HonzaBotner.Services
             response.EnsureSuccessStatusCode();
 
 
-            JsonSerializerOptions options = new JsonSerializerOptions()
+            JsonSerializerOptions options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };

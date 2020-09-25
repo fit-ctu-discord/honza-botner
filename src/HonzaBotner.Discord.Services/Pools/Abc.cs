@@ -50,8 +50,9 @@ namespace HonzaBotner.Discord.Services.Pools
 
             const string tokenPattern = @"""([^""]+)""|[\S]+";
             MatchCollection matches = Regex.Matches(text, tokenPattern);
-            List<string> arguments = matches.Cast<Match>()
-                .Select(match => match!.Groups[1].Value != "" ? match.Groups[1].Value : match.Value).ToList();
+            List<string> arguments = matches.Select(match =>
+                match!.Groups[1].Value != "" ? match.Groups[1].Value : match.Value
+            ).ToList();
 
             if (arguments.Count == 0) return ChatCommendExecutedResult.WrongSyntax;
 
@@ -64,7 +65,7 @@ namespace HonzaBotner.Discord.Services.Pools
                 {
                     Name = authorNickName, IconUrl = message.Author.AvatarUrl
                 },
-                Title = question,
+                Title = question
             };
 
             int optionIndex = 0;
@@ -75,7 +76,7 @@ namespace HonzaBotner.Discord.Services.Pools
                 if (answer.Trim() == "") return ChatCommendExecutedResult.WrongSyntax;
 
                 embed.AddField(
-                    DiscordEmoji.FromName(client, _optionsEmoji[optionIndex]).ToString(),
+                    DiscordEmoji.FromName(client, emoji).ToString(),
                     answer,
                     true
                 );

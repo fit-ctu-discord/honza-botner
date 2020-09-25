@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord;
 using HonzaBotner.Discord.Command;
 
 namespace HonzaBotner.Discord.Services.Messages
@@ -41,7 +40,7 @@ namespace HonzaBotner.Discord.Services.Messages
             try
             {
                 await oldMessage.ModifyAsync(editMessageText.Trim() == "" ? oldMessage.Content : editMessageText,
-                    embed: new DiscordEmbedBuilder {ImageUrl = imageUrl}.Build());
+                    new DiscordEmbedBuilder {ImageUrl = imageUrl}.Build());
             }
             catch
             {

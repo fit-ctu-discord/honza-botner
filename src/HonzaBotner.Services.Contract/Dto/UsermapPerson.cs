@@ -2,7 +2,6 @@
 
 namespace HonzaBotner.Services.Contract.Dto
 {
-
     public class UsermapPerson
     {
         public string? Username { get; set; }

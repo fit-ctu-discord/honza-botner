@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
 using HonzaBotner.Discord;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
@@ -17,7 +14,6 @@ namespace HonzaBotner.Pages
     {
         private readonly IUsermapInfoService _userMapInfoService;
         private readonly IDiscordRoleManager _roleManager;
-        private readonly DiscordClient _client;
 
         [BindProperty(SupportsGet = true)]
         public ulong Gid { get; set; }
@@ -27,7 +23,6 @@ namespace HonzaBotner.Pages
 
         public AuthCallbackModel(DiscordWrapper discordWrapper, IUsermapInfoService userMapInfoService, IDiscordRoleManager roleManager)
         {
-            _client = discordWrapper.Client;
             _userMapInfoService = userMapInfoService;
             _roleManager = roleManager;
         }

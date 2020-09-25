@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -19,7 +17,7 @@ namespace HonzaBotner.Discord.Services
             if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
             if (message.Content.Split(" ").Length < 3) return ChatCommendExecutedResult.WrongSyntax;
 
-            string type = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[1];
+            string _ = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[1];
             string name = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[2];
 
             await client.UpdateStatusAsync(new DiscordGame(name));
