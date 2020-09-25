@@ -6,7 +6,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Command;
 
-namespace HonzaBotner.Discord.Services.Messages
+namespace HonzaBotner.Discord.Services.Commands.Messages
 {
     public class SendImage : IChatCommand
     {
