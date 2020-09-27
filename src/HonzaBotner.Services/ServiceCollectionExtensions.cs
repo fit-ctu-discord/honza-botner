@@ -23,6 +23,7 @@ namespace HonzaBotner.Services
             serviceCollection.AddScoped<IUsermapInfoService, UserMapInfoService>();
             serviceCollection.AddHttpClient<IUsermapInfoService, UserMapInfoService>();
             serviceCollection.AddScoped<IDiscordRoleManager, DiscordRoleManager>();
+            serviceCollection.AddHttpClient<IAuthorizationService, CvutAuthorizationService>();
             serviceCollection.AddScoped<IAuthorizationService, CvutAuthorizationService>();
 
             return serviceCollection;

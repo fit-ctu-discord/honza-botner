@@ -13,6 +13,7 @@ namespace HonzaBotner.Controllers
     {
         private const string AuthIdCookieName = "honza-botner-auth-id";
         private readonly IAuthorizationService _authorizationService;
+        private string RedirectUri => Url.ActionLink(nameof(Callback));
 
         public AuthController(IAuthorizationService authorizationService)
         {
@@ -31,13 +32,12 @@ namespace HonzaBotner.Controllers
 
             Response.Cookies.Append(AuthIdCookieName, code);
 
-            string redirectUri = Url.ActionLink(nameof(Callback));
-            string uri = await _authorizationService.GetAuthLink(redirectUri);
+            string uri = await _authorizationService.GetAuthLink(RedirectUri);
             return Redirect(uri);
         }
 
         [HttpGet(nameof(Callback))]
-        public ActionResult Callback()
+        public async Task<ActionResult> Callback()
         {
             if (!Request.Cookies.TryGetValue(AuthIdCookieName, out string? verificationId)
             || !Request.Query.TryGetValue("code", out StringValues codes))
@@ -51,9 +51,12 @@ namespace HonzaBotner.Controllers
                 return BadRequest();
             }
 
+            string accessToken = await _authorizationService.GetAccessTokenAsync(code, RedirectUri);
+            string userName = await _authorizationService.GetUserNameAsync(accessToken);
 
+            bool auth = await _authorizationService.AuthorizeAsync(accessToken, userName, verificationId);
 
-            return Ok(new { A = verificationId, C = code });
+            return Ok(auth);
         }
     }
 }

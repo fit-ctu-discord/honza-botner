@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HonzaBotner.Core.Contract\HonzaBotner.Core.Contract.csproj" />
     <ProjectReference Include="..\HonzaBotner.Database\HonzaBotner.Database.csproj" />
     <ProjectReference Include="..\HonzaBotner.Discord\HonzaBotner.Discord.csproj" />
     <ProjectReference Include="..\HonzaBotner.Discord.Services\HonzaBotner.Discord.Services.csproj" />

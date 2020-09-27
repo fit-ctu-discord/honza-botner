@@ -16,7 +16,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using HonzaBotner.Core.Contract;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
@@ -36,7 +35,6 @@ namespace HonzaBotner
         {
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddControllers();
-            services.AddHttpContextAccessor();
             services.AddDbContext<HonzaBotnerDbContext>(options =>
                 options.UseNpgsql(Configuration["CVUT:ConnectionString"], b => b.MigrationsAssembly("HonzaBotner")));
             services.AddSwaggerGen(c =>
@@ -61,7 +59,6 @@ namespace HonzaBotner
                     config.AddCommand<Abc>(Abc.ChatCommand);
                 });
 
-            services.AddScoped<IAuthInfoProvider, AuthInfoProvider>();
             services.AddBotnerServicesOptions(Configuration)
                 .AddHttpClient()
                 .AddBotnerServices();
