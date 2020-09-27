@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.Http;
 
 namespace HonzaBotner.Services
 {
-    public class AccessTokenProvider : IAccessTokenProvider
+    public class AuthInfoProvider : IAuthInfoProvider
     {
         private const string TokenName = "access_token";
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AccessTokenProvider(IHttpContextAccessor httpContextAccessor)
+        public AuthInfoProvider(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
         }
@@ -23,6 +23,16 @@ namespace HonzaBotner.Services
             }
 
             return await _httpContextAccessor.HttpContext.GetTokenAsync(TokenName);
+        }
+
+        public Task<string?> GetUsernameAsync()
+        {
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                return Task.FromResult((string?)null);
+            }
+
+            return Task.FromResult(_httpContextAccessor.HttpContext.User.Identity?.Name);
         }
     }
 }
