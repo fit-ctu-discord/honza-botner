@@ -9,6 +9,8 @@ namespace HonzaBotner.Database.Mappers
             builder.HasKey(v => v.VerificationId);
             builder.HasIndex(v => new {v.GuildId, v.UserId})
                 .IsUnique();
+            builder.HasIndex(v => v.CvutUsername)
+                .IsUnique(); // By default it is "IS UNIQUE IF NOT NULL"
         }
     }
 }

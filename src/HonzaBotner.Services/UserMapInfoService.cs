@@ -12,17 +12,18 @@ namespace HonzaBotner.Services
     public sealed class UserMapInfoService : IUsermapInfoService
     {
         private readonly HttpClient _httpClient;
-        private readonly IAccessTokenProvider _accesTokenProvider;
+        private readonly IAuthInfoProvider _authInfoProvider;
 
-        public UserMapInfoService(HttpClient httpClient, IAccessTokenProvider accesTokenProvider)
+        public UserMapInfoService(HttpClient httpClient, IAuthInfoProvider authInfoProvider)
         {
             _httpClient = httpClient;
-            _accesTokenProvider = accesTokenProvider;
+            _authInfoProvider = authInfoProvider;
         }
 
-        public async Task<UsermapPerson?> GetUserInfoAsync(string username)
+        public async Task<UsermapPerson?> GetUserInfoAsync()
         {
-            string? accessToken = await _accesTokenProvider.GetTokenAsync();
+            string? accessToken = await _authInfoProvider.GetTokenAsync();
+            string? username = await _authInfoProvider.GetUsernameAsync();
             UriBuilder uriBuilder = new UriBuilder($"https://kosapi.fit.cvut.cz/usermap/v1/people/{username}?'");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);

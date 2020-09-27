@@ -1,11 +1,10 @@
 ﻿using HonzaBotner.Database.Mappers;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 namespace HonzaBotner.Database
 {
-    public class HonzaBotnerDbContext : IdentityDbContext
+    public class HonzaBotnerDbContext : DbContext
     {
         public HonzaBotnerDbContext(DbContextOptions<HonzaBotnerDbContext> options)
             : base(options)
@@ -20,5 +19,6 @@ namespace HonzaBotner.Database
         }
 
         public DbSet<Counter> Counters { get; set; }
+        public DbSet<Verification> Verifications { get; set; }
     }
 }

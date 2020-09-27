@@ -14,6 +14,7 @@ namespace HonzaBotner.Services
             {
                 configuration.GetSection(DiscordRoleConfig.ConfigName).Bind(settings);
             });
+            serviceCollection.Configure<CvutConfig>(configuration.GetSection(CvutConfig.ConfigName));
             return serviceCollection;
         }
 
@@ -22,6 +23,7 @@ namespace HonzaBotner.Services
             serviceCollection.AddScoped<IUsermapInfoService, UserMapInfoService>();
             serviceCollection.AddHttpClient<IUsermapInfoService, UserMapInfoService>();
             serviceCollection.AddScoped<IDiscordRoleManager, DiscordRoleManager>();
+            serviceCollection.AddScoped<IAuthorizationService, CvutAuthorizationService>();
 
             return serviceCollection;
         }

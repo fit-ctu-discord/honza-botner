@@ -5,6 +5,6 @@ namespace HonzaBotner.Services.Contract
 {
     public interface IUsermapInfoService
     {
-        Task<UsermapPerson?> GetUserInfoAsync(string username);
+        Task<UsermapPerson?> GetUserInfoAsync();
     }
 }

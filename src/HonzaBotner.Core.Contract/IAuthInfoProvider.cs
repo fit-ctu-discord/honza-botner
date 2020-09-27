@@ -2,8 +2,9 @@
 
 namespace HonzaBotner.Core.Contract
 {
-    public interface IAccessTokenProvider
+    public interface IAuthInfoProvider
     {
         Task<string?> GetTokenAsync();
+        Task<string?> GetUsernameAsync();
     }
 }
