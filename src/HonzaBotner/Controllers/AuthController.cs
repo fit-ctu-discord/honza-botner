@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using HonzaBotner.Services.Contract;
@@ -32,7 +33,7 @@ namespace HonzaBotner.Controllers
 
             Response.Cookies.Append(AuthIdCookieName, code);
 
-            string uri = await _authorizationService.GetAuthLink(RedirectUri);
+            string uri = await _authorizationService.GetAuthLinkAsync(RedirectUri);
             return Redirect(uri);
         }
 
@@ -51,8 +52,18 @@ namespace HonzaBotner.Controllers
                 return BadRequest();
             }
 
-            string accessToken = await _authorizationService.GetAccessTokenAsync(code, RedirectUri);
-            string userName = await _authorizationService.GetUserNameAsync(accessToken);
+            string accessToken;
+            string userName;
+            try
+            {
+                accessToken = await _authorizationService.GetAccessTokenAsync(code, RedirectUri);
+                userName = await _authorizationService.GetUserNameAsync(accessToken);
+            }
+            catch (InvalidOperationException e)
+            {
+                Response.StatusCode = 400;
+                return Content(e.Message, "text/html");
+            }
 
             bool auth = await _authorizationService.AuthorizeAsync(accessToken, userName, verificationId);
 

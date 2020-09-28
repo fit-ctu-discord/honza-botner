@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -42,7 +41,14 @@ namespace HonzaBotner.Services
 
             if (verification != null)
             {
-                return verification.Verified ? null : verification.VerificationId.ToString();
+                if (!verification.Verified)
+                {
+                    return verification.VerificationId.ToString();
+                }
+                else
+                {
+                    throw new InvalidOperationException("User is already authenticated");
+                }
             }
 
             verification = new Verification
@@ -90,7 +96,7 @@ namespace HonzaBotner.Services
             return rolesGranted;
         }
 
-        public Task<string> GetAuthLink(string redirectUri)
+        public Task<string> GetAuthLinkAsync(string redirectUri)
         {
             const string authLink =
                 "https://auth.fit.cvut.cz/oauth/authorize?response_type=code&client_id={0}&redirect_uri={1}";
@@ -119,7 +125,7 @@ namespace HonzaBotner.Services
             return !verification.Verified;
         }
 
-        private string GetQueryString(NameValueCollection queryCollection) 
+        private string GetQueryString(NameValueCollection queryCollection)
             => string.Join('&', queryCollection.AllKeys.Select(k => $"{k}={HttpUtility.UrlEncode(queryCollection[k])}"));
 
         public async Task<string> GetAccessTokenAsync(string code, string redirectUri)
@@ -149,13 +155,14 @@ namespace HonzaBotner.Services
 
             JsonDocument response = await JsonDocument.ParseAsync(await tokenResponse.Content.ReadAsStreamAsync());
 
-            return response.RootElement.GetProperty("access_token").GetString() ?? throw new InvalidOperationException();
+            return response.RootElement.GetProperty("access_token").GetString()
+                   ?? throw new InvalidOperationException("Couldn't authorize user");
         }
 
         public async Task<string> GetUserNameAsync(string accessToken)
         {
             const string checkTokenUri = "https://auth.fit.cvut.cz/oauth/check_token";
-            
+
             var uriBuilder =new UriBuilder(checkTokenUri)
             {
                 Query = $"token={accessToken}"
@@ -168,7 +175,8 @@ namespace HonzaBotner.Services
             string responseText = await response.Content.ReadAsStringAsync();
             var user = JsonDocument.Parse(responseText);
 
-            return user.RootElement.GetProperty("user_name").GetString() ?? throw new InvalidOperationException();
+            return user.RootElement.GetProperty("user_name").GetString()
+                   ?? throw new InvalidOperationException("Couldn't load information about user");
         }
     }
 }

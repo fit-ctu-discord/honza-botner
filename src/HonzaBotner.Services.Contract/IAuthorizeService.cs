@@ -9,7 +9,7 @@ namespace HonzaBotner.Services.Contract
 
         Task<bool> AuthorizeAsync(string code, string accessToken, string userName);
 
-        Task<string> GetAuthLink(string redirectUri);
+        Task<string> GetAuthLinkAsync(string redirectUri);
 
         Task<bool> VerificationExistsAsync(string code);
 

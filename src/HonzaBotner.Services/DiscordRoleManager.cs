@@ -25,18 +25,7 @@ namespace HonzaBotner.Services
 
         public async Task<bool> GrantRolesAsync(ulong guildId, ulong userId, IEnumerable<DiscordRole> discordRoles)
         {
-            // TODO: Do this in service.
-            DiscordGuild? guild = await _client.GetGuildAsync(guildId);
-            if (guild == null)
-            {
-                return false;
-            }
-
-            DiscordMember? member = await guild.GetMemberAsync(userId);
-            if (member == null)
-            {
-                return false;
-            }
+            DiscordGuild guild = await _client.GetGuildAsync(guildId);
 
             List<DRole> roles = new List<DRole>();
             foreach (DiscordRole discordRole in discordRoles)
@@ -50,6 +39,7 @@ namespace HonzaBotner.Services
                 roles.Add(role);
             }
 
+            DiscordMember member = await guild.GetMemberAsync(userId);
             foreach (DRole role in roles)
             {
                 await member.GrantRoleAsync(role, "Auth");
@@ -64,11 +54,11 @@ namespace HonzaBotner.Services
 
             IEnumerable<string> knowUserRolePrefixes = _roleConfig.RoleMapping.Keys;
 
-            foreach (string roleName in kosRoles)
+            foreach (string rolePrefix in knowUserRolePrefixes)
             {
-                string? rolePrefix = knowUserRolePrefixes.FirstOrDefault(prefix => roleName.StartsWith(prefix));
+                bool containsRole = kosRoles.Any(role => role.StartsWith(rolePrefix));
 
-                if (rolePrefix != null)
+                if (containsRole)
                 {
                     discordRoles.Add(new DiscordRole(_roleConfig.RoleMapping[rolePrefix]));
                 }
