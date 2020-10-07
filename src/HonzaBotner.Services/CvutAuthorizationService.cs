@@ -34,10 +34,10 @@ namespace HonzaBotner.Services
             _client = client;
         }
 
-        public async Task<string?> GetAuthorizationCodeAsync(ulong guildId, ulong userId)
+        public async Task<string?> GetAuthorizationCodeAsync(ulong userId)
         {
             Verification? verification = await _dbContext.Verifications
-                .FirstOrDefaultAsync(v => v.GuildId == guildId && v.UserId == userId);
+                .FirstOrDefaultAsync(v => v.UserId == userId);
 
             if (verification != null)
             {
@@ -53,7 +53,7 @@ namespace HonzaBotner.Services
 
             verification = new Verification
             {
-                VerificationId = Guid.NewGuid(), Verified = false, GuildId = guildId, UserId = userId
+                VerificationId = Guid.NewGuid(), Verified = false, UserId = userId
             };
 
             await _dbContext.Verifications.AddAsync(verification);
@@ -77,19 +77,19 @@ namespace HonzaBotner.Services
 
             UsermapPerson? person = await _usermapInfoService.GetUserInfoAsync(accessToken, userName);
             if (person == null ||
-                await _dbContext.Verifications.AnyAsync(v => v.CvutUsername == person.Username))
+                await _dbContext.Verifications.AnyAsync(v => v.AuthId == person.Username))
             {
                 return false;
             }
 
             IEnumerable<DiscordRole> discordRoles = _roleManager.MapUsermapRoles(person.Roles!.ToArray());
             bool rolesGranted =
-                await _roleManager.GrantRolesAsync(verification.GuildId, verification.UserId, discordRoles);
+                await _roleManager.GrantRolesAsync(verification.UserId, discordRoles);
 
             if (rolesGranted)
             {
                 verification.Verified = true;
-                verification.CvutUsername = person.Username;
+                verification.AuthId = person.Username;
                 await _dbContext.SaveChangesAsync();
             }
 

@@ -6,9 +6,8 @@ namespace HonzaBotner.Database
     {
         public Guid VerificationId { get; set; }
 
-        public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
-        public string? CvutUsername { get; set; }
+        public string? AuthId { get; set; }
         public bool Verified { get; set; }
     }
 }

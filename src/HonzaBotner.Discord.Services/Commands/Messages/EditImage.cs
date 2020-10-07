@@ -5,18 +5,24 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Command;
+using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Commands.Messages
 {
-    public class EditImage : IChatCommand
+    public class EditImage : BaseCommand
     {
         public const string ChatCommand = "editImage";
         // ;editImage <message-link> <new-image-url> <new-message>
+        protected override bool CanBotExecute => false;
 
-        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
-            CancellationToken cancellationToken)
+        public EditImage(ILogger<EditImage> logger, IPermissionHandler permissionHandler)
+            : base(permissionHandler, logger)
         {
-            if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
+        }
+
+        protected override async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client,
+            DiscordMessage message, CancellationToken cancellationToken = default)
+        {
             if (message.Content.Split(" ").Length < 3) return ChatCommendExecutedResult.WrongSyntax;
 
             DiscordMessage? oldMessage = await
@@ -37,15 +43,8 @@ namespace HonzaBotner.Discord.Services.Commands.Messages
             string text = message.Content;
             string editMessageText = Regex.Replace(text, pattern, "");
 
-            try
-            {
-                await oldMessage.ModifyAsync(editMessageText.Trim() == "" ? oldMessage.Content : editMessageText,
-                    new DiscordEmbedBuilder {ImageUrl = imageUrl}.Build());
-            }
-            catch
-            {
-                return ChatCommendExecutedResult.InternalError;
-            }
+            await oldMessage.ModifyAsync(editMessageText.Trim() == "" ? oldMessage.Content : editMessageText,
+                new DiscordEmbedBuilder {ImageUrl = imageUrl}.Build());
 
             return ChatCommendExecutedResult.Ok;
         }

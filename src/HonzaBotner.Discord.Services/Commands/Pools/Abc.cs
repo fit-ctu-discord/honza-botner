@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Command;
+using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Commands.Pools
 {
-    public class Abc : IChatCommand
+    public class Abc : BaseCommand
     {
         public const string ChatCommand = "abc";
         // ;abc <question> <option 1> <option 2> ...
@@ -39,8 +40,13 @@ namespace HonzaBotner.Discord.Services.Commands.Pools
             ":regional_indicator_t:"
         };
 
-        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
-            CancellationToken cancellationToken)
+        public Abc(IPermissionHandler permissionHandler, ILogger<Abc> logger)
+            : base(permissionHandler, logger)
+        {
+        }
+
+        protected override async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
+            CancellationToken cancellationToken = default)
         {
             if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
             if (message.Content.Split(" ").Length < 3) return ChatCommendExecutedResult.WrongSyntax;
@@ -84,19 +90,12 @@ namespace HonzaBotner.Discord.Services.Commands.Pools
                 optionIndex++;
             }
 
-            try
-            {
-                var poolMessage = await client.SendMessageAsync(message.Channel, embed: embed.Build());
-                await message.DeleteAsync();
+            var poolMessage = await client.SendMessageAsync(message.Channel, embed: embed.Build());
+            await message.DeleteAsync();
 
-                for (int i = 0; i < optionIndex; i++)
-                {
-                    await poolMessage.CreateReactionAsync(DiscordEmoji.FromName(client, _optionsEmoji[i]));
-                }
-            }
-            catch
+            for (int i = 0; i < optionIndex; i++)
             {
-                return ChatCommendExecutedResult.InternalError;
+                await poolMessage.CreateReactionAsync(DiscordEmoji.FromName(client, _optionsEmoji[i]));
             }
 
             return ChatCommendExecutedResult.Ok;

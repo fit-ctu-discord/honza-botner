@@ -5,18 +5,25 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Command;
+using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Commands.Messages
 {
-    public class SendMessage : IChatCommand
+    public class SendMessage : BaseCommand
     {
         public const string ChatCommand = "send";
         // ;send #general <message>
 
-        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
-            CancellationToken cancellationToken)
+        protected override bool CanBotExecute => false;
+
+        public SendMessage(IPermissionHandler permissionHandler, ILogger<SendMessage> logger)
+            : base(permissionHandler, logger)
         {
-            if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
+        }
+
+        protected override async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client,
+            DiscordMessage message, CancellationToken cancellationToken = default)
+        {
             if (message.MentionedChannels.Count.Equals(0)) return ChatCommendExecutedResult.WrongSyntax;
             if (message.Content.Split(" ").Length < 3) return ChatCommendExecutedResult.WrongSyntax;
 

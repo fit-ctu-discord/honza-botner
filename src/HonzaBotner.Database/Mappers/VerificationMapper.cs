@@ -7,9 +7,9 @@ namespace HonzaBotner.Database.Mappers
         public void Map(EntityTypeBuilder<Verification> builder)
         {
             builder.HasKey(v => v.VerificationId);
-            builder.HasIndex(v => new {v.GuildId, v.UserId})
+            builder.HasIndex(v => v.UserId)
                 .IsUnique();
-            builder.HasIndex(v => v.CvutUsername)
+            builder.HasIndex(v => v.AuthId)
                 .IsUnique(); // By default it is "IS UNIQUE IF NOT NULL"
         }
     }

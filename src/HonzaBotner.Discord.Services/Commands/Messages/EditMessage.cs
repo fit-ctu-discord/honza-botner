@@ -5,18 +5,24 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Command;
+using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Commands.Messages
 {
-    public class EditMessage : IChatCommand
+    public class EditMessage : BaseCommand
     {
         public const string ChatCommand = "edit";
         // ;edit <message-link> <new-message>
+        protected override bool CanBotExecute => false;
 
-        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
-            CancellationToken cancellationToken)
+        public EditMessage(IPermissionHandler permissionHandler, ILogger<EditMessage> logger)
+            : base(permissionHandler, logger)
         {
-            if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
+        }
+
+        protected override async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client,
+            DiscordMessage message, CancellationToken cancellationToken = default)
+        {
             if (message.Content.Split(" ").Length < 3) return ChatCommendExecutedResult.WrongSyntax;
 
             DiscordMessage? oldMessage = await
@@ -33,14 +39,7 @@ namespace HonzaBotner.Discord.Services.Commands.Messages
             string text = message.Content;
             string editMessageText = Regex.Replace(text, pattern, "");
 
-            try
-            {
-                await oldMessage.ModifyAsync(editMessageText);
-            }
-            catch
-            {
-                return ChatCommendExecutedResult.InternalError;
-            }
+            await oldMessage.ModifyAsync(editMessageText);
 
             return ChatCommendExecutedResult.Ok;
         }

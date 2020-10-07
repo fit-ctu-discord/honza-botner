@@ -8,6 +8,6 @@ namespace HonzaBotner.Services.Contract
     {
         HashSet<DiscordRole> MapUsermapRoles(params string[] kosRoles);
 
-        Task<bool> GrantRolesAsync(ulong guildId, ulong userId, IEnumerable<DiscordRole> discordRoles);
+        Task<bool> GrantRolesAsync(ulong userId, IEnumerable<DiscordRole> discordRoles);
     }
 }

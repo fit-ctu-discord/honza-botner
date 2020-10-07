@@ -4,16 +4,22 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Command;
+using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Commands.Pools
 {
-    public class YesNo : IChatCommand
+    public class YesNo : BaseCommand
     {
         public const string ChatCommand = "yesno";
         // ;yesno <question>
 
-        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
-            CancellationToken cancellationToken)
+        public YesNo(IPermissionHandler permissionHandler, ILogger<YesNo> logger)
+            : base(permissionHandler, logger)
+        {
+        }
+
+        protected override async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
+            CancellationToken cancellationToken = default)
         {
             if (message.Author.IsBot) return ChatCommendExecutedResult.CannotBeUsedByBot;
             if (message.Content.Split(" ").Length < 2) return ChatCommendExecutedResult.WrongSyntax;
@@ -33,17 +39,10 @@ namespace HonzaBotner.Discord.Services.Commands.Pools
                 Title = poolMessageContent,
             };
 
-            try
-            {
-                var poolMessage = await client.SendMessageAsync(message.Channel, embed: embed.Build());
-                await message.DeleteAsync();
-                await poolMessage.CreateReactionAsync(DiscordEmoji.FromName(client, ":thumbsup:"));
-                await poolMessage.CreateReactionAsync(DiscordEmoji.FromName(client, ":thumbsdown:"));
-            }
-            catch
-            {
-                return ChatCommendExecutedResult.InternalError;
-            }
+            var poolMessage = await client.SendMessageAsync(message.Channel, embed: embed.Build());
+            await message.DeleteAsync();
+            await poolMessage.CreateReactionAsync(DiscordEmoji.FromName(client, ":thumbsup:"));
+            await poolMessage.CreateReactionAsync(DiscordEmoji.FromName(client, ":thumbsdown:"));
 
             return ChatCommendExecutedResult.Ok;
         }

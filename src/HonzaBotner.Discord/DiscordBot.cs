@@ -34,7 +34,7 @@ namespace HonzaBotner.Discord
 
             Client.MessageCreated += (args) => OnClientOnMessageCreated(args, cancellationToken);
 
-            Client.MessageReactionAdded += (args) => OnClientOnMessageReactionAdded(args);
+            Client.MessageReactionAdded += OnClientOnMessageReactionAdded;
 
             await Task.Delay(-1, cancellationToken);
         }
@@ -106,6 +106,7 @@ namespace HonzaBotner.Discord
 
         private Task OnClientOnMessageReactionAdded(MessageReactionAddEventArgs args)
         {
+            // TODO: This is not good. Make it more universal...
             var emoji = DiscordEmoji.FromName(Client, ":pushpin:");
             int pinLimit = 1;
 

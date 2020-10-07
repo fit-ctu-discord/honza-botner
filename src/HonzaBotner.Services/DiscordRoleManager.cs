@@ -14,18 +14,18 @@ namespace HonzaBotner.Services
 {
     public sealed class DiscordRoleManager : IDiscordRoleManager
     {
+        private readonly IGuildProvider _guildProvider;
         private readonly DiscordRoleConfig _roleConfig;
-        private readonly DiscordClient _client;
 
-        public DiscordRoleManager(IOptions<DiscordRoleConfig> options, DiscordWrapper wrapper)
+        public DiscordRoleManager(IOptions<DiscordRoleConfig> options, IGuildProvider guildProvider)
         {
+            _guildProvider = guildProvider;
             _roleConfig = options.Value;
-            _client = wrapper.Client;
         }
 
-        public async Task<bool> GrantRolesAsync(ulong guildId, ulong userId, IEnumerable<DiscordRole> discordRoles)
+        public async Task<bool> GrantRolesAsync(ulong userId, IEnumerable<DiscordRole> discordRoles)
         {
-            DiscordGuild guild = await _client.GetGuildAsync(guildId);
+            DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
 
             List<DRole> roles = new List<DRole>();
             foreach (DiscordRole discordRole in discordRoles)

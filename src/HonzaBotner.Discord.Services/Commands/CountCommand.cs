@@ -5,21 +5,25 @@ using DSharpPlus.Entities;
 using HonzaBotner.Database;
 using HonzaBotner.Discord.Command;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
-    public class CountCommand : IChatCommand
+    public class CountCommand : BaseCommand
     {
         public const string ChatCommand = "counterBump";
 
         private readonly HonzaBotnerDbContext _dbContext;
 
-        public CountCommand(HonzaBotnerDbContext dbContext)
+        public CountCommand(HonzaBotnerDbContext dbContext, IPermissionHandler permissionHandler,
+            ILogger<CountCommand> logger)
+            : base(permissionHandler, logger)
         {
             _dbContext = dbContext;
         }
 
-        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message, CancellationToken cancellationToken = default)
+        protected override async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
+            CancellationToken cancellationToken = default)
         {
             ulong userId = message.Author.Id;
             Counter? counter = await _dbContext.Counters.FirstOrDefaultAsync(c => c.UserId == userId, cancellationToken);

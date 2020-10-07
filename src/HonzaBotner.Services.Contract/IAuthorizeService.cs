@@ -5,7 +5,7 @@ namespace HonzaBotner.Services.Contract
 {
     public interface IAuthorizationService
     {
-        Task<string?> GetAuthorizationCodeAsync(ulong guildId, ulong userId);
+        Task<string?> GetAuthorizationCodeAsync(ulong userId);
 
         Task<bool> AuthorizeAsync(string code, string accessToken, string userName);
 

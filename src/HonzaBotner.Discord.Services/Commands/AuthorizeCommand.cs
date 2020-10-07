@@ -4,27 +4,30 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Command;
 using HonzaBotner.Services.Contract;
+using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
-    public class AuthorizeCommand : IChatCommand
+    public class AuthorizeCommand : BaseCommand
     {
         private readonly IAuthorizationService _authorizationService;
         private const string LinkTemplate = "https://localhost:5001/Auth/Authenticate/{0}";
 
         public const string ChatCommand = "authorize";
 
-        public AuthorizeCommand(IAuthorizationService authorizationService)
+        public AuthorizeCommand(IAuthorizationService authorizationService,
+            IPermissionHandler permissionHandler, ILogger<AuthorizeCommand> logger) : base(permissionHandler, logger)
         {
             _authorizationService = authorizationService;
         }
 
-        public async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message, CancellationToken cancellationToken = default)
+        protected override async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client,
+            DiscordMessage message, CancellationToken cancellationToken = default)
         {
             DiscordUser user = message.Author;
             DiscordDmChannel channel = await client.CreateDmAsync(user);
 
-            string? code = await _authorizationService.GetAuthorizationCodeAsync(message.Channel.GuildId, user.Id);
+            string? code = await _authorizationService.GetAuthorizationCodeAsync(user.Id);
             if (code == null)
             {
                 await message.RespondAsync("Already authorized");
