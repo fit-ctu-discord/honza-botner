@@ -8,6 +8,7 @@ namespace HonzaBotner.Discord
     public class DiscordWrapper
     {
         private readonly ILogger<DiscordClient> _discordLogger;
+
         public DiscordClient Client { get; }
 
         public DiscordWrapper(IOptions<DiscordConfig> options, ILogger<DiscordClient> discordLogger)

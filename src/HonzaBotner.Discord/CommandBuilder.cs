@@ -9,16 +9,24 @@ namespace HonzaBotner.Discord
     {
         private readonly IServiceCollection _serviceCollection;
         private readonly IList<(Type Type, string Command)> _commands;
+        private readonly ISet<string> _registeredCommand;
 
         internal CommandBuilder(IServiceCollection serviceCollection)
         {
             _serviceCollection = serviceCollection;
             _commands = new List<(Type Type, string Command)>();
+            _registeredCommand = new HashSet<string>();
         }
 
         public CommandBuilder AddCommand<TCommand>(string commandText)
             where TCommand : IChatCommand
         {
+            if (!_registeredCommand.Add(commandText))
+            {
+                throw new ArgumentException("Command with this command text is already registered",
+                    nameof(commandText));
+            }
+
             var commandType = typeof(TCommand);
 
             var command = (commandType, commandText);

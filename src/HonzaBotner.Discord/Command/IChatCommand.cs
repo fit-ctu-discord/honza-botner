@@ -7,6 +7,7 @@ namespace HonzaBotner.Discord.Command
 {
     public interface IChatCommand
     {
-        Task Execute(DiscordClient client, DiscordMessage message, CancellationToken cancellationToken);
+        Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client, DiscordMessage message,
+            CancellationToken cancellationToken = default);
     }
 }
