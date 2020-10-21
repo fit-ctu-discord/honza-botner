@@ -106,7 +106,7 @@ namespace HonzaBotner
                 app.UseSwagger();
                 app.UseSwaggerUI(delegate(SwaggerUIOptions c)
                 {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApplication v1");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "HonzaBotner v1");
                     c.RoutePrefix = string.Empty;
                 });
             }

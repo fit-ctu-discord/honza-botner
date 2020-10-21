@@ -23,73 +23,47 @@ namespace HonzaBotner.Services
         private readonly IUsermapInfoService _usermapInfoService;
         private readonly IDiscordRoleManager _roleManager;
         private readonly HttpClient _client;
+        private readonly IHashService _hashService;
 
         public CvutAuthorizationService(HonzaBotnerDbContext dbContext, IOptions<CvutConfig> cvutConfig,
-            IUsermapInfoService usermapInfoService, IDiscordRoleManager roleManager, HttpClient client)
+            IUsermapInfoService usermapInfoService, IDiscordRoleManager roleManager, HttpClient client,
+            IHashService hashService)
         {
             _dbContext = dbContext;
             _cvutConfig = cvutConfig.Value;
             _usermapInfoService = usermapInfoService;
             _roleManager = roleManager;
             _client = client;
+            _hashService = hashService;
         }
 
-        public async Task<string?> GetAuthorizationCodeAsync(ulong userId)
+        public async Task<bool> AuthorizeAsync(string accessToken, string username, ulong userId)
         {
-            Verification? verification = await _dbContext.Verifications
-                .FirstOrDefaultAsync(v => v.UserId == userId);
-
-            if (verification != null)
-            {
-                if (!verification.Verified)
-                {
-                    return verification.VerificationId.ToString();
-                }
-                else
-                {
-                    throw new InvalidOperationException("User is already authenticated");
-                }
-            }
-
-            verification = new Verification
-            {
-                VerificationId = Guid.NewGuid(), Verified = false, UserId = userId
-            };
-
-            await _dbContext.Verifications.AddAsync(verification);
-            await _dbContext.SaveChangesAsync();
-
-            return verification.VerificationId.ToString();
-        }
-
-        public async Task<bool> AuthorizeAsync(string accessToken, string userName, string code)
-        {
-            if (!Guid.TryParse(code, out Guid verificationId))
+            if (await IsUserVerified(userId))
             {
                 return false;
             }
 
-            Verification? verification = await _dbContext.Verifications.FindAsync(verificationId);
-            if (verification == null || verification.Verified)
-            {
-                return verification?.Verified ?? false;
-            }
-
-            UsermapPerson? person = await _usermapInfoService.GetUserInfoAsync(accessToken, userName);
-            if (person == null ||
-                await _dbContext.Verifications.AnyAsync(v => v.AuthId == person.Username))
+            UsermapPerson? person = await _usermapInfoService.GetUserInfoAsync(accessToken, username);
+            if (person == null)
             {
                 return false;
             }
 
-            IEnumerable<DiscordRole> discordRoles = _roleManager.MapUsermapRoles(person.Roles!.ToArray());
-            bool rolesGranted =
-                await _roleManager.GrantRolesAsync(verification.UserId, discordRoles);
+            string authId = _hashService.Hash(person.Username);
+            if (await _dbContext.Verifications.AnyAsync(v => v.AuthId == authId))
+            {
+                return false;
+            }
+
+            IReadOnlySet<DiscordRole> discordRoles = _roleManager.MapUsermapRoles(person.Roles);
+            bool rolesGranted = await _roleManager.GrantRolesAsync(userId, discordRoles);
 
             if (rolesGranted)
             {
-                verification.Verified = true;
-                verification.AuthId = person.Username;
+                Verification verification = new Verification() {AuthId = authId, UserId = userId};
+
+                await _dbContext.Verifications.AddAsync(verification);
                 await _dbContext.SaveChangesAsync();
             }
 
@@ -103,26 +77,16 @@ namespace HonzaBotner.Services
 
             if (string.IsNullOrEmpty(_cvutConfig.ClientId))
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(null, "Invalid config");
             }
 
             return Task.FromResult(string.Format(authLink, _cvutConfig.ClientId, redirectUri));
         }
 
-        public async Task<bool> VerificationExistsAsync(string code)
+        public async Task<bool> IsUserVerified(ulong userId)
         {
-            if (!Guid.TryParse(code, out Guid verificationId))
-            {
-                return false;
-            }
-
-            Verification? verification = await _dbContext.Verifications.FindAsync(verificationId);
-            if (verification == null)
-            {
-                return false;
-            }
-
-            return !verification.Verified;
+            return await _dbContext.Verifications
+                .AnyAsync(v => v.UserId == userId);
         }
 
         private string GetQueryString(NameValueCollection queryCollection)

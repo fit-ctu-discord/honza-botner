@@ -10,14 +10,16 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     public class AuthorizeCommand : BaseCommand
     {
+        private readonly IUrlProvider _urlProvider;
         private readonly IAuthorizationService _authorizationService;
         private const string LinkTemplate = "https://localhost:5001/Auth/Authenticate/{0}";
 
         public const string ChatCommand = "authorize";
 
-        public AuthorizeCommand(IAuthorizationService authorizationService,
+        public AuthorizeCommand(IUrlProvider urlProvider, IAuthorizationService authorizationService,
             IPermissionHandler permissionHandler, ILogger<AuthorizeCommand> logger) : base(permissionHandler, logger)
         {
+            _urlProvider = urlProvider;
             _authorizationService = authorizationService;
         }
 
@@ -27,15 +29,16 @@ namespace HonzaBotner.Discord.Services.Commands
             DiscordUser user = message.Author;
             DiscordDmChannel channel = await client.CreateDmAsync(user);
 
-            string? code = await _authorizationService.GetAuthorizationCodeAsync(user.Id);
-            if (code == null)
+            if (await _authorizationService.IsUserVerified(user.Id))
             {
-                await message.RespondAsync("Already authorized");
-                return ChatCommendExecutedResult.InternalError;
+                await channel.SendMessageAsync($"You are already authorized");
             }
-            string link = string.Format(LinkTemplate, code);
+            else
+            {
+                string link = _urlProvider.GetAuthLink(user.Id);
+                await channel.SendMessageAsync($"Hi, authorize by following this link: {link}");
+            }
 
-            await channel.SendMessageAsync($"Hi, authorize by following this link: {link}");
             return ChatCommendExecutedResult.Ok;
         }
     }

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord;
 using HonzaBotner.Services.Contract;
@@ -23,7 +22,7 @@ namespace HonzaBotner.Services
             _roleConfig = options.Value;
         }
 
-        public async Task<bool> GrantRolesAsync(ulong userId, IEnumerable<DiscordRole> discordRoles)
+        public async Task<bool> GrantRolesAsync(ulong userId, IReadOnlySet<DiscordRole> discordRoles)
         {
             DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
 
@@ -48,9 +47,10 @@ namespace HonzaBotner.Services
             return true;
         }
 
-        public HashSet<DiscordRole> MapUsermapRoles(params string[] kosRoles)
+        public HashSet<DiscordRole> MapUsermapRoles(IReadOnlyCollection<string> kosRoles)
         {
             HashSet<DiscordRole> discordRoles = new HashSet<DiscordRole>();
+
 
             IEnumerable<string> knowUserRolePrefixes = _roleConfig.RoleMapping.Keys;
 

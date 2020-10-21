@@ -21,33 +21,34 @@ namespace HonzaBotner.Controllers
             _authorizationService = authorizationService;
         }
 
-        [HttpGet("Authenticate/{code}")]
-        public async Task<ActionResult> Authenticate(string code)
+        [HttpGet("Authenticate/{userId}")]
+        public async Task<ActionResult> Authenticate(ulong userId)
         {
-            bool verificationExists = await _authorizationService.VerificationExistsAsync(code);
-            if (!verificationExists)
+            bool isUserVerified = await _authorizationService.IsUserVerified(userId);
+            if (isUserVerified)
             {
-                // Verification already requested
+                // User already verified
                 return BadRequest();
             }
 
-            Response.Cookies.Append(AuthIdCookieName, code);
+            Response.Cookies.Append(AuthIdCookieName, userId.ToString());
 
             string uri = await _authorizationService.GetAuthLinkAsync(RedirectUri);
             return Redirect(uri);
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet(nameof(Callback))]
         public async Task<ActionResult> Callback()
         {
-            if (!Request.Cookies.TryGetValue(AuthIdCookieName, out string? verificationId)
+            if (!Request.Cookies.TryGetValue(AuthIdCookieName, out string? userIdString)
             || !Request.Query.TryGetValue("code", out StringValues codes))
             {
                 return BadRequest();
             }
 
             string? code = codes.Any() ? codes[0] : null;
-            if (string.IsNullOrEmpty(verificationId) || string.IsNullOrEmpty(code))
+            if (!ulong.TryParse(userIdString, out ulong userId) || string.IsNullOrEmpty(code))
             {
                 return BadRequest();
             }
@@ -65,7 +66,7 @@ namespace HonzaBotner.Controllers
                 return Content(e.Message, "text/html");
             }
 
-            bool auth = await _authorizationService.AuthorizeAsync(accessToken, userName, verificationId);
+            bool auth = await _authorizationService.AuthorizeAsync(accessToken, userName, userId);
 
             return Ok(auth);
         }

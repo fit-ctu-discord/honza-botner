@@ -5,13 +5,11 @@ namespace HonzaBotner.Services.Contract
 {
     public interface IAuthorizationService
     {
-        Task<string?> GetAuthorizationCodeAsync(ulong userId);
-
-        Task<bool> AuthorizeAsync(string code, string accessToken, string userName);
+        Task<bool> AuthorizeAsync(string accessToken, string username, ulong userId);
 
         Task<string> GetAuthLinkAsync(string redirectUri);
 
-        Task<bool> VerificationExistsAsync(string code);
+        Task<bool> IsUserVerified(ulong userId);
 
         Task<string> GetAccessTokenAsync(string code, string redirectUri);
 

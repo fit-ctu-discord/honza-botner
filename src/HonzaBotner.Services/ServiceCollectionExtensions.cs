@@ -29,7 +29,7 @@ namespace HonzaBotner.Services
             serviceCollection.AddScoped<IDiscordRoleManager, DiscordRoleManager>();
             serviceCollection.AddHttpClient<IAuthorizationService, CvutAuthorizationService>();
             serviceCollection.AddScoped<IAuthorizationService, CvutAuthorizationService>();
-
+            serviceCollection.AddTransient<IUrlProvider, AppUrlProvider>();
             serviceCollection.AddTransient<IHashService, Sha256HashService>();
 
             serviceCollection.AddTransient<IPermissionHandler, AllowAllPermissionHandler>()
