@@ -40,6 +40,7 @@ namespace HonzaBotner
 
             services.AddDbContext<HonzaBotnerDbContext>(options =>
                 options.UseNpgsql(connectionString, b => b.MigrationsAssembly("HonzaBotner")));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "HonzaBotner", Version = "v1"});
