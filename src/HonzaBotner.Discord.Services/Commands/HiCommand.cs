@@ -11,6 +11,8 @@ namespace HonzaBotner.Discord.Services.Commands
     {
         public const string ChatCommand = "hi";
 
+        protected override CommandPermission RequiredPermission => CommandPermission.None;
+
         public HiCommand(IPermissionHandler permissionHandler, ILogger<HiCommand> logger)
             : base(permissionHandler, logger)
         {
