@@ -18,7 +18,7 @@ namespace HonzaBotner.Discord.Command
             _logger = logger;
         }
 
-        protected virtual CommandPermission RequiredPermission => CommandPermission.None;
+        protected virtual CommandPermission RequiredPermission => CommandPermission.Authorized;
 
         protected virtual bool CanBotExecute => true;
 

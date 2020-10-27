@@ -15,6 +15,8 @@ namespace HonzaBotner.Discord.Services.Commands.Messages
         // ;editImage <message-link> <new-image-url> <new-message>
         protected override bool CanBotExecute => false;
 
+        protected override CommandPermission RequiredPermission => CommandPermission.Mod;
+
         public EditImage(ILogger<EditImage> logger, IPermissionHandler permissionHandler)
             : base(permissionHandler, logger)
         {

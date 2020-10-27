@@ -9,5 +9,9 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0-rc.1.20451.14" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0-rc.1.20451.14" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\HonzaBotner.Services.Contract\HonzaBotner.Services.Contract.csproj" />
+  </ItemGroup>
 
 </Project>
