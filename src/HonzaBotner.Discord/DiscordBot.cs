@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using HonzaBotner.Discord.Command;
 using HonzaBotner.Services.Contract;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace HonzaBotner.Discord
 {
@@ -114,7 +115,11 @@ namespace HonzaBotner.Discord
             // TODO: this is only for verify
             var emoji = DiscordEmoji.FromName(Client, ":white_check_mark:");
 
+            // https://discordapp.com/channels/366970031445377024/507515506073403402/686745124885364770
+            if (!(args.Message.Id == 686745124885364770 && args.Message.ChannelId == 507515506073403402)) return;
             if (!args.Emoji.Equals(emoji)) return;
+
+            _logger.Log(LogLevel.Information, "THIS IS THE RIGHT MESSAGE FOR VERIFY");
 
             DiscordUser user = args.User;
             DiscordDmChannel channel = await Client.CreateDmAsync(user);
