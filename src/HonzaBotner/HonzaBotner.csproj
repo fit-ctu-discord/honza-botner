@@ -25,8 +25,4 @@
     <ProjectReference Include="..\HonzaBotner.Services\HonzaBotner.Services.csproj" />
     <ProjectReference Include="..\HonzaBotner.Services.Contract\HonzaBotner.Services.Contract.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services" />
-  </ItemGroup>
 </Project>
