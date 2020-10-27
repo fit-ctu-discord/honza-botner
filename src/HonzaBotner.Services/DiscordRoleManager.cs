@@ -1,42 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord;
 using HonzaBotner.Services.Contract;
+using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Options;
-using DiscordRole = HonzaBotner.Services.Contract.DiscordRole;
+using DiscordRole = HonzaBotner.Services.Contract.Dto.DiscordRole;
 using DRole = DSharpPlus.Entities.DiscordRole;
 
 namespace HonzaBotner.Services
 {
     public sealed class DiscordRoleManager : IDiscordRoleManager
     {
+        private readonly IGuildProvider _guildProvider;
         private readonly DiscordRoleConfig _roleConfig;
-        private readonly DiscordClient _client;
 
-        public DiscordRoleManager(IOptions<DiscordRoleConfig> options, DiscordWrapper wrapper)
+        public DiscordRoleManager(IOptions<DiscordRoleConfig> options, IGuildProvider guildProvider)
         {
+            _guildProvider = guildProvider;
             _roleConfig = options.Value;
-            _client = wrapper.Client;
         }
 
-        public async Task<bool> GrantRolesAsync(ulong guildId, ulong userId, IEnumerable<DiscordRole> discordRoles)
+        public async Task<bool> GrantRolesAsync(ulong userId, IReadOnlySet<DiscordRole> discordRoles)
         {
-            // TODO: Do this in service.
-            DiscordGuild? guild = await _client.GetGuildAsync(guildId);
-            if (guild == null)
-            {
-                return false;
-            }
-
-            DiscordMember? memebr = await guild.GetMemberAsync(userId);
-            if (memebr == null)
-            {
-                return false;
-            }
+            DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
 
             List<DRole> roles = new List<DRole>();
             foreach (DiscordRole discordRole in discordRoles)
@@ -50,25 +38,27 @@ namespace HonzaBotner.Services
                 roles.Add(role);
             }
 
+            DiscordMember member = await guild.GetMemberAsync(userId);
             foreach (DRole role in roles)
             {
-                await memebr.GrantRoleAsync(role, "Auth");
+                await member.GrantRoleAsync(role, "Auth");
             }
 
             return true;
         }
 
-        public HashSet<DiscordRole> MapUsermapRoles(params string[] kosRoles)
+        public HashSet<DiscordRole> MapUsermapRoles(IReadOnlyCollection<string> kosRoles)
         {
             HashSet<DiscordRole> discordRoles = new HashSet<DiscordRole>();
 
+
             IEnumerable<string> knowUserRolePrefixes = _roleConfig.RoleMapping.Keys;
 
-            foreach (string roleName in kosRoles)
+            foreach (string rolePrefix in knowUserRolePrefixes)
             {
-                string? rolePrefix = knowUserRolePrefixes.FirstOrDefault(prefix => roleName.StartsWith(prefix));
+                bool containsRole = kosRoles.Any(role => role.StartsWith(rolePrefix));
 
-                if (rolePrefix != null)
+                if (containsRole)
                 {
                     discordRoles.Add(new DiscordRole(_roleConfig.RoleMapping[rolePrefix]));
                 }

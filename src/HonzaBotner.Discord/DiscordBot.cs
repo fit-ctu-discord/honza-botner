@@ -34,7 +34,7 @@ namespace HonzaBotner.Discord
 
             Client.MessageCreated += (args) => OnClientOnMessageCreated(args, cancellationToken);
 
-            Client.MessageReactionAdded += (args) => OnClientOnMessageReactionAdded(args, cancellationToken);
+            Client.MessageReactionAdded += OnClientOnMessageReactionAdded;
 
             await Task.Delay(-1, cancellationToken);
         }
@@ -92,7 +92,6 @@ namespace HonzaBotner.Discord
                     case ChatCommendExecutedResult.CannotBeUsedByBot:
                         await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":robot:"));
                         break;
-                    case ChatCommendExecutedResult.WrongSyntax:
                     default:
                         await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":warning:"));
                         break;
@@ -105,9 +104,9 @@ namespace HonzaBotner.Discord
             }
         }
 
-        private Task OnClientOnMessageReactionAdded(MessageReactionAddEventArgs args,
-            CancellationToken cancellationToken)
+        private Task OnClientOnMessageReactionAdded(MessageReactionAddEventArgs args)
         {
+            // TODO: This is not good. Make it more universal...
             var emoji = DiscordEmoji.FromName(Client, ":pushpin:");
             int pinLimit = 1;
 

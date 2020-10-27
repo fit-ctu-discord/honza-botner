@@ -1,9 +1,7 @@
-using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace HonzaBotner.Discord
 {

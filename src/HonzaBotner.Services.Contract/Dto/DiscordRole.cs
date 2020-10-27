@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HonzaBotner.Services.Contract
+namespace HonzaBotner.Services.Contract.Dto
 {
     public class DiscordRole
     {

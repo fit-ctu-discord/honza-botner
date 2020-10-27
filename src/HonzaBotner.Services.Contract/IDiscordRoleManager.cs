@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using HonzaBotner.Services.Contract.Dto;
 
 namespace HonzaBotner.Services.Contract
 {
     public interface IDiscordRoleManager
     {
-        HashSet<DiscordRole> MapUsermapRoles(params string[] kosRoles);
+        HashSet<DiscordRole> MapUsermapRoles(IReadOnlyCollection<string> kosRoles);
 
-        Task<bool> GrantRolesAsync(ulong guildId, ulong userId, IEnumerable<DiscordRole> discordRoles);
+        Task<bool> GrantRolesAsync(ulong userId, IReadOnlySet<DiscordRole> discordRoles);
     }
 }

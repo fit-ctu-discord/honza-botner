@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 #nullable disable
-namespace HonzaBotner.Services.Contract
+namespace HonzaBotner.Services.Contract.Dto
 {
     public class DiscordRoleConfig
     {
