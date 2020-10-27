@@ -36,7 +36,7 @@ namespace HonzaBotner
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddControllers();
             services.AddDbContext<HonzaBotnerDbContext>(options =>
-                options.UseNpgsql(Configuration["DB:ConnectionString"], b => b.MigrationsAssembly("HonzaBotner")));
+                options.UseNpgsql(Configuration["DATABASE_URL"], b => b.MigrationsAssembly("HonzaBotner")));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "HonzaBotner", Version = "v1"});
@@ -64,39 +64,6 @@ namespace HonzaBotner
                 .AddBotnerServices();
         }
 
-        private static async Task OAuthOnCreating(OAuthCreatingTicketContext context)
-        {
-            string? userName = await GetUserName(context);
-            if (userName == null)
-            {
-                throw new InvalidOperationException();
-            }
-
-            context.Identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, $"{userName}@fit.cvut.cz"));
-            context.Identity.AddClaim(new Claim(ClaimTypes.Email, $"{userName}@fit.cvut.cz")); // HACK: FIX IT
-            context.Identity.AddClaim(new Claim(ClaimTypes.Name, userName));
-
-            context.RunClaimActions();
-        }
-
-        private static async Task<string?> GetUserName(OAuthCreatingTicketContext context)
-        {
-            var uriBuilder =new UriBuilder(context.Options.UserInformationEndpoint)
-            {
-                Query = $"token={context.AccessToken}"
-            };
-            var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
-
-            HttpResponseMessage response = await context.Backchannel.SendAsync(request,
-                HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-            response.EnsureSuccessStatusCode();
-
-            string responseText = await response.Content.ReadAsStringAsync();
-            var user = JsonDocument.Parse(responseText);
-
-            return user.RootElement.GetProperty("user_name").GetString();
-        }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -112,11 +79,7 @@ namespace HonzaBotner
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
-            app.UseAuthorization();
-
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
