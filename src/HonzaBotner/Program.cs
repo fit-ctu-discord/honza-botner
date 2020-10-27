@@ -15,6 +15,7 @@ namespace HonzaBotner
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((hostContext, builder) =>
                 {
+                    builder.AddEnvironmentVariables();
                     if (hostContext.HostingEnvironment.IsDevelopment())
                     {
                         builder.AddUserSecrets<Program>();
