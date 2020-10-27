@@ -15,6 +15,8 @@ namespace HonzaBotner.Discord.Services.Commands.Messages
         // ;edit <message-link> <new-message>
         protected override bool CanBotExecute => false;
 
+        protected override CommandPermission RequiredPermission => CommandPermission.Mod;
+
         public EditMessage(IPermissionHandler permissionHandler, ILogger<EditMessage> logger)
             : base(permissionHandler, logger)
         {

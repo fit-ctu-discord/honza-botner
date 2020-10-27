@@ -16,6 +16,8 @@ namespace HonzaBotner.Discord.Services.Commands.Messages
 
         protected override bool CanBotExecute => false;
 
+        protected override CommandPermission RequiredPermission => CommandPermission.Mod;
+
         public SendMessage(IPermissionHandler permissionHandler, ILogger<SendMessage> logger)
             : base(permissionHandler, logger)
         {

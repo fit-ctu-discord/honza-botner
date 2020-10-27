@@ -16,6 +16,8 @@ namespace HonzaBotner.Discord.Services.Commands
 
         public const string ChatCommand = "authorize";
 
+        protected override CommandPermission RequiredPermission => CommandPermission.Mod;
+
         public AuthorizeCommand(IUrlProvider urlProvider, IAuthorizationService authorizationService,
             IPermissionHandler permissionHandler, ILogger<AuthorizeCommand> logger) : base(permissionHandler, logger)
         {

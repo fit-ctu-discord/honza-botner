@@ -7,6 +7,7 @@ using DSharpPlus.EventArgs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using HonzaBotner.Discord.Command;
+using HonzaBotner.Services.Contract;
 
 namespace HonzaBotner.Discord
 {
@@ -16,16 +17,20 @@ namespace HonzaBotner.Discord
         private readonly DiscordWrapper _discordWrapper;
         private readonly ILogger<DiscordBot> _logger;
         private readonly CommandCollection _commands;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly IUrlProvider _urlProvider;
 
         private DiscordClient Client => _discordWrapper.Client;
 
         public DiscordBot(IServiceProvider provider, DiscordWrapper discordWrapper, ILogger<DiscordBot> logger,
-            CommandCollection commands)
+            CommandCollection commands, IAuthorizationService authorizationService, IUrlProvider urlProvider)
         {
             _provider = provider;
             _discordWrapper = discordWrapper;
             _logger = logger;
             _commands = commands;
+            _authorizationService = authorizationService;
+            _urlProvider = urlProvider;
         }
 
         public async Task Run(CancellationToken cancellationToken)
@@ -104,22 +109,25 @@ namespace HonzaBotner.Discord
             }
         }
 
-        private Task OnClientOnMessageReactionAdded(MessageReactionAddEventArgs args)
+        private async Task OnClientOnMessageReactionAdded(MessageReactionAddEventArgs args)
         {
-            // TODO: This is not good. Make it more universal...
-            var emoji = DiscordEmoji.FromName(Client, ":pushpin:");
-            int pinLimit = 1;
+            // TODO: this is only for verify
+            var emoji = DiscordEmoji.FromName(Client, ":white_check_mark:");
 
-            if (args.Emoji.Id == emoji.Id)
+            if (!args.Emoji.Equals(emoji)) return;
+
+            DiscordUser user = args.User;
+            DiscordDmChannel channel = await Client.CreateDmAsync(user);
+
+            if (await _authorizationService.IsUserVerified(user.Id))
             {
-                int count = args.Message.GetReactionsAsync(emoji).Result.Count;
-                if (count >= pinLimit)
-                {
-                    args.Channel.GetMessageAsync(args.Message.Id).Result.PinAsync();
-                }
+                await channel.SendMessageAsync($"You are already authorized");
             }
-
-            return Task.CompletedTask;
+            else
+            {
+                string link = _urlProvider.GetAuthLink(user.Id);
+                await channel.SendMessageAsync($"Hi, authorize by following this link: {link}");
+            }
         }
     }
 }

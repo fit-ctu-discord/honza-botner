@@ -15,6 +15,8 @@ namespace HonzaBotner.Discord.Services.Commands
 
         private readonly HonzaBotnerDbContext _dbContext;
 
+        protected override CommandPermission RequiredPermission => CommandPermission.Mod;
+
         public CountCommand(HonzaBotnerDbContext dbContext, IPermissionHandler permissionHandler,
             ILogger<CountCommand> logger)
             : base(permissionHandler, logger)
