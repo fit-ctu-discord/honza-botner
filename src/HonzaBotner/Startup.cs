@@ -35,11 +35,11 @@ namespace HonzaBotner
         {
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddControllers();
+
+            string connectionString = PsqlConnectionStringParser.GetEFConnectionString(Configuration["DATABASE_URL"]);
+
             services.AddDbContext<HonzaBotnerDbContext>(options =>
-                options.UseNpgsql(
-                    PsqlConnectionStringParser.GetEFConnectioString(
-                        Configuration["DATABASE_URL"]
-                    ), b => b.MigrationsAssembly("HonzaBotner")));
+                options.UseNpgsql(connectionString, b => b.MigrationsAssembly("HonzaBotner")));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "HonzaBotner", Version = "v1"});
