@@ -37,7 +37,7 @@ namespace HonzaBotner
             services.AddControllers();
             services.AddDbContext<HonzaBotnerDbContext>(options =>
                 options.UseNpgsql(
-                    PsqlConnectionStringParser.GetEFConnectionString(
+                    PsqlConnectionStringParser.GetEFConnectioString(
                         Configuration["DATABASE_URL"]
                     ), b => b.MigrationsAssembly("HonzaBotner")));
             services.AddSwaggerGen(c =>
