@@ -53,6 +53,7 @@ namespace HonzaBotner
                     config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
                     config.AddCommand<CountCommand>(CountCommand.ChatCommand);
                     config.AddCommand<Activity>(Activity.ChatCommand);
+                    config.AddCommand<HugCommand>(HugCommand.ChatCommand);
                     // Messages
                     config.AddCommand<SendMessage>(SendMessage.ChatCommand);
                     config.AddCommand<EditMessage>(EditMessage.ChatCommand);
