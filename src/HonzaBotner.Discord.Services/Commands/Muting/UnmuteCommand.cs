@@ -15,12 +15,14 @@ namespace HonzaBotner.Discord.Services.Commands.Muting
         protected override CommandPermission RequiredPermission => CommandPermission.Mod;
 
         private readonly IGuildProvider _guildProvider;
+        private readonly MuteRoleHelper _roleHelper;
 
         public UnmuteCommand(IPermissionHandler permissionHandler, ILogger<UnmuteCommand> logger,
-            IGuildProvider guildProvider)
+            IGuildProvider guildProvider, MuteRoleHelper roleHelper)
             : base(permissionHandler, logger)
         {
             _guildProvider = guildProvider;
+            _roleHelper = roleHelper;
         }
 
         protected override async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client,
@@ -37,14 +39,14 @@ namespace HonzaBotner.Discord.Services.Commands.Muting
                 return ChatCommendExecutedResult.InternalError;
             }
 
-            if (!MuteRoleHelper.IsMuted(targetMember))
+            if (!_roleHelper.IsMuted(targetMember))
             {
                 await message.RespondAsync("Target user is not muted");
                 return ChatCommendExecutedResult.Ok;
             }
 
             var guild = await _guildProvider.GetCurrentGuildAsync();
-            await MuteRoleHelper.Unmute(guild, targetMember);
+            await _roleHelper.Unmute(guild, targetMember);
 
             return ChatCommendExecutedResult.Ok;
         }

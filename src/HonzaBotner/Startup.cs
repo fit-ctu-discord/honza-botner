@@ -50,6 +50,7 @@ namespace HonzaBotner
 
             services.AddDiscordOptions(Configuration)
                 .AddCommandOptions(Configuration)
+                .AddCommandServices()
                 .AddDiscordBot(config =>
                 {
                     config.AddCommand<HiCommand>(HiCommand.ChatCommand);

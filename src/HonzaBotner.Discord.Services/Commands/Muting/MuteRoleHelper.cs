@@ -1,19 +1,25 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
+using HonzaBotner.Discord.Services.Options;
+using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Commands.Muting
 {
-    public static class MuteRoleHelper
+    public class MuteRoleHelper
     {
-        private const ulong MuteRoleId = 750276752663904306;
-
-        public static bool IsMuted(DiscordMember user)
+        private readonly ulong _muteRoleId;
+        public MuteRoleHelper(IOptions<CommonCommandOptions> options)
         {
-            return user.Roles.Any(r => r.Id == MuteRoleId);
+            _muteRoleId = options.Value.MuteRoleId;
         }
 
-        public static async Task Mute(DiscordGuild guild, DiscordMember user)
+        public bool IsMuted(DiscordMember user)
+        {
+            return user.Roles.Any(r => r.Id == _muteRoleId);
+        }
+
+        public async Task Mute(DiscordGuild guild, DiscordMember user)
         {
             var muteRole = GetMuteRole(guild);
             if (muteRole == null) return;
@@ -21,7 +27,7 @@ namespace HonzaBotner.Discord.Services.Commands.Muting
             await guild.GrantRoleAsync(user, muteRole, "User muted");
         }
 
-        public static async Task Unmute(DiscordGuild guild, DiscordMember user)
+        public async Task Unmute(DiscordGuild guild, DiscordMember user)
         {
             var muteRole = GetMuteRole(guild);
             if (muteRole == null) return;
@@ -29,9 +35,9 @@ namespace HonzaBotner.Discord.Services.Commands.Muting
             await guild.RevokeRoleAsync(user, muteRole, "User unmuted");
         }
 
-        public static DiscordRole? GetMuteRole(DiscordGuild guild)
+        public DiscordRole? GetMuteRole(DiscordGuild guild)
         {
-            return guild.Roles.FirstOrDefault(r => r.Id == MuteRoleId);
+            return guild.Roles.FirstOrDefault(r => r.Id == _muteRoleId);
         }
     }
 }
