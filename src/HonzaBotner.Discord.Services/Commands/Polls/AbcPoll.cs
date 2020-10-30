@@ -26,11 +26,17 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
             ":regional_indicator_m:",
             ":regional_indicator_n:",
             ":regional_indicator_o:",
-            ":regional_indicator_p:",
-            ":regional_indicator_q:",
-            ":regional_indicator_r:",
-            ":regional_indicator_s:",
-            ":regional_indicator_t:"
+            ":regional_indicator_p:"
+            // ":regional_indicator_q:",
+            // ":regional_indicator_r:",
+            // ":regional_indicator_s:",
+            // ":regional_indicator_t:",
+            // ":regional_indicator_u:",
+            // ":regional_indicator_v:",
+            // ":regional_indicator_w:",
+            // ":regional_indicator_x:",
+            // ":regional_indicator_y:",
+            // ":regional_indicator_z:"
         };
 
         private readonly string _authorUsername;
