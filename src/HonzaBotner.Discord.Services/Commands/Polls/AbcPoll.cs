@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -66,6 +67,11 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
                 Author = new DiscordEmbedBuilder.EmbedAuthor {Name = _authorUsername, IconUrl = _authorAvatarUrl},
                 Title = _question
             };
+
+            if (_answers.Count > _optionsEmoji.Count)
+            {
+                throw new ArgumentException("Too many answer options");
+            }
 
             _answers.Zip(_optionsEmoji).ToList().ForEach(pair =>
             {
