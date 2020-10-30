@@ -3,7 +3,9 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Command;
+using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
@@ -15,11 +17,12 @@ namespace HonzaBotner.Discord.Services.Commands
         protected override bool CanBotExecute => false;
         protected override CommandPermission RequiredPermission => CommandPermission.Authorized;
 
-        protected const string HugEmoteName = "peepoHugger";
+        protected readonly string _hugEmoteName;
 
-        public HugCommand(IPermissionHandler permissionHandler, ILogger<HugCommand> logger)
+        public HugCommand(IPermissionHandler permissionHandler, ILogger<HugCommand> logger, IOptions<CommonCommandOptions> options)
             : base(permissionHandler, logger)
         {
+            _hugEmoteName = options.Value.HugEmoteName;
         }
 
         protected override async Task<ChatCommendExecutedResult> ExecuteAsync(DiscordClient client,
@@ -28,7 +31,7 @@ namespace HonzaBotner.Discord.Services.Commands
             if (message.Content.Split(" ").Length != 2) return ChatCommendExecutedResult.WrongSyntax;
             if (message.MentionedUsers.Count != 1) return ChatCommendExecutedResult.WrongSyntax;
 
-            await client.SendMessageAsync(message.Channel, $":{HugEmoteName}: {message.MentionedUsers[0].Mention}");
+            await client.SendMessageAsync(message.Channel, $":{_hugEmoteName}: {message.MentionedUsers[0].Mention}");
 
             return ChatCommendExecutedResult.Ok;
         }
