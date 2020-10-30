@@ -59,6 +59,9 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
                 throw new ArgumentException("Odd number of quotes");
             }
 
+            // Pattern matches quoted string and captures the quoted content in a capture group
+            // Matched string: `"Hello, world"`
+            // Captured string: `Hello, world`
             const string quotedGroupPattern = @"""([^\""]*?)""";
             var matches = Regex.Matches(message, quotedGroupPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
