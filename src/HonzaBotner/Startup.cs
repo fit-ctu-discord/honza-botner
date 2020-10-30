@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Discord.Services.Commands.Messages;
 using HonzaBotner.Discord.Services.Commands.Pools;
+using HonzaBotner.Discord.Services.Commands.Muting;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
 using HonzaBotner.Services;
@@ -61,6 +62,9 @@ namespace HonzaBotner
                     // Pools
                     config.AddCommand<YesNo>(YesNo.ChatCommand);
                     config.AddCommand<Abc>(Abc.ChatCommand);
+                    //Muting
+                    config.AddCommand<MuteCommand>(MuteCommand.ChatCommand);
+                    config.AddCommand<UnmuteCommand>(UnmuteCommand.ChatCommand);
                 });
 
             services.AddBotnerServicesOptions(Configuration)
