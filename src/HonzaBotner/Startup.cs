@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Discord.Services.Commands.Messages;
-using HonzaBotner.Discord.Services.Commands.Pools;
+using HonzaBotner.Discord.Services.Commands.Polls;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
 using HonzaBotner.Services;
@@ -58,9 +58,8 @@ namespace HonzaBotner
                     config.AddCommand<EditMessage>(EditMessage.ChatCommand);
                     config.AddCommand<SendImage>(SendImage.ChatCommand);
                     config.AddCommand<EditImage>(EditImage.ChatCommand);
-                    // Pools
-                    config.AddCommand<YesNo>(YesNo.ChatCommand);
-                    config.AddCommand<Abc>(Abc.ChatCommand);
+                    // Polls
+                    config.AddCommand<PollCommand>(PollCommand.ChatCommand);
                 });
 
             services.AddBotnerServicesOptions(Configuration)
