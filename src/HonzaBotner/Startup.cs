@@ -8,6 +8,7 @@ using HonzaBotner.Discord.Services.Commands.Messages;
 using HonzaBotner.Discord.Services.Commands.Pools;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
+using HonzaBotner.Discord.Services;
 using HonzaBotner.Services;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
@@ -47,6 +48,7 @@ namespace HonzaBotner
             });
 
             services.AddDiscordOptions(Configuration)
+                .AddCommandOptions(Configuration)
                 .AddDiscordBot(config =>
                 {
                     config.AddCommand<HiCommand>(HiCommand.ChatCommand);
