@@ -8,6 +8,7 @@ using HonzaBotner.Discord.Services.Commands.Messages;
 using HonzaBotner.Discord.Services.Commands.Polls;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
+using HonzaBotner.Discord.Services;
 using HonzaBotner.Services;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
@@ -47,12 +48,14 @@ namespace HonzaBotner
             });
 
             services.AddDiscordOptions(Configuration)
+                .AddCommandOptions(Configuration)
                 .AddDiscordBot(config =>
                 {
                     config.AddCommand<HiCommand>(HiCommand.ChatCommand);
                     config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
                     config.AddCommand<CountCommand>(CountCommand.ChatCommand);
                     config.AddCommand<Activity>(Activity.ChatCommand);
+                    config.AddCommand<HugCommand>(HugCommand.ChatCommand);
                     // Messages
                     config.AddCommand<SendMessage>(SendMessage.ChatCommand);
                     config.AddCommand<EditMessage>(EditMessage.ChatCommand);
