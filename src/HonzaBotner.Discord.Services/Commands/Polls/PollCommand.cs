@@ -17,7 +17,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
         protected override CommandPermission RequiredPermission => CommandPermission.Authorized;
         protected override bool CanBotExecute => false;
 
-        public PollCommand(IPermissionHandler permissionHandler, ILogger logger)
+        public PollCommand(IPermissionHandler permissionHandler, ILogger<PollCommand> logger)
             : base(permissionHandler, logger)
         {
         }

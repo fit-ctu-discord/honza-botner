@@ -83,8 +83,10 @@ namespace HonzaBotner
                     c.RoutePrefix = string.Empty;
                 });
             }
-
-            UpdateDatabase(app);
+            else
+            {
+                UpdateDatabase(app);
+            }
 
             app.UseHttpsRedirection();
             app.UseRouting();

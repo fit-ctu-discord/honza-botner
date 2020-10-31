@@ -15,7 +15,10 @@ namespace HonzaBotner.Discord
         {
             _discordLogger = discordLogger;
 
-            var config = new DiscordConfiguration() {Token = options.Value.Token, TokenType = TokenType.Bot};
+            var config = new DiscordConfiguration()
+            {
+                Token = options.Value.Token, TokenType = TokenType.Bot, Intents = DiscordIntents.All
+            };
 
             discordLogger.LogInformation("Starting with secret: {0}", options.Value.Token);
             Client = new DiscordClient(config);
