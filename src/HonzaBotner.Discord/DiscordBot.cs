@@ -18,19 +18,17 @@ namespace HonzaBotner.Discord
         private readonly DiscordWrapper _discordWrapper;
         private readonly ILogger<DiscordBot> _logger;
         private readonly CommandCollection _commands;
-        private readonly IAuthorizationService _authorizationService;
         private readonly IUrlProvider _urlProvider;
 
         private DiscordClient Client => _discordWrapper.Client;
 
         public DiscordBot(IServiceProvider provider, DiscordWrapper discordWrapper, ILogger<DiscordBot> logger,
-            CommandCollection commands, IAuthorizationService authorizationService, IUrlProvider urlProvider)
+            CommandCollection commands, IUrlProvider urlProvider)
         {
             _provider = provider;
             _discordWrapper = discordWrapper;
             _logger = logger;
             _commands = commands;
-            _authorizationService = authorizationService;
             _urlProvider = urlProvider;
         }
 
@@ -121,10 +119,14 @@ namespace HonzaBotner.Discord
 
             _logger.Log(LogLevel.Information, "THIS IS THE RIGHT MESSAGE FOR VERIFY");
 
+
             DiscordUser user = args.User;
             DiscordDmChannel channel = await Client.CreateDmAsync(user);
 
-            if (await _authorizationService.IsUserVerified(user.Id))
+            using var scope = _provider.CreateScope();
+            var authorizationService = scope.ServiceProvider.GetRequiredService<IAuthorizationService>();
+
+            if (await authorizationService.IsUserVerified(user.Id))
             {
                 await channel.SendMessageAsync($"You are already authorized");
             }
