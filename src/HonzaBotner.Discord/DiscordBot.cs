@@ -36,7 +36,7 @@ namespace HonzaBotner.Discord
         {
             await Client.ConnectAsync();
 
-            Client.MessageCreated += (args) => OnClientOnMessageCreated(args, cancellationToken);
+            Client.MessageCreated += (client, args) => OnClientOnMessageCreated(args, cancellationToken);
 
             Client.MessageReactionAdded += OnClientOnMessageReactionAdded;
 
@@ -108,7 +108,7 @@ namespace HonzaBotner.Discord
             }
         }
 
-        private async Task OnClientOnMessageReactionAdded(MessageReactionAddEventArgs args)
+        private async Task OnClientOnMessageReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)
         {
             // TODO: this is only for verify
             var emoji = DiscordEmoji.FromName(Client, ":white_check_mark:");
@@ -121,7 +121,7 @@ namespace HonzaBotner.Discord
 
 
             DiscordUser user = args.User;
-            DiscordDmChannel channel = await Client.CreateDmAsync(user);
+            DiscordDmChannel channel = await args.Guild.Members[user.Id].CreateDmChannelAsync();
 
             using var scope = _provider.CreateScope();
             var authorizationService = scope.ServiceProvider.GetRequiredService<IAuthorizationService>();

@@ -19,13 +19,6 @@ namespace HonzaBotner.Discord
 
             discordLogger.LogInformation("Starting with secret: {0}", options.Value.Token);
             Client = new DiscordClient(config);
-            Client.DebugLogger.LogMessageReceived += HandleLog;
-        }
-
-        private void HandleLog(object? sender, DebugLogMessageEventArgs args)
-        {
-            var level = args.Level.ToLoggingLevel();
-            _discordLogger.Log(level, $"[{args.Application}]: {args.Message}");
         }
     }
 }

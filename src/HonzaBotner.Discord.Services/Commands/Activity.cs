@@ -27,7 +27,7 @@ namespace HonzaBotner.Discord.Services.Commands
             string _ = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[1];
             string name = message.Content.Split(" ", StringSplitOptions.RemoveEmptyEntries)[2];
 
-            await client.UpdateStatusAsync(new DiscordGame(name));
+            await client.UpdateStatusAsync(new DiscordActivity(name, ActivityType.Custom));
 
             return ChatCommendExecutedResult.Ok;
         }

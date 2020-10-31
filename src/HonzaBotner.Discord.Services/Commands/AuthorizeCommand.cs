@@ -29,7 +29,7 @@ namespace HonzaBotner.Discord.Services.Commands
             DiscordMessage message, CancellationToken cancellationToken = default)
         {
             DiscordUser user = message.Author;
-            DiscordDmChannel channel = await client.CreateDmAsync(user);
+            DiscordDmChannel channel = await message.Channel.Guild.Members[user.Id].CreateDmChannelAsync();
 
             if (await _authorizationService.IsUserVerified(user.Id))
             {
