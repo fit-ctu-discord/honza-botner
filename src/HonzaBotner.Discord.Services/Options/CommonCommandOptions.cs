@@ -5,6 +5,6 @@
         public static string ConfigName => "CommonCommandOptions";
 
         public ulong MuteRoleId { get; set; }
-        public string HugEmoteName { get; set; }
+        public string? HugEmoteName { get; set; }
     }
 }

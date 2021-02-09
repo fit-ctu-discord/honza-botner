@@ -1,16 +1,8 @@
-using System;
-using System.Net.Http;
-using System.Security.Claims;
-using System.Text.Json;
-using System.Threading.Tasks;
 using HonzaBotner.Discord.Services.Commands;
-using HonzaBotner.Discord.Services.Commands.Messages;
-using HonzaBotner.Discord.Services.Commands.Polls;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
 using HonzaBotner.Discord.Services;
 using HonzaBotner.Services;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -51,18 +43,21 @@ namespace HonzaBotner
                 .AddCommandOptions(Configuration)
                 .AddDiscordBot(config =>
                 {
-                    config.AddCommand<HiCommand>(HiCommand.ChatCommand);
-                    config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
-                    config.AddCommand<CountCommand>(CountCommand.ChatCommand);
-                    config.AddCommand<Activity>(Activity.ChatCommand);
-                    config.AddCommand<HugCommand>(HugCommand.ChatCommand);
-                    // Messages
-                    config.AddCommand<SendMessage>(SendMessage.ChatCommand);
-                    config.AddCommand<EditMessage>(EditMessage.ChatCommand);
-                    config.AddCommand<SendImage>(SendImage.ChatCommand);
-                    config.AddCommand<EditImage>(EditImage.ChatCommand);
-                    // Polls
-                    config.AddCommand<PollCommand>(PollCommand.ChatCommand);
+                    config.RegisterCommands<AuthorizeCommands>();
+                    config.RegisterCommands<AdminCommands>();
+                    config.RegisterCommands<OtherCommands>();
+                    // config.AddCommand<HiCommand>(HiCommand.ChatCommand);
+                    // config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
+                    // config.AddCommand<CountCommand>(CountCommand.ChatCommand);
+                    // config.AddCommand<Activity>(Activity.ChatCommand);
+                    // config.AddCommand<HugCommand>(HugCommand.ChatCommand);
+                    // // Messages
+                    // config.AddCommand<SendMessage>(SendMessage.ChatCommand);
+                    // config.AddCommand<EditMessage>(EditMessage.ChatCommand);
+                    // config.AddCommand<SendImage>(SendImage.ChatCommand);
+                    // config.AddCommand<EditImage>(EditImage.ChatCommand);
+                    // // Polls
+                    // config.AddCommand<PollCommand>(PollCommand.ChatCommand);
                 });
 
             services.AddBotnerServicesOptions(Configuration)

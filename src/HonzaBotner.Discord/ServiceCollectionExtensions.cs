@@ -1,4 +1,5 @@
 using System;
+using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,18 +14,13 @@ namespace HonzaBotner.Discord
             return serviceCollection;
         }
 
-        public static IServiceCollection AddDiscordBot(this IServiceCollection serviceCollection,
-            Action<CommandBuilder> configure)
+        public static IServiceCollection AddDiscordBot(this IServiceCollection serviceCollection, Action<CommandsNextExtension> config)
         {
             serviceCollection.AddHostedService<DiscordWorker>();
             serviceCollection.AddSingleton<IDiscordBot, DiscordBot>();
             serviceCollection.AddSingleton<DiscordWrapper>();
             serviceCollection.AddTransient<IGuildProvider, ConfigGuildProvider>();
-
-            var builder = new CommandBuilder(serviceCollection);
-            configure(builder);
-
-            serviceCollection.AddSingleton(builder.ToCollection());
+            serviceCollection.AddSingleton(new CommandConfigurator(config));
 
             return serviceCollection;
         }

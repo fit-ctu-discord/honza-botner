@@ -2,13 +2,13 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using HonzaBotner.Services.Contract;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using HonzaBotner.Discord.Command;
-using HonzaBotner.Services.Contract;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace HonzaBotner.Discord
 {
@@ -17,98 +17,85 @@ namespace HonzaBotner.Discord
         private readonly IServiceProvider _provider;
         private readonly DiscordWrapper _discordWrapper;
         private readonly ILogger<DiscordBot> _logger;
-        private readonly CommandCollection _commands;
         private readonly IUrlProvider _urlProvider;
+        private readonly CommandConfigurator _configurator;
 
         private DiscordClient Client => _discordWrapper.Client;
+        private CommandsNextExtension Commands => _discordWrapper.Commands;
 
         public DiscordBot(IServiceProvider provider, DiscordWrapper discordWrapper, ILogger<DiscordBot> logger,
-            CommandCollection commands, IUrlProvider urlProvider)
+            IUrlProvider urlProvider, CommandConfigurator configurator)
         {
             _provider = provider;
             _discordWrapper = discordWrapper;
             _logger = logger;
-            _commands = commands;
             _urlProvider = urlProvider;
+            _configurator = configurator;
         }
 
         public async Task Run(CancellationToken cancellationToken)
         {
+            Client.Ready += Client_Ready;
+            Client.GuildAvailable += Client_GuildAvailable;
+            Client.ClientErrored += Client_ClientError;
+            Client.MessageReactionAdded += Client_MessageReactionAdded;
+
+            Commands.CommandExecuted += Commands_CommandExecuted;
+            Commands.CommandErrored += Commands_CommandErrored;
+
+            _configurator.Config(Commands);
+
             await Client.ConnectAsync();
-
-            Client.MessageCreated += (client, args) => OnClientOnMessageCreated(args, cancellationToken);
-
-            Client.MessageReactionAdded += OnClientOnMessageReactionAdded;
-
             await Task.Delay(-1, cancellationToken);
         }
 
-        private bool GetCommand(MessageCreateEventArgs args, out IChatCommand commandProvider,
-            IServiceScope? scope = null)
+        private Task Client_Ready(DiscordClient sender, ReadyEventArgs e)
         {
-            var provider = scope == null ? _provider : scope.ServiceProvider;
-
-            string message = args.Message.Content.Substring(1).Split(" ")[0]!;
-            _logger.LogInformation(message);
-            var command = _commands.GetCommandType(message);
-            _logger.LogInformation(command?.ToString());
-
-            if (command == null)
-            {
-                _logger.LogWarning("Couldn't find command for message '{0}'", args.Message.Content);
-                commandProvider = null!;
-                return false;
-            }
-
-            var service = provider.GetService(command);
-            if (service is IChatCommand c)
-            {
-                commandProvider = c;
-                return true;
-            }
-
-            // Shouldn't happen at all
-            _logger.LogError("Couldn't find {0} in DI context", command.Name);
-            commandProvider = null!;
-            return false;
+            sender.Logger.LogInformation("Client is ready to process events");
+            return Task.CompletedTask;
         }
 
-        private async Task OnClientOnMessageCreated(MessageCreateEventArgs args, CancellationToken cancellationToken)
+        private Task Client_GuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
         {
-            if (!args.Message.Content.StartsWith(";")) return;
+            sender.Logger.LogInformation($"Guild available: {e.Guild.Name}");
+            return Task.CompletedTask;
+        }
 
-            using var scope = _provider.CreateScope();
+        private Task Client_ClientError(DiscordClient sender, ClientErrorEventArgs e)
+        {
+            sender.Logger.LogError(e.Exception, "Exception occured");
+            return Task.CompletedTask;
+        }
 
-            if (!GetCommand(args, out var commandProvider, scope)) return;
+        private Task Commands_CommandExecuted(CommandsNextExtension sender, CommandExecutionEventArgs e)
+        {
+            e.Context.Client.Logger.LogInformation(
+                $"{e.Context.User.Username} successfully executed '{e.Command.QualifiedName}'");
+            return Task.CompletedTask;
+        }
 
-            try
+        private async Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
+        {
+            e.Context.Client.Logger.LogError(
+                $"{e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}",
+                DateTime.Now);
+
+            if (e.Exception is ChecksFailedException ex)
             {
-                var commandResult = await commandProvider.ExecuteAsync(Client, args.Message, cancellationToken);
+                var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
 
-                switch (commandResult)
+                var embed = new DiscordEmbedBuilder
                 {
-                    case ChatCommendExecutedResult.Ok:
-                        await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":white_check_mark:"));
-                        break;
-                    case ChatCommendExecutedResult.InternalError:
-                        await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":x:"));
-                        break;
-                    case ChatCommendExecutedResult.CannotBeUsedByBot:
-                        await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":robot:"));
-                        break;
-                    default:
-                        await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":warning:"));
-                        break;
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e!.ToString());
-                await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Client, ":no_entry:"));
+                    Title = "Přístup zakázán",
+                    Description = $"{emoji} Na vykonání příkazu nemáte dostatečná práva. Pokud si myslíte že ano, kontaktujte svého MODa.",
+                    Color = new DiscordColor(0xFF0000) // red
+                };
+                await e.Context.RespondAsync("", embed: embed);
             }
         }
 
-        private async Task OnClientOnMessageReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)
+        // TODO: Find out if we need it.
+        private async Task Client_MessageReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)
         {
             // TODO: this is only for verify
             var emoji = DiscordEmoji.FromName(Client, ":white_check_mark:");
@@ -128,7 +115,7 @@ namespace HonzaBotner.Discord
 
             if (await authorizationService.IsUserVerified(user.Id))
             {
-                await channel.SendMessageAsync($"You are already authorized");
+                await channel.SendMessageAsync("You are already authorized");
             }
             else
             {
