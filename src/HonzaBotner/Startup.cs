@@ -2,6 +2,7 @@ using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
 using HonzaBotner.Discord.Services;
+using HonzaBotner.Discord.Services.Reactions;
 using HonzaBotner.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -39,6 +40,10 @@ namespace HonzaBotner
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "HonzaBotner", Version = "v1"});
             });
 
+            services.AddBotnerServicesOptions(Configuration)
+                .AddHttpClient()
+                .AddBotnerServices();
+
             services.AddDiscordOptions(Configuration)
                 .AddCommandOptions(Configuration)
                 .AddDiscordBot(config =>
@@ -46,6 +51,7 @@ namespace HonzaBotner
                     config.RegisterCommands<AuthorizeCommands>();
                     config.RegisterCommands<AdminCommands>();
                     config.RegisterCommands<OtherCommands>();
+                    config.RegisterCommands<EmoteCommands>();
                     // config.AddCommand<HiCommand>(HiCommand.ChatCommand);
                     // config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
                     // config.AddCommand<CountCommand>(CountCommand.ChatCommand);
@@ -58,11 +64,11 @@ namespace HonzaBotner
                     // config.AddCommand<EditImage>(EditImage.ChatCommand);
                     // // Polls
                     // config.AddCommand<PollCommand>(PollCommand.ChatCommand);
+                }, reactions =>
+                {
+                    reactions.AddReaction<VerificationReactionHandler>()
+                        .AddReaction<EmojiCounterHandler>();
                 });
-
-            services.AddBotnerServicesOptions(Configuration)
-                .AddHttpClient()
-                .AddBotnerServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -6,5 +6,9 @@
 
         public ulong MuteRoleId { get; set; }
         public string? HugEmoteName { get; set; }
+
+        public ulong VerificationMessageId { get; set; }
+        public ulong VerificationChannelId { get; set; }
+        public string VerificationEmojiName { get; set; } = ":white_check_mark:";
     }
 }

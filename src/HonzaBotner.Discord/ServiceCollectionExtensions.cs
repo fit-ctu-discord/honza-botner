@@ -14,13 +14,18 @@ namespace HonzaBotner.Discord
             return serviceCollection;
         }
 
-        public static IServiceCollection AddDiscordBot(this IServiceCollection serviceCollection, Action<CommandsNextExtension> config)
+        public static IServiceCollection AddDiscordBot(this IServiceCollection serviceCollection,
+            Action<CommandsNextExtension> commandConfig, Action<ReactionListBuilder> reactionConfig)
         {
             serviceCollection.AddHostedService<DiscordWorker>();
             serviceCollection.AddSingleton<IDiscordBot, DiscordBot>();
             serviceCollection.AddSingleton<DiscordWrapper>();
             serviceCollection.AddTransient<IGuildProvider, ConfigGuildProvider>();
-            serviceCollection.AddSingleton(new CommandConfigurator(config));
+            serviceCollection.AddTransient<ReactionHandler>();
+            serviceCollection.AddSingleton(new CommandConfigurator(commandConfig));
+            ReactionListBuilder builder = new(serviceCollection);
+            reactionConfig(builder);
+            serviceCollection.AddSingleton(builder.Build());
 
             return serviceCollection;
         }

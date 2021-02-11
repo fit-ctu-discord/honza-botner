@@ -6,30 +6,23 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using HonzaBotner.Services.Contract;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord
 {
     internal class DiscordBot : IDiscordBot
     {
-        private readonly IServiceProvider _provider;
         private readonly DiscordWrapper _discordWrapper;
-        private readonly ILogger<DiscordBot> _logger;
-        private readonly IUrlProvider _urlProvider;
+        private readonly ReactionHandler _reactionHandler;
         private readonly CommandConfigurator _configurator;
 
         private DiscordClient Client => _discordWrapper.Client;
         private CommandsNextExtension Commands => _discordWrapper.Commands;
 
-        public DiscordBot(IServiceProvider provider, DiscordWrapper discordWrapper, ILogger<DiscordBot> logger,
-            IUrlProvider urlProvider, CommandConfigurator configurator)
+        public DiscordBot(DiscordWrapper discordWrapper, ReactionHandler reactionHandler, CommandConfigurator configurator)
         {
-            _provider = provider;
             _discordWrapper = discordWrapper;
-            _logger = logger;
-            _urlProvider = urlProvider;
+            _reactionHandler = reactionHandler;
             _configurator = configurator;
         }
 
@@ -39,6 +32,7 @@ namespace HonzaBotner.Discord
             Client.GuildAvailable += Client_GuildAvailable;
             Client.ClientErrored += Client_ClientError;
             Client.MessageReactionAdded += Client_MessageReactionAdded;
+            Client.MessageReactionRemoved += Client_MessageReactionRemoved;
 
             Commands.CommandExecuted += Commands_CommandExecuted;
             Commands.CommandErrored += Commands_CommandErrored;
@@ -80,7 +74,7 @@ namespace HonzaBotner.Discord
                 $"{e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}",
                 DateTime.Now);
 
-            if (e.Exception is ChecksFailedException ex)
+            if (e.Exception is ChecksFailedException)
             {
                 var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
 
@@ -94,34 +88,14 @@ namespace HonzaBotner.Discord
             }
         }
 
-        // TODO: Find out if we need it.
-        private async Task Client_MessageReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)
+        private Task Client_MessageReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)
         {
-            // TODO: this is only for verify
-            var emoji = DiscordEmoji.FromName(Client, ":white_check_mark:");
+            return _reactionHandler.HandleAddAsync(args);
+        }
 
-            // https://discordapp.com/channels/366970031445377024/507515506073403402/686745124885364770
-            if (!(args.Message.Id == 686745124885364770 && args.Message.ChannelId == 507515506073403402)) return;
-            if (!args.Emoji.Equals(emoji)) return;
-
-            _logger.Log(LogLevel.Information, "THIS IS THE RIGHT MESSAGE FOR VERIFY");
-
-
-            DiscordUser user = args.User;
-            DiscordDmChannel channel = await args.Guild.Members[user.Id].CreateDmChannelAsync();
-
-            using var scope = _provider.CreateScope();
-            var authorizationService = scope.ServiceProvider.GetRequiredService<IAuthorizationService>();
-
-            if (await authorizationService.IsUserVerified(user.Id))
-            {
-                await channel.SendMessageAsync("You are already authorized");
-            }
-            else
-            {
-                string link = _urlProvider.GetAuthLink(user.Id);
-                await channel.SendMessageAsync($"Hi, authorize by following this link: {link}");
-            }
+        private Task Client_MessageReactionRemoved(DiscordClient client, MessageReactionRemoveEventArgs args)
+        {
+            return _reactionHandler.HandleRemoveAsync(args);
         }
     }
 }
