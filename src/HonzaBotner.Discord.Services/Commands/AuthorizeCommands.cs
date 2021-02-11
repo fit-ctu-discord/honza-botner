@@ -10,8 +10,14 @@ namespace HonzaBotner.Discord.Services.Commands
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class AuthorizeCommands : BaseCommandModule
     {
-        public IUrlProvider UrlProvider { private get; set; } = null!;
-        public IAuthorizationService AuthorizationService { private get; set; } = null!;
+        private readonly IUrlProvider _urlProvider;
+        private readonly IAuthorizationService _authorizationService;
+
+        public AuthorizeCommands(IUrlProvider urlProvider, IAuthorizationService authorizationService)
+        {
+            _urlProvider = urlProvider;
+            _authorizationService = authorizationService;
+        }
 
         [Command("authorize"), Aliases("auth")]
         public async Task AuthorizeCommand(CommandContext ctx)
@@ -20,13 +26,13 @@ namespace HonzaBotner.Discord.Services.Commands
             DiscordUser user = message.Author;
             DiscordDmChannel channel = await message.Channel.Guild.Members[user.Id].CreateDmChannelAsync();
 
-            if (await AuthorizationService.IsUserVerified(user.Id))
+            if (await _authorizationService.IsUserVerified(user.Id))
             {
                 await channel.SendMessageAsync($"You are already authorized");
             }
             else
             {
-                string link = UrlProvider.GetAuthLink(user.Id);
+                string link = _urlProvider.GetAuthLink(user.Id);
                 await channel.SendMessageAsync($"Hi, authorize by following this link: {link}");
             }
         }

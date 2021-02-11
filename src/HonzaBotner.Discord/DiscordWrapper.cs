@@ -25,7 +25,7 @@ namespace HonzaBotner.Discord
 
             Client = new DiscordClient(config);
 
-            CommandsNextConfiguration cConfig = new CommandsNextConfiguration()
+            CommandsNextConfiguration cConfig = new()
             {
                 Services = services, StringPrefixes = optionsConfig.Prefixes, EnableDms = true
             };

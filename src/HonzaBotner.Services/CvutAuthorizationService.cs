@@ -61,7 +61,7 @@ namespace HonzaBotner.Services
 
             if (rolesGranted)
             {
-                Verification verification = new Verification() {AuthId = authId, UserId = userId};
+                Verification verification = new() {AuthId = authId, UserId = userId};
 
                 await _dbContext.Verifications.AddAsync(verification);
                 await _dbContext.SaveChangesAsync();
@@ -97,7 +97,7 @@ namespace HonzaBotner.Services
             const string tokenUri = "https://auth.fit.cvut.cz/oauth/token";
 
             string credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes(_cvutConfig.ClientId + ":" + _cvutConfig.ClientSecret));
-            NameValueCollection queryCollection = new NameValueCollection
+            NameValueCollection queryCollection = new()
             {
                 {"grant_type", "authorization_code"}, {"code", code}, {"redirect_uri", redirectUri}
             };
@@ -107,7 +107,7 @@ namespace HonzaBotner.Services
                 Query = GetQueryString(queryCollection)
             };
 
-            HttpRequestMessage requestMessage = new HttpRequestMessage()
+            HttpRequestMessage requestMessage = new()
             {
                 RequestUri = uriBuilder.Uri,
                 Headers = {Authorization = new AuthenticationHeaderValue("Basic", credentials)},

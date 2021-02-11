@@ -19,14 +19,14 @@ namespace HonzaBotner.Services
 
         public async Task<UsermapPerson?> GetUserInfoAsync(string accessToken, string userName)
         {
-            UriBuilder uriBuilder = new UriBuilder($"https://kosapi.fit.cvut.cz/usermap/v1/people/{userName}?'");
+            UriBuilder uriBuilder = new($"https://kosapi.fit.cvut.cz/usermap/v1/people/{userName}?'");
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
+            HttpRequestMessage request = new(HttpMethod.Get, uriBuilder.Uri);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             HttpResponseMessage response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            JsonSerializerOptions options = new JsonSerializerOptions
+            JsonSerializerOptions options = new()
             {
                 PropertyNameCaseInsensitive = true
             };

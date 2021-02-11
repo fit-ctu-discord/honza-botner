@@ -7,6 +7,5 @@ namespace HonzaBotner.Discord
     public interface IGuildProvider
     {
         Task<DiscordGuild> GetCurrentGuildAsync();
-        IEnumerable<ulong> GetElevatedRoleIds();
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using HonzaBotner.Discord;
+﻿using HonzaBotner.Discord;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Configuration;
@@ -31,17 +30,6 @@ namespace HonzaBotner.Services
             serviceCollection.AddTransient<IHashService, Sha256HashService>();
 
             return serviceCollection;
-        }
-
-        private static object CreateInstance(this IServiceProvider services, ServiceDescriptor descriptor)
-        {
-            if (descriptor.ImplementationInstance != null)
-                return descriptor.ImplementationInstance;
-
-            if (descriptor.ImplementationFactory != null)
-                return descriptor.ImplementationFactory(services);
-
-            return ActivatorUtilities.GetServiceOrCreateInstance(services, descriptor.ImplementationType!);
         }
     }
 }

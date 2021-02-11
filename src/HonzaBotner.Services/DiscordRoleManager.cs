@@ -26,7 +26,7 @@ namespace HonzaBotner.Services
         {
             DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
 
-            List<DRole> roles = new List<DRole>();
+            List<DRole> roles = new();
             foreach (DiscordRole discordRole in discordRoles)
             {
                 DRole? role = guild.GetRole(discordRole.RoleId);
@@ -49,7 +49,7 @@ namespace HonzaBotner.Services
 
         public HashSet<DiscordRole> MapUsermapRoles(IReadOnlyCollection<string> kosRoles)
         {
-            HashSet<DiscordRole> discordRoles = new HashSet<DiscordRole>();
+            HashSet<DiscordRole> discordRoles = new();
 
 
             IEnumerable<string> knowUserRolePrefixes = _roleConfig.RoleMapping.Keys;
