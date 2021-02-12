@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Services.Contract;
@@ -18,7 +19,10 @@ namespace HonzaBotner.Discord.Services.Reactions
         {
             DiscordEmoji emoji = eventArgs.Emoji;
 
-            await _emojiCounterService.IncrementAsync(emoji.Id);
+            if (eventArgs.Guild.Emojis.ContainsKey(emoji.Id))
+            {
+                await _emojiCounterService.IncrementAsync(emoji.Id);
+            }
 
             return IReactionHandler.Result.Continue;
         }
@@ -27,7 +31,10 @@ namespace HonzaBotner.Discord.Services.Reactions
         {
             DiscordEmoji emoji = eventArgs.Emoji;
 
-            await _emojiCounterService.DecrementAsync(emoji.Id);
+            if (eventArgs.Guild.Emojis.ContainsKey(emoji.Id))
+            {
+                await _emojiCounterService.DecrementAsync(emoji.Id);
+            }
 
             return IReactionHandler.Result.Continue;
         }
