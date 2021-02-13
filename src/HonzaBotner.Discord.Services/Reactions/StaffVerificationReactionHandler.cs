@@ -32,7 +32,7 @@ namespace HonzaBotner.Discord.Services.Reactions
             DiscordUser user = eventArgs.User;
             DiscordDmChannel channel = await eventArgs.Guild.Members[user.Id].CreateDmChannelAsync();
 
-            string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
+            string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Staff);
             await channel.SendMessageAsync($"Ahoj, pro získání rolí zaměstnance klikni na: {link}");
 
             return IReactionHandler.Result.Stop;

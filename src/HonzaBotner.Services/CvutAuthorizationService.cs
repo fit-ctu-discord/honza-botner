@@ -53,7 +53,7 @@ namespace HonzaBotner.Services
             UsermapPerson? person = await _usermapInfoService.GetUserInfoAsync(accessToken, username);
             if (person == null)
             {
-                _logger.LogWarning("Couldn't fetch info from  UserMap");
+                _logger.LogWarning("Couldn't fetch info from UserMap");
                 return false;
             }
 
