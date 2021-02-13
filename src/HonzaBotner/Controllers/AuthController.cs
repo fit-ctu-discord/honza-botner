@@ -77,7 +77,6 @@ namespace HonzaBotner.Controllers
             {
                 case "auth": rolesPool = RolesPool.Auth; break;
                 case "staff": rolesPool = RolesPool.Staff; break;
-                case "student": rolesPool = RolesPool.Student; break;
                 default:
                     rolesPool = RolesPool.Auth;
                     return false;

@@ -57,7 +57,6 @@ namespace HonzaBotner.Services
             {
                 RolesPool.Auth => _roleConfig.RoleMapping,
                 RolesPool.Staff => _roleConfig.StaffRoleMapping,
-                RolesPool.Student => _roleConfig.StudentRoleMapping,
                 _ => throw new ArgumentOutOfRangeException(nameof(rolesPool), rolesPool, null)
             };
 
