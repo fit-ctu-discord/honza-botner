@@ -64,6 +64,12 @@ namespace HonzaBotner.Services
 
                 if (discordVerification.Equals(authVerification))
                 {
+                    bool ungranted = await _roleManager.UngrantRolesPoolAsync(userId, rolesPool);
+                    if (!ungranted)
+                    {
+                        // TODO: error ungranting roles
+                        return false;
+                    }
                     bool rolesGranted = await _roleManager.GrantRolesAsync(userId, discordRoles);
                     return rolesGranted;
                 }

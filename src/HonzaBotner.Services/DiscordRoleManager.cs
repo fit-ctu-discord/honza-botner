@@ -48,6 +48,39 @@ namespace HonzaBotner.Services
             return true;
         }
 
+        public async Task<bool> UngrantRolesPoolAsync(ulong userId, RolesPool rolesPool)
+        {
+            DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
+
+            IDictionary<string, ulong> rolesMapping = rolesPool switch
+            {
+                RolesPool.Auth => _roleConfig.RoleMapping,
+                RolesPool.Staff => _roleConfig.StaffRoleMapping,
+                _ => throw new ArgumentOutOfRangeException(nameof(rolesPool), rolesPool, null)
+            };
+
+            List<DRole> roles = new();
+
+            foreach ((var key, ulong value) in rolesMapping)
+            {
+                DRole? role = guild.GetRole(value);
+                if (role == null)
+                {
+                    return false;
+                }
+
+                roles.Add(role);
+            }
+
+            DiscordMember member = await guild.GetMemberAsync(userId);
+            foreach (DRole role in roles)
+            {
+                await member.RevokeRoleAsync(role, "Auth");
+            }
+
+            return true;
+        }
+
         public HashSet<DiscordRole> MapUsermapRoles(IReadOnlyCollection<string> kosRoles, RolesPool rolesPool)
         {
             HashSet<DiscordRole> discordRoles = new();
