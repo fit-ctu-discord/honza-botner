@@ -8,6 +8,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Group("admin")]
     [Description("Administrativní příkazy")]
     [Hidden]
+    [RequireOwner]
     public class AdminCommands : BaseCommandModule
     {
         [Command("sudo"), Description("Executes a command as another user."), Hidden, RequireOwner]
