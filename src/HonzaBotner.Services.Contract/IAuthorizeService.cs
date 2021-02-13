@@ -1,11 +1,12 @@
 using System;
 using System.Threading.Tasks;
+using HonzaBotner.Services.Contract.Dto;
 
 namespace HonzaBotner.Services.Contract
 {
     public interface IAuthorizationService
     {
-        Task<bool> AuthorizeAsync(string accessToken, string username, ulong userId);
+        Task<bool> AuthorizeAsync(string accessToken, string username, ulong userId, RolesPool rolesPool);
 
         Task<string> GetAuthLinkAsync(string redirectUri);
 

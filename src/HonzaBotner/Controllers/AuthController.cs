@@ -1,7 +1,9 @@
 using System;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using HonzaBotner.Services.Contract;
+using HonzaBotner.Services.Contract.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
@@ -13,6 +15,7 @@ namespace HonzaBotner.Controllers
     public class AuthController : ControllerBase
     {
         private const string AuthIdCookieName = "honza-botner-auth-id";
+        private const string RolesPoolCookieName = "honza-botner-roles-pool";
         private readonly IAuthorizationService _authorizationService;
         private string RedirectUri => Url.ActionLink(nameof(Callback));
 
@@ -21,17 +24,11 @@ namespace HonzaBotner.Controllers
             _authorizationService = authorizationService;
         }
 
-        [HttpGet("Authenticate/{userId}")]
-        public async Task<ActionResult> Authenticate(ulong userId)
+        [HttpGet("Authenticate/{userId}/{pool}")]
+        public async Task<ActionResult> Authenticate(ulong userId, string pool)
         {
-            bool isUserVerified = await _authorizationService.IsUserVerified(userId);
-            if (isUserVerified)
-            {
-                // User already verified
-                return BadRequest();
-            }
-
             Response.Cookies.Append(AuthIdCookieName, userId.ToString());
+            Response.Cookies.Append(RolesPoolCookieName, pool);
 
             string uri = await _authorizationService.GetAuthLinkAsync(RedirectUri);
             return Redirect(uri);
@@ -42,16 +39,19 @@ namespace HonzaBotner.Controllers
         public async Task<ActionResult> Callback()
         {
             if (!Request.Cookies.TryGetValue(AuthIdCookieName, out string? userIdString)
-            || !Request.Query.TryGetValue("code", out StringValues codes))
+                || !Request.Cookies.TryGetValue(RolesPoolCookieName, out string? pool)
+                || !Request.Query.TryGetValue("code", out StringValues codes))
             {
                 return BadRequest();
             }
 
             string? code = codes.Any() ? codes[0] : null;
-            if (!ulong.TryParse(userIdString, out ulong userId) || string.IsNullOrEmpty(code))
+            if (!ulong.TryParse(userIdString, out ulong userId) || string.IsNullOrEmpty(code) || !GetRolesPool(pool, out RolesPool rolesPool))
             {
                 return BadRequest();
             }
+
+
 
             string accessToken;
             string userName;
@@ -66,9 +66,24 @@ namespace HonzaBotner.Controllers
                 return Content(e.Message, "text/html");
             }
 
-            bool auth = await _authorizationService.AuthorizeAsync(accessToken, userName, userId);
+            bool auth = await _authorizationService.AuthorizeAsync(accessToken, userName, userId, rolesPool);
 
             return Ok(auth);
+        }
+
+        private bool GetRolesPool(string? value, out RolesPool rolesPool)
+        {
+            switch (value?.ToLowerInvariant())
+            {
+                case "auth": rolesPool = RolesPool.Auth; break;
+                case "staff": rolesPool = RolesPool.Staff; break;
+                case "student": rolesPool = RolesPool.Student; break;
+                default:
+                    rolesPool = RolesPool.Auth;
+                    return false;
+            }
+
+            return true;
         }
     }
 }
