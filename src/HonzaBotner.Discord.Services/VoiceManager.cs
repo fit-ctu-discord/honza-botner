@@ -1,64 +1,83 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Timer = System.Threading.Timer;
 
 namespace HonzaBotner.Discord.Services
 {
-    public class VoiceManager: IVoiceManager
+    public class VoiceManager : IVoiceManager
     {
-        private readonly CommandConfigurator _configurator;
+        private readonly IGuildProvider _guildProvider;
         private readonly DiscordWrapper _discordWrapper;
         private DiscordClient Client => _discordWrapper.Client;
 
-        public VoiceManager(DiscordWrapper discordWrapper, CommandConfigurator configurator)
+        public VoiceManager(DiscordWrapper discordWrapper, IGuildProvider guildProvider)
         {
             _discordWrapper = discordWrapper;
-            _configurator = configurator;
-
-            Console.WriteLine("hmmm");
+            _guildProvider = guildProvider;
         }
 
-        public async Task Run(CancellationToken cancellationToken)
+        public Task Run()
         {
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
 
-            Console.WriteLine("hmmm 2");
-
-            //await Client.ConnectAsync();
-            await Task.Delay(-1, cancellationToken);
+            return Task.CompletedTask;
         }
 
-        public Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs args)
+        public async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs args)
         {
+            // TODO hardcoded IDs, check guild?
+            if (args.After.Channel?.Id == 810277031089930251)
+            {
+                await AddNewVoiceChannelAsync(client, args.Channel, await args.Guild.GetMemberAsync(args.User.Id));
+            }
+
+            if (args.Before.Channel != null)
+            {
+                // TODO: category id, generator channel id
+                if (args.Before.Channel.Parent.Id == 750055929340231714 && args.Before.Channel.Id != 810277031089930251)
+                {
+                    await ClearUnusedVoiceChannelAsync(args.Before.Channel);
+                }
+            }
+        }
+
+        public async Task AddNewVoiceChannelAsync(DiscordClient client, DiscordChannel channelToCloneFrom,
+            DiscordMember member, string? name = null, int? limit = 0)
+        {
+            if (name?.Trim().Length == 0)
+            {
+                name = null;
+            }
+
+            DiscordChannel newChannel =
+                await channelToCloneFrom.CloneAsync($"Member {member.Username} created new voice channel.");
+            await newChannel.ModifyAsync(model =>
+            {
+                model.Name = name ?? $"{member.Username}'s channel";
+                model.Userlimit = limit;
+            });
+            await newChannel.AddOverwriteAsync(member, Permissions.ManageChannels | Permissions.MuteMembers);
+
+            member.PlaceInAsync(newChannel);
             Task.Run(async () =>
             {
-                DiscordDmChannel channel = await args.Guild.Members[args.User.Id].CreateDmChannelAsync();
-                await channel.SendMessageAsync(args.After.ToString());
-
-                if (args.Guild.Id == 750055928669405258 && args.After.Channel.Id == 750055929340231716)
-                {
-                    IEnumerable<DiscordChannel> others = args.Guild.GetChannel(750055929340231714).Children
-                        .Where(channel => channel.Id != 750055929340231716);
-                    foreach (DiscordChannel discordChannel in others)
-                    {
-                        if (!discordChannel.Users.Any())
-                        {
-                            await discordChannel.DeleteAsync();
-                        }
-                    }
-
-                    DiscordChannel cloned = await args.Channel.CloneAsync("Creates custom voice channel.");
-                    await cloned.ModifyAsync(model => model.Name = "New channel from user " + args.User.Username);
-                    await cloned.PlaceMemberAsync(await args.Guild.GetMemberAsync(args.User.Id));
-                }
+                await Task.Delay(10000);
+                await ClearUnusedVoiceChannelAsync(newChannel);
             });
+        }
 
-            return Task.CompletedTask;
+        public async Task ClearUnusedVoiceChannelAsync(DiscordChannel channel)
+        {
+            if (!channel.Users.Any())
+            {
+                await channel.DeleteAsync();
+            }
         }
     }
 }

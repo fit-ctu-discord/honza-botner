@@ -8,6 +8,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using HonzaBotner.Discord.Services.Attributes;
 using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord
@@ -17,16 +18,18 @@ namespace HonzaBotner.Discord
         private readonly DiscordWrapper _discordWrapper;
         private readonly ReactionHandler _reactionHandler;
         private readonly CommandConfigurator _configurator;
+        private readonly IVoiceManager _voiceManager;
 
         private DiscordClient Client => _discordWrapper.Client;
         private CommandsNextExtension Commands => _discordWrapper.Commands;
 
         public DiscordBot(DiscordWrapper discordWrapper, ReactionHandler reactionHandler,
-            CommandConfigurator configurator)
+            CommandConfigurator configurator, IVoiceManager voiceManager)
         {
             _discordWrapper = discordWrapper;
             _reactionHandler = reactionHandler;
             _configurator = configurator;
+            _voiceManager = voiceManager;
         }
 
         public async Task Run(CancellationToken cancellationToken)
@@ -41,6 +44,8 @@ namespace HonzaBotner.Discord
             Commands.CommandErrored += Commands_CommandErrored;
 
             _configurator.Config(Commands);
+
+            await _voiceManager.Run();
 
             await Client.ConnectAsync();
             await Task.Delay(-1, cancellationToken);
@@ -79,6 +84,12 @@ namespace HonzaBotner.Discord
 
             if (e.Exception is ChecksFailedException)
             {
+                if ((e.Exception as ChecksFailedException)!.FailedChecks.Any(attribute => attribute is RequireChannelAttribute))
+                {
+                    // TODO ?
+                    return;
+                }
+
                 var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
 
                 var embed = new DiscordEmbedBuilder

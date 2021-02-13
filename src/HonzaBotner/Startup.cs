@@ -52,6 +52,7 @@ namespace HonzaBotner
                     config.RegisterCommands<AdminCommands>();
                     config.RegisterCommands<OtherCommands>();
                     config.RegisterCommands<EmoteCommands>();
+                    config.RegisterCommands<VoiceCommands>();
                     // config.AddCommand<HiCommand>(HiCommand.ChatCommand);
                     // config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
                     // config.AddCommand<CountCommand>(CountCommand.ChatCommand);

@@ -1,14 +1,15 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 
 namespace HonzaBotner.Discord
 {
     public interface IVoiceManager
     {
-        Task Run(CancellationToken cancellationToken);
+        Task Run();
 
-        Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs args);
+        Task AddNewVoiceChannelAsync(DiscordClient client, DiscordChannel channelToCloneFrom, DiscordMember user, string? name, int? limit);
     }
 }
