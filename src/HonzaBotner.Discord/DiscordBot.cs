@@ -113,14 +113,17 @@ namespace HonzaBotner.Discord
             {
                 if (args.Guild.Id == 750055928669405258 && args.After.Channel.Id == 750055929340231716)
                 {
-                    DiscordChannel cloned = await args.Channel.CloneAsync("Creates custom voice channel.");
                     IEnumerable<DiscordChannel> others = args.Guild.GetChannel(750055929340231714).Children
                         .Where(channel => channel.Id != 750055929340231716);
                     foreach (DiscordChannel discordChannel in others)
                     {
-                       await discordChannel.DeleteAsync();
+                        if (!discordChannel.Users.Any())
+                        {
+                            await discordChannel.DeleteAsync();
+                        }
                     }
 
+                    DiscordChannel cloned = await args.Channel.CloneAsync("Creates custom voice channel.");
                     await cloned.ModifyAsync(model => model.Name = "New channel from user " + args.User.Username);
                     await cloned.PlaceMemberAsync(await args.Guild.GetMemberAsync(args.User.Id));
                 }
