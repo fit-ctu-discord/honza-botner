@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -37,7 +36,6 @@ namespace HonzaBotner.Discord
             Client.ClientErrored += Client_ClientError;
             Client.MessageReactionAdded += Client_MessageReactionAdded;
             Client.MessageReactionRemoved += Client_MessageReactionRemoved;
-            Client.VoiceStateUpdated += Client_VoiceStateUpdated;
 
             Commands.CommandExecuted += Commands_CommandExecuted;
             Commands.CommandErrored += Commands_CommandErrored;
@@ -102,34 +100,6 @@ namespace HonzaBotner.Discord
         private Task Client_MessageReactionRemoved(DiscordClient client, MessageReactionRemoveEventArgs args)
         {
             return _reactionHandler.HandleRemoveAsync(args);
-        }
-
-        private Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs args)
-        {
-            // DiscordDmChannel channel = await args.Guild.Members[args.User.Id].CreateDmChannelAsync();
-            // await channel.SendMessageAsync(args.After.ToString());
-
-            Task.Run(async () =>
-            {
-                if (args.Guild.Id == 750055928669405258 && args.After.Channel.Id == 750055929340231716)
-                {
-                    IEnumerable<DiscordChannel> others = args.Guild.GetChannel(750055929340231714).Children
-                        .Where(channel => channel.Id != 750055929340231716);
-                    foreach (DiscordChannel discordChannel in others)
-                    {
-                        if (!discordChannel.Users.Any())
-                        {
-                            await discordChannel.DeleteAsync();
-                        }
-                    }
-
-                    DiscordChannel cloned = await args.Channel.CloneAsync("Creates custom voice channel.");
-                    await cloned.ModifyAsync(model => model.Name = "New channel from user " + args.User.Username);
-                    await cloned.PlaceMemberAsync(await args.Guild.GetMemberAsync(args.User.Id));
-                }
-            });
-
-            return Task.CompletedTask;
         }
     }
 }

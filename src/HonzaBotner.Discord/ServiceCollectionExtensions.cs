@@ -15,17 +15,21 @@ namespace HonzaBotner.Discord
         }
 
         public static IServiceCollection AddDiscordBot(this IServiceCollection serviceCollection,
-            Action<CommandsNextExtension> commandConfig, Action<ReactionListBuilder> reactionConfig)
+            Action<CommandsNextExtension> commandConfig, Action<ReactionListBuilder> reactionConfig, Action<IServiceCollection> other)
         {
             serviceCollection.AddHostedService<DiscordWorker>();
             serviceCollection.AddSingleton<IDiscordBot, DiscordBot>();
             serviceCollection.AddSingleton<DiscordWrapper>();
             serviceCollection.AddTransient<IGuildProvider, ConfigGuildProvider>();
             serviceCollection.AddTransient<ReactionHandler>();
+
             serviceCollection.AddSingleton(new CommandConfigurator(commandConfig));
+
             ReactionListBuilder builder = new(serviceCollection);
             reactionConfig(builder);
             serviceCollection.AddSingleton(builder.Build());
+
+            other(serviceCollection);
 
             return serviceCollection;
         }
