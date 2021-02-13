@@ -1,25 +1,21 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Reactions
 {
-    public class VerificationReactionHandler : IReactionHandler
+    public class StaffVerificationReactionHandler : IReactionHandler
     {
-        private readonly IAuthorizationService _authorizationService;
         private readonly IUrlProvider _urlProvider;
         private readonly CommonCommandOptions _config;
 
-        public VerificationReactionHandler(IAuthorizationService authorizationService, IUrlProvider urlProvider,
+        public StaffVerificationReactionHandler(IUrlProvider urlProvider,
             IOptions<CommonCommandOptions> options)
         {
-            _authorizationService = authorizationService;
             _urlProvider = urlProvider;
             _config = options.Value;
         }
@@ -31,20 +27,13 @@ namespace HonzaBotner.Discord.Services.Reactions
             if (!(eventArgs.Message.Id == _config.VerificationMessageId
                   && eventArgs.Message.ChannelId == _config.VerificationChannelId))
                 return IReactionHandler.Result.Continue;
-            if (!eventArgs.Emoji.Name.Equals(_config.VerificationEmojiName)) return IReactionHandler.Result.Continue;
+            if (!eventArgs.Emoji.Name.Equals(_config.StaffVerificationEmojiName)) return IReactionHandler.Result.Continue;
 
             DiscordUser user = eventArgs.User;
             DiscordDmChannel channel = await eventArgs.Guild.Members[user.Id].CreateDmChannelAsync();
 
-            if (await _authorizationService.IsUserVerified(user.Id))
-            {
-                await channel.SendMessageAsync("Již jsi autorizován");
-            }
-            else
-            {
-                string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
-                await channel.SendMessageAsync($"Ahoj, autorizuj se prosím pomocí tohoto odkazu: {link}");
-            }
+            string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
+            await channel.SendMessageAsync($"Ahoj, pro získání rolí zaměstnance klikni na: {link}");
 
             return IReactionHandler.Result.Stop;
         }

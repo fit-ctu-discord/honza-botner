@@ -14,7 +14,7 @@ namespace HonzaBotner.Services
             _cvutConfig = config.Value;
         }
 
-        public string GetAuthLink(ulong userId)
+        public string GetAuthLink(ulong userId, RolesPool pool)
         {
             const string authPath = "/Auth/Authenticate/";
 
@@ -23,7 +23,7 @@ namespace HonzaBotner.Services
                 throw new InvalidOperationException("Invalid CVUT config");
             }
 
-            return $"{_cvutConfig.AppBaseUrl}{authPath}{userId}";
+            return $"{_cvutConfig.AppBaseUrl}{authPath}{userId}/{pool.ToString().ToLowerInvariant()}";
         }
     }
 }

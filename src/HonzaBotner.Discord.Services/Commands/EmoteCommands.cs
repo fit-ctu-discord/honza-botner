@@ -12,7 +12,7 @@ using HonzaBotner.Services.Contract.Dto;
 namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("emotes")]
-    [Description("Příkazy ke získání informací ohledně emotes")]
+    [Description("Příkazy ke získání informací ohledně emotes\nLze použít navíc přepinače `animated` a `nonanimated`")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class EmoteCommands : BaseCommandModule
     {
@@ -24,20 +24,22 @@ namespace HonzaBotner.Discord.Services.Commands
         }
 
         [GroupCommand]
+        [Priority(1)]
         [Description("Získaní přehledu o počtu použití za den")]
-        public Task PerDayCommand(CommandContext ctx)
+        public Task PerDayCommand(CommandContext ctx, [RemainingText] string parameters)
         {
-            return Display(ctx, false);
+            return Display(ctx, false, parameters);
         }
 
         [Command("total")]
+        [Priority(2)]
         [Description("Získaní přehledu o počtu použití za celou donu")]
         public Task TotalCommand(CommandContext ctx)
         {
-            return Display(ctx, true);
+            return Display(ctx, true, "");
         }
 
-        private async Task Display(CommandContext ctx, bool total)
+        private async Task Display(CommandContext ctx, bool total, string parameters)
         {
             IEnumerable<CountedEmoji> results = await _emojiCounterService.ListAsync();
             await ctx.RespondAsync("**Statistika používání custom emotes**");

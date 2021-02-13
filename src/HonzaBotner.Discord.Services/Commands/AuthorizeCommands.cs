@@ -3,6 +3,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using HonzaBotner.Services.Contract;
+using HonzaBotner.Services.Contract.Dto;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
@@ -32,7 +33,7 @@ namespace HonzaBotner.Discord.Services.Commands
             }
             else
             {
-                string link = _urlProvider.GetAuthLink(user.Id);
+                string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
                 await channel.SendMessageAsync($"Hi, authorize by following this link: {link}");
             }
         }

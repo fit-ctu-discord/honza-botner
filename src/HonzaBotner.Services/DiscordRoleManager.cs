@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
@@ -47,12 +48,19 @@ namespace HonzaBotner.Services
             return true;
         }
 
-        public HashSet<DiscordRole> MapUsermapRoles(IReadOnlyCollection<string> kosRoles)
+        public HashSet<DiscordRole> MapUsermapRoles(IReadOnlyCollection<string> kosRoles, RolesPool rolesPool)
         {
             HashSet<DiscordRole> discordRoles = new();
 
 
-            IEnumerable<string> knowUserRolePrefixes = _roleConfig.RoleMapping.Keys;
+            IDictionary<string, ulong> roles = rolesPool switch
+            {
+                RolesPool.Auth => _roleConfig.RoleMapping,
+                RolesPool.Staff => _roleConfig.StaffRoleMapping,
+                _ => throw new ArgumentOutOfRangeException(nameof(rolesPool), rolesPool, null)
+            };
+
+            IEnumerable<string> knowUserRolePrefixes = roles.Keys;
 
             foreach (string rolePrefix in knowUserRolePrefixes)
             {
@@ -60,7 +68,7 @@ namespace HonzaBotner.Services
 
                 if (containsRole)
                 {
-                    discordRoles.Add(new DiscordRole(_roleConfig.RoleMapping[rolePrefix]));
+                    discordRoles.Add(new DiscordRole(roles[rolePrefix]));
                 }
             }
 

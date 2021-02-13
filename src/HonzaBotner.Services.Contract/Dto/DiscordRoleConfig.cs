@@ -7,5 +7,7 @@ namespace HonzaBotner.Services.Contract.Dto
     {
         public const string ConfigName = "DiscordRoles";
         public Dictionary<string, ulong> RoleMapping { get; set; }
+        public Dictionary<string, ulong> StaffRoleMapping { get; set; }
+        public Dictionary<string, ulong> StudentRoleMapping { get; set; }
     }
 }

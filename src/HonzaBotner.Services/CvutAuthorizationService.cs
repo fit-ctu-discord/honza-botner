@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Linq;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Services
 {
@@ -24,10 +25,11 @@ namespace HonzaBotner.Services
         private readonly IDiscordRoleManager _roleManager;
         private readonly HttpClient _client;
         private readonly IHashService _hashService;
+        private readonly ILogger<CvutAuthorizationService> _logger;
 
         public CvutAuthorizationService(HonzaBotnerDbContext dbContext, IOptions<CvutConfig> cvutConfig,
             IUsermapInfoService usermapInfoService, IDiscordRoleManager roleManager, HttpClient client,
-            IHashService hashService)
+            IHashService hashService, ILogger<CvutAuthorizationService> logger)
         {
             _dbContext = dbContext;
             _cvutConfig = cvutConfig.Value;
@@ -35,31 +37,37 @@ namespace HonzaBotner.Services
             _roleManager = roleManager;
             _client = client;
             _hashService = hashService;
+            _logger = logger;
         }
 
-        public async Task<bool> AuthorizeAsync(string accessToken, string username, ulong userId)
+        public async Task<bool> AuthorizeAsync(string accessToken, string username, ulong userId, RolesPool rolesPool)
         {
-            if (await IsUserVerified(userId))
+            bool requiresUnverified = rolesPool == RolesPool.Auth;
+
+            if (await IsUserVerified(userId) && requiresUnverified)
             {
+                _logger.LogWarning("User already verified");
                 return false;
             }
 
             UsermapPerson? person = await _usermapInfoService.GetUserInfoAsync(accessToken, username);
             if (person == null)
             {
+                _logger.LogWarning("Couldn't fetch info from  UserMap");
                 return false;
             }
 
             string authId = _hashService.Hash(person.Username);
-            if (await _dbContext.Verifications.AnyAsync(v => v.AuthId == authId))
+            if (await _dbContext.Verifications.AnyAsync(v => v.AuthId == authId) && requiresUnverified)
             {
+                _logger.LogWarning("User already verified 2");
                 return false;
             }
 
-            IReadOnlySet<DiscordRole> discordRoles = _roleManager.MapUsermapRoles(person.Roles);
+            IReadOnlySet<DiscordRole> discordRoles = _roleManager.MapUsermapRoles(person.Roles, rolesPool);
             bool rolesGranted = await _roleManager.GrantRolesAsync(userId, discordRoles);
 
-            if (rolesGranted)
+            if (rolesGranted && requiresUnverified)
             {
                 Verification verification = new() {AuthId = authId, UserId = userId};
 
