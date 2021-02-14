@@ -8,7 +8,7 @@ namespace HonzaBotner.Discord
 {
     public interface IVoiceManager
     {
-        Task Run();
+        Task Init();
 
         Task AddNewVoiceChannelAsync(DiscordChannel channelToCloneFrom, DiscordMember user, string? name, int? limit);
 

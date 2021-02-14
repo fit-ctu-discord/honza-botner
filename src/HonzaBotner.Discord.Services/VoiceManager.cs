@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -10,24 +11,29 @@ namespace HonzaBotner.Discord.Services
 {
     public class VoiceManager : IVoiceManager
     {
+        private readonly IGuildProvider _guildProvider;
         private readonly DiscordWrapper _discordWrapper;
         private readonly CommonCommandOptions _config;
 
         private DiscordClient Client => _discordWrapper.Client;
 
-        public VoiceManager(DiscordWrapper discordWrapper, IOptions<CommonCommandOptions> options)
+        public VoiceManager(IGuildProvider guildProvider, DiscordWrapper discordWrapper,
+            IOptions<CommonCommandOptions> options)
         {
+            _guildProvider = guildProvider;
             _discordWrapper = discordWrapper;
             _config = options.Value;
         }
 
-        public Task Run()
+        public async Task Init()
         {
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-            return Task.CompletedTask;
+
+            // Startup cleaning.
+            await DeleteAllUnusedVoiceChannelsAsync();
         }
 
-        public async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs args)
+        private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs args)
         {
             if (args.After.Channel?.Id == _config.CustomVoiceClickChannel)
             {
@@ -39,7 +45,7 @@ namespace HonzaBotner.Discord.Services
                 if (args.Before.Channel.Parent.Id == _config.CustomVoiceCategory &&
                     args.Before.Channel.Id != _config.CustomVoiceClickChannel)
                 {
-                    await ClearUnusedVoiceChannelAsync(args.Before.Channel);
+                    await DeleteUnusedVoiceChannelAsync(args.Before.Channel);
                 }
             }
         }
@@ -74,7 +80,7 @@ namespace HonzaBotner.Discord.Services
                     var ignoredTask = Task.Run(async () =>
                     {
                         await Task.Delay(1000 * _config.CustomVoiceRemoveAfterCommand);
-                        await ClearUnusedVoiceChannelAsync(newChannel);
+                        await DeleteUnusedVoiceChannelAsync(newChannel);
                     });
                 }
             }
@@ -114,8 +120,10 @@ namespace HonzaBotner.Discord.Services
             return false;
         }
 
-        public async Task ClearUnusedVoiceChannelAsync(DiscordChannel channel)
+        private async Task DeleteUnusedVoiceChannelAsync(DiscordChannel channel)
         {
+            if (channel.Id == _config.CustomVoiceClickChannel) return;
+
             if (!channel.Users.Any())
             {
                 try
@@ -126,6 +134,15 @@ namespace HonzaBotner.Discord.Services
                 {
                     // ignored
                 }
+            }
+        }
+
+        private async Task DeleteAllUnusedVoiceChannelsAsync()
+        {
+            DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
+            foreach (DiscordChannel discordChannel in guild.GetChannel(_config.CustomVoiceCategory).Children)
+            {
+                await DeleteUnusedVoiceChannelAsync(discordChannel);
             }
         }
     }

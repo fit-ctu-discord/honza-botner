@@ -44,7 +44,7 @@ namespace HonzaBotner.Discord
 
             _configurator.Config(Commands);
 
-            await _voiceManager.Run();
+            await _voiceManager.Init();
 
             await Client.ConnectAsync();
             await Task.Delay(-1, cancellationToken);
