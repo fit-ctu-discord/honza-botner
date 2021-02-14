@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord.Attributes;
 using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.Options;
 
@@ -11,7 +11,6 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("voice")]
     [Description("Commands to control custom voice channels.")]
-    [InChannels(new ulong[] {750108543125946448})]
     public class VoiceCommands : BaseCommandModule
     {
         private readonly IVoiceManager _voiceManager;
@@ -25,18 +24,25 @@ namespace HonzaBotner.Discord.Services.Commands
 
         [Command("add")]
         [Description("Create new voice channel. Users has 30 seconds to join.")]
-        public Task AddVoiceChannel(
+        public async Task AddVoiceChannel(
             CommandContext ctx,
             [Description("Name of the channel.")] string name,
             [Description("Limit number of members who can join.")]
             int limit = 0
         )
         {
-            ctx.TriggerTypingAsync();
+            await ctx.TriggerTypingAsync();
+            if (!InValidChannel(ctx.Channel))
+            {
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
+                return;
+            }
 
-            _voiceManager.AddNewVoiceChannelAsync(ctx.Client, ctx.Guild.GetChannel(810277031089930251), ctx.Member,
+            await _voiceManager.AddNewVoiceChannelAsync(ctx.Guild.GetChannel(_config.CustomVoiceClickChannel),
+                ctx.Member,
                 name, limit);
-            return ctx.RespondAsync($"I have created new voice channel '{name}' for you!");
+
+            await ctx.RespondAsync($"I have created new voice channel '{name}' for you!");
         }
 
         [Command("edit")]
@@ -48,23 +54,27 @@ namespace HonzaBotner.Discord.Services.Commands
             int? limit = null
         )
         {
-            await ctx.TriggerTypingAsync();
-
-            if (ctx.Member.VoiceState.Channel != null && ctx.Member.VoiceState.Channel.Parent.Id == 750055929340231714)
+            if (!InValidChannel(ctx.Channel))
             {
-                if ((ctx.Member.VoiceState.Channel.PermissionsFor(ctx.Member) & Permissions.ManageChannels) ==
-                    0) return;
-
-                await ctx.Member.VoiceState.Channel.ModifyAsync(model =>
-                {
-                    model.Name = newName;
-
-                    if (limit != null)
-                    {
-                        model.Userlimit = limit;
-                    }
-                });
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
+                return;
             }
+
+            bool success = await _voiceManager.EditVoiceChannelAsync(ctx.Member, newName, limit);
+
+            if (success)
+            {
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+            }
+            else
+            {
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
+            }
+        }
+
+        private bool InValidChannel(DiscordChannel channel)
+        {
+            return _config.CustomVoiceCommandsChannels.Contains(channel.Id);
         }
     }
 }

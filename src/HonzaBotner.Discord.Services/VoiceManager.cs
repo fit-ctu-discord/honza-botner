@@ -31,20 +31,22 @@ namespace HonzaBotner.Discord.Services
         {
             if (args.After.Channel?.Id == _config.CustomVoiceClickChannel)
             {
-                await AddNewVoiceChannelAsync(client, args.Channel, await args.Guild.GetMemberAsync(args.User.Id));
+                await AddNewVoiceChannelAsync(args.Channel, await args.Guild.GetMemberAsync(args.User.Id));
             }
 
             if (args.Before.Channel != null)
             {
-                if (args.Before.Channel.Parent.Id == _config.CustomVoiceCategory && args.Before.Channel.Id != _config.CustomVoiceClickChannel)
+                if (args.Before.Channel.Parent.Id == _config.CustomVoiceCategory &&
+                    args.Before.Channel.Id != _config.CustomVoiceClickChannel)
                 {
                     await ClearUnusedVoiceChannelAsync(args.Before.Channel);
                 }
             }
         }
 
-        public async Task AddNewVoiceChannelAsync(DiscordClient client, DiscordChannel channelToCloneFrom,
-            DiscordMember member, string? name = null, int? limit = 0)
+        public async Task AddNewVoiceChannelAsync(
+            DiscordChannel channelToCloneFrom, DiscordMember member,
+            string? name = null, int? limit = 0)
         {
             if (name?.Trim().Length == 0)
             {
@@ -80,6 +82,36 @@ namespace HonzaBotner.Discord.Services
             {
                 // ignored
             }
+        }
+
+        public async Task<bool> EditVoiceChannelAsync(DiscordMember member, string? newName = null, int? limit = 0)
+        {
+            if (member.VoiceState.Channel == null || member.VoiceState.Channel.Parent.Id != _config.CustomVoiceCategory)
+            {
+                return false;
+            }
+
+            if ((member.VoiceState.Channel.PermissionsFor(member) & Permissions.ManageChannels) == 0) return false;
+
+            try
+            {
+                await member.VoiceState.Channel.ModifyAsync(model =>
+                {
+                    model.Name = newName;
+
+                    if (limit != null)
+                    {
+                        model.Userlimit = limit;
+                    }
+                });
+                return true;
+            }
+            catch
+            {
+                // ignored
+            }
+
+            return false;
         }
 
         public async Task ClearUnusedVoiceChannelAsync(DiscordChannel channel)

@@ -8,7 +8,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using HonzaBotner.Discord.Attributes;
 using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord
@@ -84,12 +83,6 @@ namespace HonzaBotner.Discord
 
             if (e.Exception is ChecksFailedException)
             {
-                if ((e.Exception as ChecksFailedException)!.FailedChecks.Any(attribute => attribute is InChannelsAttribute))
-                {
-                    // TODO ?
-                    return;
-                }
-
                 var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
 
                 var embed = new DiscordEmbedBuilder

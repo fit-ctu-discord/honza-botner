@@ -10,6 +10,8 @@ namespace HonzaBotner.Discord
     {
         Task Run();
 
-        Task AddNewVoiceChannelAsync(DiscordClient client, DiscordChannel channelToCloneFrom, DiscordMember user, string? name, int? limit);
+        Task AddNewVoiceChannelAsync(DiscordChannel channelToCloneFrom, DiscordMember user, string? name, int? limit);
+
+        Task<bool> EditVoiceChannelAsync(DiscordMember user, string? name, int? limit);
     }
 }

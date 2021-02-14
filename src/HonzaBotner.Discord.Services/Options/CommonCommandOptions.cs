@@ -17,5 +17,6 @@
         public ulong CustomVoiceCategory { get; set; }
         public ulong CustomVoiceClickChannel { get; set; }
         public int CustomVoiceRemoveAfterCommand { get; set; }
+        public ulong[] CustomVoiceCommandsChannels { get; set; } = System.Array.Empty<ulong>();
     }
 }
