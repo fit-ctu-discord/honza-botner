@@ -61,7 +61,7 @@ namespace HonzaBotner.Controllers
 
                 return Ok(await _authorizationService.AuthorizeAsync(accessToken, userName, userId, rolesPool) switch
                 {
-                    IAuthorizationService.AuthorizeResult.OK => "Sucessfully authenticated.",
+                    IAuthorizationService.AuthorizeResult.OK => "Successfully authenticated.",
                     IAuthorizationService.AuthorizeResult.Failed => "Authentication failed.",
                     IAuthorizationService.AuthorizeResult.DifferentMember =>
                         "Authentication failed because you are registered with another auth code or another user already uses your auth code.",
