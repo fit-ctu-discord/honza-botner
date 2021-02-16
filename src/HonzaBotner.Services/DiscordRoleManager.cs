@@ -55,6 +55,7 @@ namespace HonzaBotner.Services
 
         public async Task<bool> UngrantRolesPoolAsync(ulong userId, RolesPool rolesPool)
         {
+            bool returnValue = true;
             DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
 
             IDictionary<string, ulong> rolesMapping = rolesPool switch
@@ -71,10 +72,13 @@ namespace HonzaBotner.Services
                 DRole? role = guild.GetRole(value);
                 if (role == null)
                 {
-                    return false;
+                    returnValue = false;
+                    _logger.LogError("Ungranting roles for user id {0} failed for role key:{1} = value:{2}.", userId, key, value);
                 }
-
-                roles.Add(role);
+                else
+                {
+                    roles.Add(role);
+                }
             }
 
             DiscordMember member = await guild.GetMemberAsync(userId);
@@ -83,7 +87,7 @@ namespace HonzaBotner.Services
                 await member.RevokeRoleAsync(role, "Auth");
             }
 
-            return true;
+            return returnValue;
         }
 
         public HashSet<DiscordRole> MapUsermapRoles(IReadOnlyCollection<string> kosRoles, RolesPool rolesPool)

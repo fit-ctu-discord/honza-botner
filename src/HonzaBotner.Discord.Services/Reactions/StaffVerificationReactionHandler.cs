@@ -55,7 +55,9 @@ namespace HonzaBotner.Discord.Services.Reactions
             bool ungranted = await _roleManager.UngrantRolesPoolAsync(eventArgs.User.Id, RolesPool.Staff);
             if (!ungranted)
             {
-                _logger.LogWarning("Ungranting roles failed.", eventArgs.User.Username, eventArgs.User.Id);
+                _logger.LogWarning("Ungranting roles for user {0} (id {1}) failed.", eventArgs.User.Username, eventArgs.User.Id);
+                DiscordDmChannel channel = await eventArgs.Guild.Members[eventArgs.User.Id].CreateDmChannelAsync();
+                await channel.SendMessageAsync("Staff role se nepodařilo odebrat. Prosím, kontaktujte moderátory.");
             }
 
             return IReactionHandler.Result.Continue;

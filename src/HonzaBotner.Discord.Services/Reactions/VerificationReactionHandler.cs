@@ -36,14 +36,15 @@ namespace HonzaBotner.Discord.Services.Reactions
             DiscordUser user = eventArgs.User;
             DiscordDmChannel channel = await eventArgs.Guild.Members[user.Id].CreateDmChannelAsync();
 
+            string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
+
             if (await _authorizationService.IsUserVerified(user.Id))
             {
-                await channel.SendMessageAsync("Již jsi autorizován");
+                await channel.SendMessageAsync($"Ahoj, už jsi ověřený.\nPro aktualizaci rolí dle UserMap klikni na odkaz: {link}");
             }
             else
             {
-                string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
-                await channel.SendMessageAsync($"Ahoj, autorizuj se prosím pomocí tohoto odkazu: {link}");
+                await channel.SendMessageAsync($"Ahoj, pro ověření a přidělení rolí dle UserMap klikni na odkaz: {link}");
             }
 
             return IReactionHandler.Result.Stop;

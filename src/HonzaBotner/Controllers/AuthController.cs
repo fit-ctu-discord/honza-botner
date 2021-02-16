@@ -58,23 +58,23 @@ namespace HonzaBotner.Controllers
             {
                 accessToken = await _authorizationService.GetAccessTokenAsync(code, RedirectUri);
                 userName = await _authorizationService.GetUserNameAsync(accessToken);
+
+                return Ok(await _authorizationService.AuthorizeAsync(accessToken, userName, userId, rolesPool) switch
+                {
+                    IAuthorizationService.AuthorizeResult.OK => "Sucessfully authenticated.",
+                    IAuthorizationService.AuthorizeResult.Failed => "Authentication failed.",
+                    IAuthorizationService.AuthorizeResult.DifferentMember =>
+                        "Authentication failed because you are registered with another auth code or another user already uses your auth code.",
+                    IAuthorizationService.AuthorizeResult.UserMapError =>
+                        "Authentication failed due to UserMap service failure.",
+                    _ => throw new ArgumentOutOfRangeException()
+                });
             }
             catch (InvalidOperationException e)
             {
                 Response.StatusCode = 400;
                 return Content(e.Message, "text/html");
             }
-
-            return Ok(await _authorizationService.AuthorizeAsync(accessToken, userName, userId, rolesPool) switch
-            {
-                IAuthorizationService.AuthorizeResult.OK => "Sucessfully authenticated.",
-                IAuthorizationService.AuthorizeResult.Failed => "Authentication failed.",
-                IAuthorizationService.AuthorizeResult.DifferentMember =>
-                    "Authentication failed because you are registered with another auth code or another user already uses your auth code.",
-                IAuthorizationService.AuthorizeResult.UserMapError =>
-                    "Authentication failed due to UserMap service failure.",
-                _ => throw new ArgumentOutOfRangeException()
-            });
         }
 
         private bool GetRolesPool(string? value, out RolesPool rolesPool)

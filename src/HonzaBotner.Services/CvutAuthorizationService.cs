@@ -59,15 +59,15 @@ namespace HonzaBotner.Services
             // discord and auth -> update roles
             if (discordIdPresent && authPresent)
             {
-                Verification discordVerification = await _dbContext.Verifications.FirstAsync(v => v.UserId == userId);
-                Verification authVerification = await _dbContext.Verifications.FirstAsync(v => v.AuthId == authId);
+                bool verificationExists =
+                    await _dbContext.Verifications.AnyAsync(v => v.UserId == userId && v.AuthId == authId);
 
-                if (discordVerification.Equals(authVerification))
+                if (verificationExists)
                 {
                     bool ungranted = await _roleManager.UngrantRolesPoolAsync(userId, rolesPool);
                     if (!ungranted)
                     {
-                        // TODO: error ungranting roles
+                        _logger.LogWarning("Ungranting roles pool {2} for {0} (id {1}) failed.", username, userId, rolesPool);
                         return IAuthorizationService.AuthorizeResult.Failed;
                     }
                     bool granted = await _roleManager.GrantRolesAsync(userId, discordRoles);
