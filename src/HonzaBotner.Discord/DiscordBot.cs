@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -15,15 +17,18 @@ namespace HonzaBotner.Discord
         private readonly DiscordWrapper _discordWrapper;
         private readonly ReactionHandler _reactionHandler;
         private readonly CommandConfigurator _configurator;
+        private readonly IVoiceManager _voiceManager;
 
         private DiscordClient Client => _discordWrapper.Client;
         private CommandsNextExtension Commands => _discordWrapper.Commands;
 
-        public DiscordBot(DiscordWrapper discordWrapper, ReactionHandler reactionHandler, CommandConfigurator configurator)
+        public DiscordBot(DiscordWrapper discordWrapper, ReactionHandler reactionHandler,
+            CommandConfigurator configurator, IVoiceManager voiceManager)
         {
             _discordWrapper = discordWrapper;
             _reactionHandler = reactionHandler;
             _configurator = configurator;
+            _voiceManager = voiceManager;
         }
 
         public async Task Run(CancellationToken cancellationToken)
@@ -43,10 +48,11 @@ namespace HonzaBotner.Discord
             await Task.Delay(-1, cancellationToken);
         }
 
-        private Task Client_Ready(DiscordClient sender, ReadyEventArgs e)
+        private async Task Client_Ready(DiscordClient sender, ReadyEventArgs e)
         {
             sender.Logger.LogInformation("Client is ready to process events");
-            return Task.CompletedTask;
+
+            await _voiceManager.Init();
         }
 
         private Task Client_GuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
@@ -81,7 +87,8 @@ namespace HonzaBotner.Discord
                 var embed = new DiscordEmbedBuilder
                 {
                     Title = "Přístup zakázán",
-                    Description = $"{emoji} Na vykonání příkazu nemáte dostatečná práva. Pokud si myslíte že ano, kontaktujte svého MODa.",
+                    Description =
+                        $"{emoji} Na vykonání příkazu nemáte dostatečná práva. Pokud si myslíte že ano, kontaktujte svého MODa.",
                     Color = new DiscordColor(0xFF0000) // red
                 };
                 await e.Context.RespondAsync("", embed: embed);

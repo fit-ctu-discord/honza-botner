@@ -22,7 +22,9 @@ namespace HonzaBotner.Discord
             serviceCollection.AddSingleton<DiscordWrapper>();
             serviceCollection.AddTransient<IGuildProvider, ConfigGuildProvider>();
             serviceCollection.AddTransient<ReactionHandler>();
+
             serviceCollection.AddSingleton(new CommandConfigurator(commandConfig));
+
             ReactionListBuilder builder = new(serviceCollection);
             reactionConfig(builder);
             serviceCollection.AddSingleton(builder.Build());

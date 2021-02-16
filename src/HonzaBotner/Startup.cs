@@ -50,8 +50,8 @@ namespace HonzaBotner
                 {
                     //config.RegisterCommands<AuthorizeCommands>();
                     config.RegisterCommands<AdminCommands>();
-                    config.RegisterCommands<OtherCommands>();
                     config.RegisterCommands<EmoteCommands>();
+                    config.RegisterCommands<VoiceCommands>();
                     // config.AddCommand<HiCommand>(HiCommand.ChatCommand);
                     // config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
                     // config.AddCommand<CountCommand>(CountCommand.ChatCommand);
@@ -69,8 +69,9 @@ namespace HonzaBotner
                     reactions.AddReaction<VerificationReactionHandler>()
                         .AddReaction<StaffVerificationReactionHandler>()
                         .AddReaction<EmojiCounterHandler>();
-
                 });
+
+            services.AddSingleton<IVoiceManager, VoiceManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
