@@ -15,7 +15,7 @@ namespace HonzaBotner.Discord.Services
         private readonly IGuildProvider _guildProvider;
         private readonly DiscordWrapper _discordWrapper;
         private readonly CustomVoiceOptions _voiceConfig;
-        private readonly Logger<VoiceManager> _logger;
+        private readonly ILogger<VoiceManager> _logger;
 
         private DiscordClient Client => _discordWrapper.Client;
 
@@ -25,7 +25,7 @@ namespace HonzaBotner.Discord.Services
             _guildProvider = guildProvider;
             _discordWrapper = discordWrapper;
             _voiceConfig = options.Value;
-            _logger = _logger;
+            _logger = logger;
         }
 
         public async Task Init()

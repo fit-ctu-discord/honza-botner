@@ -38,6 +38,8 @@ namespace HonzaBotner.Discord.Services.Commands
                 return;
             }
 
+            name = name.Substring(0, 30);
+
             await _voiceManager.AddNewVoiceChannelAsync(ctx.Guild.GetChannel(_voiceConfig.ClickChannelId),
                 ctx.Member,
                 name, limit);
