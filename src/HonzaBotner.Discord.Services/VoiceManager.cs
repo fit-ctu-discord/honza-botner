@@ -77,7 +77,7 @@ namespace HonzaBotner.Discord.Services
                 catch
                 {
                     // Placing the member in the channel failed, so remove it after some time.
-                    var ignoredTask = Task.Run(async () =>
+                    var _ = Task.Run(async () =>
                     {
                         await Task.Delay(1000 * _config.CustomVoiceRemoveAfterCommand);
                         await DeleteUnusedVoiceChannelAsync(newChannel);

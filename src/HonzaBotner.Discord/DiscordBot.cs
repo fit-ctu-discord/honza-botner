@@ -44,16 +44,15 @@ namespace HonzaBotner.Discord
 
             _configurator.Config(Commands);
 
-            await _voiceManager.Init();
-
             await Client.ConnectAsync();
             await Task.Delay(-1, cancellationToken);
         }
 
-        private Task Client_Ready(DiscordClient sender, ReadyEventArgs e)
+        private async Task Client_Ready(DiscordClient sender, ReadyEventArgs e)
         {
             sender.Logger.LogInformation("Client is ready to process events");
-            return Task.CompletedTask;
+
+            await _voiceManager.Init();
         }
 
         private Task Client_GuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
