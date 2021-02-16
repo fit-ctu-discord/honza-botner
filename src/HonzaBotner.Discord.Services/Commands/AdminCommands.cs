@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
@@ -48,54 +44,6 @@ namespace HonzaBotner.Discord.Services.Commands
             }
 
             await oldMessage.ModifyAsync(newText);
-        }
-
-        [Command("role")]
-        public async Task AddRole(CommandContext ctx, DiscordRole role, DiscordRole newRole)
-        {
-            var __ = Task.Run(async () =>
-            {
-                foreach ((_, DiscordMember member) in ctx.Guild.Members)
-                {
-                    if (member.Roles.Contains(role) && !member.Roles.Contains(newRole))
-                    {
-                        await member.GrantRoleAsync(newRole);
-                    }
-                }
-            });
-        }
-
-        [Command("fixrole")]
-        public async Task FixBINIrole(CommandContext ctx)
-        {
-            DiscordRole bakalar = ctx.Guild.GetRole(686762848650919955);
-            DiscordRole bi = ctx.Guild.GetRole(809934141650763816);
-            DiscordRole magistr = ctx.Guild.GetRole(686762912034979971);
-            DiscordRole ni = ctx.Guild.GetRole(809934144380862535);
-
-            var __ = Task.Run(async () =>
-            {
-                foreach ((_, DiscordMember member) in ctx.Guild.Members)
-                {
-                    if (member.Roles.Contains(magistr) && member.Roles.Contains(bakalar))
-                    {
-                        // ?
-                        continue;
-                    }
-
-                    if (member.Roles.Contains(magistr) && !member.Roles.Contains(ni))
-                    {
-                        await member.GrantRoleAsync(ni);
-                        continue;
-                    }
-
-                    if (member.Roles.Contains(bakalar) && !member.Roles.Contains(bi))
-                    {
-                        await member.GrantRoleAsync(bi);
-                        continue;
-                    }
-                }
-            });
         }
 
         [Command("countRole")]
