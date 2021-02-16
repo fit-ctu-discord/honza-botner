@@ -44,6 +44,7 @@ namespace HonzaBotner.Services
                 roles.Add(role);
             }
 
+            // TODO: job queue
             var _ = Task.Run(async () =>
             {
                 DiscordMember member = await guild.GetMemberAsync(userId);
@@ -84,14 +85,15 @@ namespace HonzaBotner.Services
                 }
             }
 
-            var _ = Task.Run(async () =>
+            // TODO: job queue
+            DiscordMember member = await guild.GetMemberAsync(userId);
+            foreach (DRole role in roles)
             {
-                DiscordMember member = await guild.GetMemberAsync(userId);
-                foreach (DRole role in roles)
+                if (member.Roles.Contains(role))
                 {
                     await member.RevokeRoleAsync(role, "Auth");
                 }
-            });
+            }
 
             return returnValue;
         }

@@ -34,7 +34,7 @@ namespace HonzaBotner.Discord.Services.Commands
         }
 
         [Command("edit")]
-        public async Task SendMessage(CommandContext ctx, string url, string newText)
+        public async Task SendMessage(CommandContext ctx, string url, [RemainingText] string newText)
         {
             DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(ctx.Message.Channel.Guild, url);
 
