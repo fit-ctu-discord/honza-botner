@@ -44,11 +44,14 @@ namespace HonzaBotner.Services
                 roles.Add(role);
             }
 
-            DiscordMember member = await guild.GetMemberAsync(userId);
-            foreach (DRole role in roles)
+            var _ = Task.Run(async () =>
             {
-                await member.GrantRoleAsync(role, "Auth");
-            }
+                DiscordMember member = await guild.GetMemberAsync(userId);
+                foreach (DRole role in roles)
+                {
+                    await member.GrantRoleAsync(role, "Auth");
+                }
+            });
 
             return true;
         }
