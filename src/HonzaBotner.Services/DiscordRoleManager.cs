@@ -57,12 +57,12 @@ namespace HonzaBotner.Services
             return true;
         }
 
-        public async Task<bool> UngrantRolesPoolAsync(ulong userId, RolesPool rolesPool)
+        public async Task<bool> RevokeRolesPoolAsync(ulong userId, RolesPool rolesPool)
         {
             bool returnValue = true;
             DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
 
-            IDictionary<string, ulong> rolesMapping = rolesPool switch
+            IDictionary<string, ulong[]> rolesMapping = rolesPool switch
             {
                 RolesPool.Auth => _roleConfig.RoleMapping,
                 RolesPool.Staff => _roleConfig.StaffRoleMapping,
@@ -71,17 +71,21 @@ namespace HonzaBotner.Services
 
             List<DRole> roles = new();
 
-            foreach ((var key, ulong value) in rolesMapping)
+            foreach ((var key, ulong[] roleIds) in rolesMapping)
             {
-                DRole? role = guild.GetRole(value);
-                if (role == null)
+                foreach (ulong value in roleIds)
                 {
-                    returnValue = false;
-                    _logger.LogError("Ungranting roles for user id {0} failed for role key:{1} = value:{2}.", userId, key, value);
-                }
-                else
-                {
-                    roles.Add(role);
+                    DRole? role = guild.GetRole(value);
+                    if (role == null)
+                    {
+                        returnValue = false;
+                        _logger.LogError("Revoking roles for user id {0} failed for role key:{1} = value:{2}.",
+                            userId, key, value);
+                    }
+                    else
+                    {
+                        roles.Add(role);
+                    }
                 }
             }
 
@@ -103,7 +107,7 @@ namespace HonzaBotner.Services
             HashSet<DiscordRole> discordRoles = new();
 
 
-            IDictionary<string, ulong> roles = rolesPool switch
+            IDictionary<string, ulong[]> roles = rolesPool switch
             {
                 RolesPool.Auth => _roleConfig.RoleMapping,
                 RolesPool.Staff => _roleConfig.StaffRoleMapping,
@@ -118,7 +122,10 @@ namespace HonzaBotner.Services
 
                 if (containsRole)
                 {
-                    discordRoles.Add(new DiscordRole(roles[rolePrefix]));
+                    foreach (DiscordRole role in roles[rolePrefix].Select(roleId => new DiscordRole(roleId)))
+                    {
+                        discordRoles.Add(role);
+                    }
                 }
             }
 

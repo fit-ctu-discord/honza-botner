@@ -52,7 +52,7 @@ namespace HonzaBotner.Discord.Services.Reactions
                 return IReactionHandler.Result.Continue;
             if (!eventArgs.Emoji.Name.Equals(_config.StaffVerificationEmojiName)) return IReactionHandler.Result.Continue;
 
-            bool ungranted = await _roleManager.UngrantRolesPoolAsync(eventArgs.User.Id, RolesPool.Staff);
+            bool ungranted = await _roleManager.RevokeRolesPoolAsync(eventArgs.User.Id, RolesPool.Staff);
             if (!ungranted)
             {
                 _logger.LogWarning("Ungranting roles for user {0} (id {1}) failed.", eventArgs.User.Username, eventArgs.User.Id);
