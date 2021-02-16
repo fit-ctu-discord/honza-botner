@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -38,7 +39,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 return;
             }
 
-            name = name.Substring(0, 30);
+            name = name.Substring(0, Math.Min(name.Length, 30));
 
             await _voiceManager.AddNewVoiceChannelAsync(ctx.Guild.GetChannel(_voiceConfig.ClickChannelId),
                 ctx.Member,

@@ -62,7 +62,7 @@ namespace HonzaBotner.Discord.Services
             }
             else
             {
-                name = name?.Substring(0, 30);
+                name = name?.Substring(0, Math.Min(name.Length, 30));
             }
 
             try
