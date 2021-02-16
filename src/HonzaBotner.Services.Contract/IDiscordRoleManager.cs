@@ -9,5 +9,7 @@ namespace HonzaBotner.Services.Contract
         HashSet<DiscordRole> MapUsermapRoles(IReadOnlyCollection<string> kosRoles, RolesPool rolesPool);
 
         Task<bool> GrantRolesAsync(ulong userId, IReadOnlySet<DiscordRole> discordRoles);
+
+        Task<bool> UngrantRolesPoolAsync(ulong userId, RolesPool rolesPool);
     }
 }
