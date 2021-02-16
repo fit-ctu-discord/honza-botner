@@ -6,6 +6,7 @@ using DSharpPlus.Entities;
 using HonzaBotner.Discord;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using DiscordRole = HonzaBotner.Services.Contract.Dto.DiscordRole;
 using DRole = DSharpPlus.Entities.DiscordRole;
@@ -14,11 +15,14 @@ namespace HonzaBotner.Services
 {
     public sealed class DiscordRoleManager : IDiscordRoleManager
     {
+        private readonly ILogger<DiscordRoleManager> _logger;
         private readonly IGuildProvider _guildProvider;
         private readonly DiscordRoleConfig _roleConfig;
 
-        public DiscordRoleManager(IOptions<DiscordRoleConfig> options, IGuildProvider guildProvider)
+        public DiscordRoleManager(IOptions<DiscordRoleConfig> options, ILogger<DiscordRoleManager> logger,
+            IGuildProvider guildProvider)
         {
+            _logger = logger;
             _guildProvider = guildProvider;
             _roleConfig = options.Value;
         }
@@ -33,6 +37,7 @@ namespace HonzaBotner.Services
                 DRole? role = guild.GetRole(discordRole.RoleId);
                 if (role == null)
                 {
+                    _logger.LogWarning("Couldn't map all roles. Please verify your config file");
                     return false;
                 }
 
