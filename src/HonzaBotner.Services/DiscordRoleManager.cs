@@ -53,6 +53,43 @@ namespace HonzaBotner.Services
             return true;
         }
 
+        public async Task<bool> UngrantRolesPoolAsync(ulong userId, RolesPool rolesPool)
+        {
+            bool returnValue = true;
+            DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
+
+            IDictionary<string, ulong> rolesMapping = rolesPool switch
+            {
+                RolesPool.Auth => _roleConfig.RoleMapping,
+                RolesPool.Staff => _roleConfig.StaffRoleMapping,
+                _ => throw new ArgumentOutOfRangeException(nameof(rolesPool), rolesPool, null)
+            };
+
+            List<DRole> roles = new();
+
+            foreach ((var key, ulong value) in rolesMapping)
+            {
+                DRole? role = guild.GetRole(value);
+                if (role == null)
+                {
+                    returnValue = false;
+                    _logger.LogError("Ungranting roles for user id {0} failed for role key:{1} = value:{2}.", userId, key, value);
+                }
+                else
+                {
+                    roles.Add(role);
+                }
+            }
+
+            DiscordMember member = await guild.GetMemberAsync(userId);
+            foreach (DRole role in roles)
+            {
+                await member.RevokeRoleAsync(role, "Auth");
+            }
+
+            return returnValue;
+        }
+
         public HashSet<DiscordRole> MapUsermapRoles(IReadOnlyCollection<string> kosRoles, RolesPool rolesPool)
         {
             HashSet<DiscordRole> discordRoles = new();

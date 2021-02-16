@@ -27,13 +27,14 @@ namespace HonzaBotner.Discord.Services.Commands
             DiscordUser user = message.Author;
             DiscordDmChannel channel = await message.Channel.Guild.Members[user.Id].CreateDmChannelAsync();
 
+            string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
+
             if (await _authorizationService.IsUserVerified(user.Id))
             {
-                await channel.SendMessageAsync($"You are already authorized");
+                await channel.SendMessageAsync($"You are already authorized.\nTo update roles follow this link: {link}");
             }
             else
             {
-                string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
                 await channel.SendMessageAsync($"Hi, authorize by following this link: {link}");
             }
         }

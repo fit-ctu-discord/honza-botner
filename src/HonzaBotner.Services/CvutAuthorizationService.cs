@@ -40,42 +40,64 @@ namespace HonzaBotner.Services
             _logger = logger;
         }
 
-        public async Task<bool> AuthorizeAsync(string accessToken, string username, ulong userId, RolesPool rolesPool)
+        public async Task<IAuthorizationService.AuthorizeResult> AuthorizeAsync(string accessToken, string username, ulong userId, RolesPool rolesPool)
         {
-            bool requiresUnverified = rolesPool == RolesPool.Auth;
-
-            if (await IsUserVerified(userId) && requiresUnverified)
-            {
-                _logger.LogWarning("User already verified");
-                return false;
-            }
+            bool discordIdPresent = await IsUserVerified(userId);
 
             UsermapPerson? person = await _usermapInfoService.GetUserInfoAsync(accessToken, username);
             if (person == null)
             {
                 _logger.LogWarning("Couldn't fetch info from UserMap");
-                return false;
+                return IAuthorizationService.AuthorizeResult.UserMapError;
             }
 
             string authId = _hashService.Hash(person.Username);
-            if (await _dbContext.Verifications.AnyAsync(v => v.AuthId == authId) && requiresUnverified)
-            {
-                _logger.LogWarning("User already verified 2");
-                return false;
-            }
+            bool authPresent = await _dbContext.Verifications.AnyAsync(v => v.AuthId == authId);
 
             IReadOnlySet<DiscordRole> discordRoles = _roleManager.MapUsermapRoles(person.Roles, rolesPool);
-            bool rolesGranted = await _roleManager.GrantRolesAsync(userId, discordRoles);
 
-            if (rolesGranted && requiresUnverified)
+            // discord and auth -> update roles
+            if (discordIdPresent && authPresent)
             {
-                Verification verification = new() {AuthId = authId, UserId = userId};
+                bool verificationExists =
+                    await _dbContext.Verifications.AnyAsync(v => v.UserId == userId && v.AuthId == authId);
 
-                await _dbContext.Verifications.AddAsync(verification);
-                await _dbContext.SaveChangesAsync();
+                if (verificationExists)
+                {
+                    bool ungranted = await _roleManager.UngrantRolesPoolAsync(userId, rolesPool);
+                    if (!ungranted)
+                    {
+                        _logger.LogWarning("Ungranting roles pool {2} for {0} (id {1}) failed.", username, userId, rolesPool);
+                        return IAuthorizationService.AuthorizeResult.Failed;
+                    }
+                    bool granted = await _roleManager.GrantRolesAsync(userId, discordRoles);
+                    return granted ? IAuthorizationService.AuthorizeResult.OK : IAuthorizationService.AuthorizeResult.Failed;
+                }
+
+                return IAuthorizationService.AuthorizeResult.DifferentMember;
             }
 
-            return rolesGranted;
+            // discord xor auth -> user already verified, error
+            if (discordIdPresent || authPresent)
+            {
+                return IAuthorizationService.AuthorizeResult.DifferentMember;
+            }
+
+            // nothing -> create database entry, update roles
+            {
+                bool rolesGranted = await _roleManager.GrantRolesAsync(userId, discordRoles);
+
+                if (rolesGranted)
+                {
+                    Verification verification = new() {AuthId = authId, UserId = userId};
+
+                    await _dbContext.Verifications.AddAsync(verification);
+                    await _dbContext.SaveChangesAsync();
+                    return IAuthorizationService.AuthorizeResult.OK;
+                }
+
+                return IAuthorizationService.AuthorizeResult.Failed;
+            }
         }
 
         public Task<string> GetAuthLinkAsync(string redirectUri)
@@ -98,22 +120,21 @@ namespace HonzaBotner.Services
         }
 
         private string GetQueryString(NameValueCollection queryCollection)
-            => string.Join('&', queryCollection.AllKeys.Select(k => $"{k}={HttpUtility.UrlEncode(queryCollection[k])}"));
+            => string.Join('&',
+                queryCollection.AllKeys.Select(k => $"{k}={HttpUtility.UrlEncode(queryCollection[k])}"));
 
         public async Task<string> GetAccessTokenAsync(string code, string redirectUri)
         {
             const string tokenUri = "https://auth.fit.cvut.cz/oauth/token";
 
-            string credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes(_cvutConfig.ClientId + ":" + _cvutConfig.ClientSecret));
+            string credentials =
+                Convert.ToBase64String(Encoding.UTF8.GetBytes(_cvutConfig.ClientId + ":" + _cvutConfig.ClientSecret));
             NameValueCollection queryCollection = new()
             {
                 {"grant_type", "authorization_code"}, {"code", code}, {"redirect_uri", redirectUri}
             };
 
-            var uriBuilder =new UriBuilder(tokenUri)
-            {
-                Query = GetQueryString(queryCollection)
-            };
+            var uriBuilder = new UriBuilder(tokenUri) {Query = GetQueryString(queryCollection)};
 
             HttpRequestMessage requestMessage = new()
             {
@@ -135,10 +156,7 @@ namespace HonzaBotner.Services
         {
             const string checkTokenUri = "https://auth.fit.cvut.cz/oauth/check_token";
 
-            var uriBuilder =new UriBuilder(checkTokenUri)
-            {
-                Query = $"token={accessToken}"
-            };
+            var uriBuilder = new UriBuilder(checkTokenUri) {Query = $"token={accessToken}"};
             var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
 
             HttpResponseMessage response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
