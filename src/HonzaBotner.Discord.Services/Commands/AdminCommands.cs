@@ -57,7 +57,7 @@ namespace HonzaBotner.Discord.Services.Commands
             {
                 foreach ((_, DiscordMember member) in ctx.Guild.Members)
                 {
-                    if (member.Roles.Contains(role))
+                    if (member.Roles.Contains(role) && !member.Roles.Contains(newRole))
                     {
                         await member.GrantRoleAsync(newRole);
                     }
