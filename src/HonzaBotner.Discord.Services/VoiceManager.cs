@@ -5,6 +5,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.Services.Options;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services
@@ -14,15 +15,17 @@ namespace HonzaBotner.Discord.Services
         private readonly IGuildProvider _guildProvider;
         private readonly DiscordWrapper _discordWrapper;
         private readonly CustomVoiceOptions _voiceConfig;
+        private readonly Logger<VoiceManager> _logger;
 
         private DiscordClient Client => _discordWrapper.Client;
 
         public VoiceManager(IGuildProvider guildProvider, DiscordWrapper discordWrapper,
-            IOptions<CustomVoiceOptions> options)
+            IOptions<CustomVoiceOptions> options, ILogger<VoiceManager> logger)
         {
             _guildProvider = guildProvider;
             _discordWrapper = discordWrapper;
             _voiceConfig = options.Value;
+            _logger = _logger;
         }
 
         public async Task Init()
@@ -69,11 +72,11 @@ namespace HonzaBotner.Discord.Services
                 });
                 await newChannel.AddOverwriteAsync(member, Permissions.ManageChannels | Permissions.MuteMembers);
 
-                try
+                if (member.VoiceState.Channel != null)
                 {
                     await member.PlaceInAsync(newChannel);
                 }
-                catch
+                else
                 {
                     // Placing the member in the channel failed, so remove it after some time.
                     var _ = Task.Run(async () =>
@@ -83,9 +86,9 @@ namespace HonzaBotner.Discord.Services
                     });
                 }
             }
-            catch
+            catch (Exception e)
             {
-                // ignored
+                _logger.LogWarning(e , "Creating voice channel failed.");
             }
         }
 
@@ -101,7 +104,6 @@ namespace HonzaBotner.Discord.Services
 
             if (!customVoiceCategory.Equals(member.VoiceState.Channel.Parent))
             {
-                Console.WriteLine("lmao NOOOO");
                 return false;
             }
 
