@@ -36,20 +36,6 @@ namespace HonzaBotner.Migrations
                     b.ToTable("CountedEmojis");
                 });
 
-            modelBuilder.Entity("HonzaBotner.Database.Counter", b =>
-                {
-                    b.Property<decimal>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<decimal>("Count")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("Counters");
-                });
-
             modelBuilder.Entity("HonzaBotner.Database.Verification", b =>
                 {
                     b.Property<decimal>("UserId")
