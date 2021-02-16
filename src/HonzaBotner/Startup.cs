@@ -93,6 +93,7 @@ namespace HonzaBotner
             }
 
             app.UseHttpsRedirection();
+            app.UseReverseProxyHttpsEnforcer();
             app.UseRouting();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
