@@ -46,12 +46,11 @@ namespace HonzaBotner.Controllers
             }
 
             string? code = codes.Any() ? codes[0] : null;
-            if (!ulong.TryParse(userIdString, out ulong userId) || string.IsNullOrEmpty(code) || !GetRolesPool(pool, out RolesPool rolesPool))
+            if (!ulong.TryParse(userIdString, out ulong userId) || string.IsNullOrEmpty(code) ||
+                !GetRolesPool(pool, out RolesPool rolesPool))
             {
                 return BadRequest();
             }
-
-
 
             string accessToken;
             string userName;
@@ -66,17 +65,28 @@ namespace HonzaBotner.Controllers
                 return Content(e.Message, "text/html");
             }
 
-            bool auth = await _authorizationService.AuthorizeAsync(accessToken, userName, userId, rolesPool);
-
-            return Ok(auth);
+            return Ok(await _authorizationService.AuthorizeAsync(accessToken, userName, userId, rolesPool) switch
+            {
+                IAuthorizationService.AuthorizeResult.OK => "Sucessfully authenticated.",
+                IAuthorizationService.AuthorizeResult.Failed => "Authentication failed.",
+                IAuthorizationService.AuthorizeResult.DifferentMember =>
+                    "Authentication failed because you are registered with another auth code or another user already uses your auth code.",
+                IAuthorizationService.AuthorizeResult.UserMapError =>
+                    "Authentication failed due to UserMap service failure.",
+                _ => throw new ArgumentOutOfRangeException()
+            });
         }
 
         private bool GetRolesPool(string? value, out RolesPool rolesPool)
         {
             switch (value?.ToLowerInvariant())
             {
-                case "auth": rolesPool = RolesPool.Auth; break;
-                case "staff": rolesPool = RolesPool.Staff; break;
+                case "auth":
+                    rolesPool = RolesPool.Auth;
+                    break;
+                case "staff":
+                    rolesPool = RolesPool.Staff;
+                    break;
                 default:
                     rolesPool = RolesPool.Auth;
                     return false;

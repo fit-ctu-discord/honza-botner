@@ -40,7 +40,7 @@ namespace HonzaBotner.Services
             _logger = logger;
         }
 
-        public async Task<bool> AuthorizeAsync(string accessToken, string username, ulong userId, RolesPool rolesPool)
+        public async Task<IAuthorizationService.AuthorizeResult> AuthorizeAsync(string accessToken, string username, ulong userId, RolesPool rolesPool)
         {
             bool discordIdPresent = await IsUserVerified(userId);
 
@@ -48,7 +48,7 @@ namespace HonzaBotner.Services
             if (person == null)
             {
                 _logger.LogWarning("Couldn't fetch info from UserMap");
-                return false;
+                return IAuthorizationService.AuthorizeResult.UserMapError;
             }
 
             string authId = _hashService.Hash(person.Username);
@@ -68,21 +68,19 @@ namespace HonzaBotner.Services
                     if (!ungranted)
                     {
                         // TODO: error ungranting roles
-                        return false;
+                        return IAuthorizationService.AuthorizeResult.Failed;
                     }
-                    bool rolesGranted = await _roleManager.GrantRolesAsync(userId, discordRoles);
-                    return rolesGranted;
+                    bool granted = await _roleManager.GrantRolesAsync(userId, discordRoles);
+                    return granted ? IAuthorizationService.AuthorizeResult.OK : IAuthorizationService.AuthorizeResult.Failed;
                 }
 
-                // TODO: wtf, discord id and auth hash used, but not in the same database record.
-                return false;
+                return IAuthorizationService.AuthorizeResult.DifferentMember;
             }
 
             // discord xor auth -> user already verified, error
             if (discordIdPresent || authPresent)
             {
-                // TODO: error, mismatch discord id and auth hash -> different discord user has this auth
-                return false;
+                return IAuthorizationService.AuthorizeResult.DifferentMember;
             }
 
             // nothing -> create database entry, update roles
@@ -95,9 +93,10 @@ namespace HonzaBotner.Services
 
                     await _dbContext.Verifications.AddAsync(verification);
                     await _dbContext.SaveChangesAsync();
+                    return IAuthorizationService.AuthorizeResult.OK;
                 }
 
-                return rolesGranted;
+                return IAuthorizationService.AuthorizeResult.Failed;
             }
         }
 
