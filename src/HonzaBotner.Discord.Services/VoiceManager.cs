@@ -60,6 +60,10 @@ namespace HonzaBotner.Discord.Services
             {
                 name = null;
             }
+            else
+            {
+                name = name?.Substring(0, 30);
+            }
 
             try
             {
@@ -70,7 +74,6 @@ namespace HonzaBotner.Discord.Services
                     model.Name = name ?? $"{member.Username}'s channel";
                     model.Userlimit = limit;
                 });
-                await newChannel.AddOverwriteAsync(member, Permissions.ManageChannels | Permissions.MuteMembers);
 
                 if (member.VoiceState.Channel != null)
                 {
@@ -106,8 +109,6 @@ namespace HonzaBotner.Discord.Services
             {
                 return false;
             }
-
-            if ((member.VoiceState.Channel.PermissionsFor(member) & Permissions.ManageChannels) == 0) return false;
 
             try
             {
