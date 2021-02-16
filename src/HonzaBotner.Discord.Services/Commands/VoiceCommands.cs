@@ -14,12 +14,12 @@ namespace HonzaBotner.Discord.Services.Commands
     public class VoiceCommands : BaseCommandModule
     {
         private readonly IVoiceManager _voiceManager;
-        private readonly CommonCommandOptions _config;
+        private readonly CustomVoiceOptions _voiceConfig;
 
-        public VoiceCommands(IVoiceManager voiceManager, IOptions<CommonCommandOptions> options)
+        public VoiceCommands(IVoiceManager voiceManager, IOptions<CustomVoiceOptions> options)
         {
             _voiceManager = voiceManager;
-            _config = options.Value;
+            _voiceConfig = options.Value;
         }
 
         [Command("add")]
@@ -38,7 +38,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 return;
             }
 
-            await _voiceManager.AddNewVoiceChannelAsync(ctx.Guild.GetChannel(_config.CustomVoiceClickChannel),
+            await _voiceManager.AddNewVoiceChannelAsync(ctx.Guild.GetChannel(_voiceConfig.ClickChannelId),
                 ctx.Member,
                 name, limit);
 
@@ -74,7 +74,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
         private bool InValidChannel(DiscordChannel channel)
         {
-            return _config.CustomVoiceCommandsChannels.Contains(channel.Id);
+            return _voiceConfig.CommandChannelsIds.Contains(channel.Id);
         }
     }
 }

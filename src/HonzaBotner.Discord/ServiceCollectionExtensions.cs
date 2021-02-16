@@ -15,7 +15,7 @@ namespace HonzaBotner.Discord
         }
 
         public static IServiceCollection AddDiscordBot(this IServiceCollection serviceCollection,
-            Action<CommandsNextExtension> commandConfig, Action<ReactionListBuilder> reactionConfig, Action<IServiceCollection> other)
+            Action<CommandsNextExtension> commandConfig, Action<ReactionListBuilder> reactionConfig)
         {
             serviceCollection.AddHostedService<DiscordWorker>();
             serviceCollection.AddSingleton<IDiscordBot, DiscordBot>();
@@ -28,8 +28,6 @@ namespace HonzaBotner.Discord
             ReactionListBuilder builder = new(serviceCollection);
             reactionConfig(builder);
             serviceCollection.AddSingleton(builder.Build());
-
-            other(serviceCollection);
 
             return serviceCollection;
         }

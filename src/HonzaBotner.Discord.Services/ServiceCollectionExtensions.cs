@@ -10,6 +10,7 @@ namespace HonzaBotner.Discord.Services
             IConfiguration configuration)
         {
             serviceCollection.Configure<CommonCommandOptions>(configuration.GetSection(CommonCommandOptions.ConfigName));
+            serviceCollection.Configure<CustomVoiceOptions>(configuration.GetSection(CustomVoiceOptions.ConfigName));
 
             return serviceCollection;
         }

@@ -69,10 +69,9 @@ namespace HonzaBotner
                     reactions.AddReaction<VerificationReactionHandler>()
                         .AddReaction<StaffVerificationReactionHandler>()
                         .AddReaction<EmojiCounterHandler>();
-                }, collection =>
-                {
-                    collection.AddSingleton<IVoiceManager, VoiceManager>();
                 });
+
+            services.AddSingleton<IVoiceManager, VoiceManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
