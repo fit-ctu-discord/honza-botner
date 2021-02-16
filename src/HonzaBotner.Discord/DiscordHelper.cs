@@ -31,7 +31,7 @@ namespace HonzaBotner.Discord
         public static async Task<DiscordMessage?> FindMessageFromLink(DiscordGuild guild, string link)
         {
             // Match the channel and message IDs.
-            const string pattern = @"https://discordapp\.com/channels/(?:\d+)/(\d+)/(\d+)/?";
+            const string pattern = @"https://discord\.com/channels/(?:\d+)/(\d+)/(\d+)/?";
             Regex regex = new Regex(pattern);
             Match match = regex.Match(link);
 
