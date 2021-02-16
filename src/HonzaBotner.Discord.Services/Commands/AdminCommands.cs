@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -13,7 +15,9 @@ namespace HonzaBotner.Discord.Services.Commands
     public class AdminCommands : BaseCommandModule
     {
         [Command("sudo"), Description("Executes a command as another user.")]
-        public async Task Sudo(CommandContext ctx, [Description("Member to execute as.")] DiscordMember member, [RemainingText, Description("Command text to execute.")] string command)
+        public async Task Sudo(CommandContext ctx, [Description("Member to execute as.")] DiscordMember member,
+            [RemainingText, Description("Command text to execute.")]
+            string command)
         {
             await ctx.TriggerTypingAsync();
 
@@ -27,6 +31,20 @@ namespace HonzaBotner.Discord.Services.Commands
 
             // and perform the sudo
             await cmds.ExecuteCommandAsync(fakeContext);
+        }
+
+        [Command("edit")]
+        public async Task SendMessage(CommandContext ctx, string url, string newText)
+        {
+            DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(ctx.Message.Channel.Guild, url);
+
+            if (oldMessage == null)
+            {
+                // TODO
+                return;
+            }
+
+            await oldMessage.ModifyAsync(newText);
         }
     }
 }
