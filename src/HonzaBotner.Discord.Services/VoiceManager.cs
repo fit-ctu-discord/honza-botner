@@ -43,7 +43,7 @@ namespace HonzaBotner.Discord.Services
                 await AddNewVoiceChannelAsync(args.Channel, await args.Guild.GetMemberAsync(args.User.Id));
             }
 
-            if (args.Before.Channel != null)
+            if (args.Before?.Channel != null)
             {
                 if (args.Before.Channel.Id != _voiceConfig.ClickChannelId)
                 {
