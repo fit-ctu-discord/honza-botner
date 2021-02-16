@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
@@ -45,6 +48,21 @@ namespace HonzaBotner.Discord.Services.Commands
             }
 
             await oldMessage.ModifyAsync(newText);
+        }
+
+        [Command("role")]
+        public async Task AddRole(CommandContext ctx, DiscordRole role, DiscordRole newRole)
+        {
+            var __ = Task.Run(async () =>
+            {
+                foreach ((_, DiscordMember member) in ctx.Guild.Members)
+                {
+                    if (member.Roles.Contains(role))
+                    {
+                        await member.GrantRoleAsync(newRole);
+                    }
+                }
+            });
         }
     }
 }
