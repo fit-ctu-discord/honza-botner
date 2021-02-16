@@ -64,5 +64,21 @@ namespace HonzaBotner.Discord.Services.Commands
                 }
             });
         }
+
+        [Command("countRole")]
+        public async Task CountRole(CommandContext ctx, DiscordRole role)
+        {
+            int count = 0;
+
+            foreach ((_, DiscordMember member) in ctx.Guild.Members)
+            {
+                if (member.Roles.Contains(role))
+                {
+                    count++;
+                }
+            }
+
+            await ctx.Channel.SendMessageAsync(count.ToString());
+        }
     }
 }
