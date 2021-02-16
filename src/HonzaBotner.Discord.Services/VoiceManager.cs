@@ -17,6 +17,8 @@ namespace HonzaBotner.Discord.Services
         private readonly CustomVoiceOptions _voiceConfig;
         private readonly ILogger<VoiceManager> _logger;
 
+        private bool initialized;
+
         private DiscordClient Client => _discordWrapper.Client;
 
         public VoiceManager(IGuildProvider guildProvider, DiscordWrapper discordWrapper,
@@ -30,10 +32,15 @@ namespace HonzaBotner.Discord.Services
 
         public async Task Init()
         {
-            Client.VoiceStateUpdated += Client_VoiceStateUpdated;
+            if (!initialized)
+            {
+                initialized = true;
 
-            // Startup cleaning.
-            await DeleteAllUnusedVoiceChannelsAsync();
+                Client.VoiceStateUpdated += Client_VoiceStateUpdated;
+
+                // Startup cleaning.
+                await DeleteAllUnusedVoiceChannelsAsync();
+            }
         }
 
         private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs args)

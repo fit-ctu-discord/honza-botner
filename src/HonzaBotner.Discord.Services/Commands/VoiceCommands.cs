@@ -45,7 +45,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 ctx.Member,
                 name, limit);
 
-            await ctx.RespondAsync($"I have created new voice channel '{name}' for you!");
+            await ctx.RespondAsync($"I have created new voice channel `{name}` for you!");
         }
 
         [Command("edit")]

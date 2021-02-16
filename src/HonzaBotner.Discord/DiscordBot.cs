@@ -48,17 +48,17 @@ namespace HonzaBotner.Discord
             await Task.Delay(-1, cancellationToken);
         }
 
-        private async Task Client_Ready(DiscordClient sender, ReadyEventArgs e)
+        private Task Client_Ready(DiscordClient sender, ReadyEventArgs e)
         {
             sender.Logger.LogInformation("Client is ready to process events");
-
-            await _voiceManager.Init();
+            return Task.CompletedTask;
         }
 
-        private Task Client_GuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
+        private async Task Client_GuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
         {
             sender.Logger.LogInformation($"Guild available: {e.Guild.Name}");
-            return Task.CompletedTask;
+
+            await _voiceManager.Init();
         }
 
         private Task Client_ClientError(DiscordClient sender, ClientErrorEventArgs e)
