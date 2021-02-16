@@ -75,10 +75,10 @@ namespace HonzaBotner.Discord.Services
             try
             {
                 DiscordChannel newChannel =
-                    await channelToCloneFrom.CloneAsync($"Member {member.Username} created new voice channel.");
+                    await channelToCloneFrom.CloneAsync($"Member {member.Nickname} created new voice channel.");
                 await newChannel.ModifyAsync(model =>
                 {
-                    model.Name = name ?? $"{member.Username}'s channel";
+                    model.Name = name ?? $"{member.Nickname}'s channel";
                     model.Userlimit = limit;
                 });
 

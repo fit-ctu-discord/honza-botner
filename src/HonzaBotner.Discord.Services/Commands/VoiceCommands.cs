@@ -45,7 +45,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 ctx.Member,
                 name, limit);
 
-            await ctx.RespondAsync($"I have created new voice channel `{name}` for you!");
+            await ctx.RespondAsync($"I have created new voice channel for you!");
         }
 
         [Command("edit")]
@@ -62,6 +62,8 @@ namespace HonzaBotner.Discord.Services.Commands
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
                 return;
             }
+
+            newName = newName.Substring(0, Math.Min(newName.Length, 30));
 
             bool success = await _voiceManager.EditVoiceChannelAsync(ctx.Member, newName, limit);
 
