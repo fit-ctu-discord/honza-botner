@@ -4,36 +4,24 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using HonzaBotner.Discord.Services.Attributes;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("admin")]
     [Description("Administrativní příkazy")]
     [Hidden]
-    [RequirePermissions(Permissions.Administrator)]
+    [RequireMod]
     public class AdminCommands : BaseCommandModule
     {
-        [Command("sudo"), Description("Executes a command as another user.")]
-        public async Task Sudo(CommandContext ctx, [Description("Member to execute as.")] DiscordMember member,
-            [RemainingText, Description("Command text to execute.")]
-            string command)
+        [Command("send")]
+        public async Task SendMessage(CommandContext ctx, DiscordChannel channel, [RemainingText] string text)
         {
-            await ctx.TriggerTypingAsync();
-
-            var cmds = ctx.CommandsNext;
-
-            // retrieve the command and its arguments from the given string
-            var cmd = cmds.FindCommand(command, out var customArgs);
-
-            // create a fake CommandContext
-            var fakeContext = cmds.CreateFakeContext(member, ctx.Channel, command, ctx.Prefix, cmd, customArgs);
-
-            // and perform the sudo
-            await cmds.ExecuteCommandAsync(fakeContext);
+            await channel.SendMessageAsync(text);
         }
 
         [Command("edit")]
-        public async Task SendMessage(CommandContext ctx, string url, [RemainingText] string newText)
+        public async Task EditMessage(CommandContext ctx, string url, [RemainingText] string newText)
         {
             DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(ctx.Message.Channel.Guild, url);
 
