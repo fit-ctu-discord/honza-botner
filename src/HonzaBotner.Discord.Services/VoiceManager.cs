@@ -69,12 +69,7 @@ namespace HonzaBotner.Discord.Services
 
             try
             {
-                string userName = member.Nickname;
-                if (userName == null || userName.Trim().Length == 0)
-                {
-                    userName = member.Username;
-                }
-
+                string? userName = ConvertStringToValidState(member.Nickname, member.Username);
                 DiscordChannel newChannel =
                     await channelToCloneFrom.CloneAsync($"Member {userName} created new voice channel.");
 
@@ -123,12 +118,7 @@ namespace HonzaBotner.Discord.Services
 
             try
             {
-                string? userName = ConvertStringToValidState(member.Nickname);
-                if (userName == null || userName.Trim().Length == 0)
-                {
-                    userName = member.Username;
-                }
-
+                string? userName = ConvertStringToValidState(member.Nickname, member.Username);
                 await EditChannelAsync(member.VoiceState.Channel, newName, limit, userName);
                 return true;
             }
@@ -169,13 +159,13 @@ namespace HonzaBotner.Discord.Services
             }
         }
 
-        private string? ConvertStringToValidState(string? input)
+        private string? ConvertStringToValidState(string? input, string? defaultValue = null)
         {
             input = Regex.Replace(input ?? "", @"[^\u0000-\u007F]+", string.Empty);
 
             if (input.Trim().Length == 0)
             {
-                return null;
+                return defaultValue;
             }
 
             return input.Substring(0, Math.Min(input.Length, 30));
