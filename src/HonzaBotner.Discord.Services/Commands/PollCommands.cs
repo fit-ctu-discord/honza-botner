@@ -40,6 +40,7 @@ namespace HonzaBotner.Discord.Services.Commands
             }
 
             await poll.Post(ctx.Client, ctx.Channel);
+            await ctx.Message.DeleteAsync();
         }
 
         [Command("yesno")]
@@ -51,6 +52,7 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             await new YesNoPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question)
                 .Post(ctx.Client, ctx.Channel);
+            await ctx.Message.DeleteAsync();
         }
 
         [Command("abc")]
@@ -62,6 +64,7 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             await new AbcPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question, answers.ToList())
                 .Post(ctx.Client, ctx.Channel);
+            await ctx.Message.DeleteAsync();
         }
     }
 }
