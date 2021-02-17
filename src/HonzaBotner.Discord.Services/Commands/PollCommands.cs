@@ -11,7 +11,7 @@ namespace HonzaBotner.Discord.Services.Commands
     public class PollCommands : BaseCommandModule
     {
         private readonly string _pollErrorMessage =
-            "Poll build failed. Make sure question has less than 256 characters and each option less than 1024 characters";
+            "Poll build failed. Make sure the question has less than 256 characters and each option has less than 1024 characters.";
 
         [GroupCommand]
         [Description("Creates either yes/no or ABC poll.")]
