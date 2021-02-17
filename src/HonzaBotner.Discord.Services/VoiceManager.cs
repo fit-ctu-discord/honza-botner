@@ -120,6 +120,15 @@ namespace HonzaBotner.Discord.Services
                 return false;
             }
 
+            if (newName?.Trim().Length == 0)
+            {
+                newName = null;
+            }
+            else
+            {
+                newName = newName?.Substring(0, Math.Min(newName.Length, 30));
+            }
+
             DiscordChannel customVoiceCategory = member.Guild.GetChannel(_voiceConfig.ClickChannelId).Parent;
 
             if (!customVoiceCategory.Equals(member.VoiceState.Channel.Parent))
@@ -129,9 +138,15 @@ namespace HonzaBotner.Discord.Services
 
             try
             {
+                string userName = member.Nickname;
+                if (userName == null || userName.Trim().Length == 0)
+                {
+                    userName = member.Username;
+                }
+
                 await member.VoiceState.Channel.ModifyAsync(model =>
                 {
-                    model.Name = newName;
+                    model.Name = newName ?? $"{userName}'s channel";;
 
                     if (limit != null)
                     {
