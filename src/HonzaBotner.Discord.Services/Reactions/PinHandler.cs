@@ -46,7 +46,7 @@ namespace HonzaBotner.Discord.Services.Reactions
                         {
                             try
                             {
-                                ulong roleId = UInt64.Parse(keyValuePair.Key);
+                                ulong roleId = ulong.Parse(keyValuePair.Key);
                                 roleToScore.Add(roleId, keyValuePair.Value);
                             }
                             catch
