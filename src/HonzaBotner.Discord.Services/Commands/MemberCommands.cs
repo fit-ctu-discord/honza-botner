@@ -104,7 +104,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
             [Command("roleOr")]
             [Aliases("or")]
-            [Description()]
+            [Description("")]
             public async Task CountRoleOr(CommandContext ctx, params DiscordRole[] roles)
             {
                 int count = 0;
