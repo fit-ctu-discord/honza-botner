@@ -53,6 +53,7 @@ namespace HonzaBotner.Discord.Services.Commands
         }
 
         [Group(name: "role")]
+        [ModuleLifespan(ModuleLifespan.Transient)]
         public class MemberRoleCount : BaseCommandModule
         {
             [Command("count")]
