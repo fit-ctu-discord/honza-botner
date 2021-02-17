@@ -9,7 +9,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
 {
     public class AbcPoll : IPoll
     {
-        public static int MaxResponses => _optionsEmoji.Count;
+        public static int MaxOptions => _optionsEmoji.Count;
 
         private static readonly List<string> _optionsEmoji = new List<string>
         {
@@ -44,25 +44,26 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
         private readonly string _authorUsername;
         private readonly string _authorAvatarUrl;
         private readonly string _question;
-        private readonly List<string> _answers;
+        private readonly List<string> _options;
 
-        public AbcPoll(string authorUsername, string authorAvatarUrl, string question, List<string> answers)
+        public AbcPoll(string authorUsername, string authorAvatarUrl, string question, List<string> options)
         {
             _authorUsername = authorUsername;
             _authorAvatarUrl = authorAvatarUrl;
             _question = question;
-            _answers = answers;
+            _options = options;
         }
 
         public async Task Post(DiscordClient client, DiscordChannel channel)
         {
             DiscordMessage pollMessage = await client.SendMessageAsync(channel, embed: Build(client));
-            await AddReactions(client, pollMessage);
+
+            var _ = Task.Run(async () => { await AddReactions(client, pollMessage); });
         }
 
         private async Task AddReactions(DiscordClient client, DiscordMessage message)
         {
-            foreach (string emoji in _optionsEmoji.Take(_answers.Count))
+            foreach (string emoji in _optionsEmoji.Take(_options.Count))
             {
                 await message.CreateReactionAsync(DiscordEmoji.FromName(client, emoji));
             }
@@ -70,18 +71,18 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
 
         private DiscordEmbed Build(DiscordClient client)
         {
-            DiscordEmbedBuilder builder = new DiscordEmbedBuilder
+            DiscordEmbedBuilder builder = new()
             {
                 Author = new DiscordEmbedBuilder.EmbedAuthor {Name = _authorUsername, IconUrl = _authorAvatarUrl},
                 Title = _question
             };
 
-            if (_answers.Count > _optionsEmoji.Count)
+            if (_options.Count > _optionsEmoji.Count)
             {
-                throw new ArgumentException("Too many answer options");
+                throw new ArgumentException("Too many options.");
             }
 
-            _answers.Zip(_optionsEmoji).ToList().ForEach(pair =>
+            _options.Zip(_optionsEmoji).ToList().ForEach(pair =>
             {
                 var (answer, emojiName) = pair;
 

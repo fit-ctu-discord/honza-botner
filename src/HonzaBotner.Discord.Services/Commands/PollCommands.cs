@@ -28,14 +28,14 @@ namespace HonzaBotner.Discord.Services.Commands
             {
                 poll = new YesNoPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, options.First());
             }
-            else if (options.Length - 1 <= AbcPoll.MaxResponses)
+            else if (options.Length - 1 <= AbcPoll.MaxOptions)
             {
                 poll = new AbcPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, options.First(),
                     options.Skip(1).ToList());
             }
             else
             {
-                await ctx.RespondAsync($"Too many responses, maximum number of responses is ${AbcPoll.MaxResponses}");
+                await ctx.RespondAsync($"Too many options, maximum number of responses is ${AbcPoll.MaxOptions}.");
                 return;
             }
 
@@ -58,7 +58,7 @@ namespace HonzaBotner.Discord.Services.Commands
         [Priority(2)]
         public async Task AbcPollCommand(CommandContext ctx,
             [Description("Poll's question.")] string question,
-            [Description("Poll's answers.")] params string[] answers)
+            [Description("Poll's options.")] params string[] answers)
         {
             await new AbcPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question, answers.ToList())
                 .Post(ctx.Client, ctx.Channel);
