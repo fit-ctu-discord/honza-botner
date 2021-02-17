@@ -48,7 +48,7 @@ namespace HonzaBotner
                 .AddCommandOptions(Configuration)
                 .AddDiscordBot(config =>
                 {
-                    config.RegisterCommands<AuthorizeCommands>();
+                    //config.RegisterCommands<AuthorizeCommands>();
                     config.RegisterCommands<AdminCommands>();
                     config.RegisterCommands<EmoteCommands>();
                     config.RegisterCommands<MemberCommands>();
@@ -91,10 +91,10 @@ namespace HonzaBotner
             else
             {
                 UpdateDatabase(app);
+                app.UseReverseProxyHttpsEnforcer();
             }
 
             app.UseHttpsRedirection();
-            app.UseReverseProxyHttpsEnforcer();
             app.UseRouting();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
