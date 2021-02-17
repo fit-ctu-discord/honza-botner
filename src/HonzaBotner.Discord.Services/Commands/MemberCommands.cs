@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using System.Transactions;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -17,7 +15,7 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("member")]
     [ModuleLifespan(ModuleLifespan.Transient)]
-    [Description("Member commands.")]
+    [Description("Commands to interact with members.")]
     [Hidden]
     [RequireMod]
     public class MemberCommands : BaseCommandModule
@@ -64,7 +62,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
         [Command("erase")]
         [Priority(1)]
-        public async Task MemberErase(CommandContext ctx, string cvutUsername)
+        public async Task MemberErase(CommandContext ctx, [Description("CVUT username of member to erase.")] string cvutUsername)
         {
             string authId = _hashService.Hash(cvutUsername);
             Verification? databaseRecord = await _dbContext.Verifications.FirstOrDefaultAsync(v => v.AuthId == authId);
@@ -104,8 +102,8 @@ namespace HonzaBotner.Discord.Services.Commands
 
             [Command("roleOr")]
             [Aliases("or")]
-            [Description("")]
-            public async Task CountRoleOr(CommandContext ctx, params DiscordRole[] roles)
+            [Description("Counts all members which have AT LEAST ONE of the provided roles.")]
+            public async Task CountRoleOr(CommandContext ctx, [Description("Roles to check.")] params DiscordRole[] roles)
             {
                 int count = 0;
 
@@ -126,7 +124,8 @@ namespace HonzaBotner.Discord.Services.Commands
 
             [Command("roleAnd")]
             [Aliases("and")]
-            public async Task CountRoleAnd(CommandContext ctx, params DiscordRole[] roles)
+            [Description("Counts all members which have ALL of the provided roles.")]
+            public async Task CountRoleAnd(CommandContext ctx, [Description("Roles to check.")] params DiscordRole[] roles)
             {
                 int count = 0;
 

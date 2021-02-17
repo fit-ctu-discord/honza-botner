@@ -110,10 +110,18 @@ namespace HonzaBotner.Discord.Services
 
         public async Task<bool> EditVoiceChannelAsync(DiscordMember member, string? newName = null, int? limit = 0)
         {
-
             if (member.VoiceState.Channel == null)
             {
                 return false;
+            }
+
+            if (newName?.Trim().Length == 0)
+            {
+                newName = null;
+            }
+            else
+            {
+                newName = newName?.Substring(0, Math.Min(newName.Length, 30));
             }
 
             DiscordChannel customVoiceCategory = member.Guild.GetChannel(_voiceConfig.ClickChannelId).Parent;
@@ -125,9 +133,15 @@ namespace HonzaBotner.Discord.Services
 
             try
             {
+                string userName = member.Nickname;
+                if (userName == null || userName.Trim().Length == 0)
+                {
+                    userName = member.Username;
+                }
+
                 await member.VoiceState.Channel.ModifyAsync(model =>
                 {
-                    model.Name = newName;
+                    model.Name = newName ?? $"{userName}'s channel";;
 
                     if (limit != null)
                     {

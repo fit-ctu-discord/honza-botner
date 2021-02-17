@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -12,7 +10,8 @@ using HonzaBotner.Services.Contract.Dto;
 namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("emotes")]
-    [Description("Příkazy ke získání informací ohledně emotes\nLze použít navíc přepinače `animated` a `nonanimated`")]
+    [Aliases("emote", "emojis", "emoji")]
+    [Description("Commands to display stats about emote usage. You can also use additional switches `animated` and `nonanimated`.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class EmoteCommands : BaseCommandModule
     {
@@ -24,16 +23,17 @@ namespace HonzaBotner.Discord.Services.Commands
         }
 
         [GroupCommand]
-        [Priority(1)]
-        [Description("Získaní přehledu o počtu použití za den")]
+        [Command("perday")]
+        [Aliases("daily")]
+        [Description("Displays per day usage of emotes.")]
         public Task PerDayCommand(CommandContext ctx, [RemainingText] string parameters)
         {
             return Display(ctx, false, parameters);
         }
 
         [Command("total")]
-        [Priority(2)]
-        [Description("Získaní přehledu o počtu použití za celou donu")]
+        [Aliases("all")]
+        [Description("Displays total usage of emotes.")]
         public Task TotalCommand(CommandContext ctx)
         {
             return Display(ctx, true, "");
