@@ -77,11 +77,8 @@ namespace HonzaBotner.Discord.Services
 
                 DiscordChannel newChannel =
                     await channelToCloneFrom.CloneAsync($"Member {userName} created new voice channel.");
-                await newChannel.ModifyAsync(model =>
-                {
-                    model.Name = name ?? $"{userName ?? "FIŤÁK"}'s channel";
-                    model.Userlimit = limit;
-                });
+
+                await EditChannelAsync(member.VoiceState.Channel, name, limit, userName);
 
                 try
                 {
@@ -132,15 +129,7 @@ namespace HonzaBotner.Discord.Services
                     userName = member.Username;
                 }
 
-                await member.VoiceState.Channel.ModifyAsync(model =>
-                {
-                    model.Name = newName ?? $"{userName ?? "FIŤÁK"}'s channel";
-
-                    if (limit != null)
-                    {
-                        model.Userlimit = limit;
-                    }
-                });
+                await EditChannelAsync(member.VoiceState.Channel, newName, limit, userName);
                 return true;
             }
             catch (Exception e)
@@ -190,6 +179,19 @@ namespace HonzaBotner.Discord.Services
             }
 
             return input.Substring(0, Math.Min(input.Length, 30));
+        }
+
+        private async Task EditChannelAsync(DiscordChannel channel, string? name, int? limit, string? userName)
+        {
+            await channel.ModifyAsync(model =>
+            {
+                model.Name = name ?? $"{userName ?? "FIŤÁK"}'s channel";
+
+                if (limit != null)
+                {
+                    model.Userlimit = Math.Max(Math.Min(limit.Value, 99), 0);;
+                }
+            });
         }
     }
 }
