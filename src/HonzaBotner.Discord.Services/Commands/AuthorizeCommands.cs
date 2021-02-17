@@ -31,7 +31,8 @@ namespace HonzaBotner.Discord.Services.Commands
 
             if (await _authorizationService.IsUserVerified(user.Id))
             {
-                await channel.SendMessageAsync($"You are already authorized.\nTo update roles follow this link: {link}");
+                await channel.SendMessageAsync(
+                    $"You are already authorized.\nTo update roles follow this link: {link}");
             }
             else
             {

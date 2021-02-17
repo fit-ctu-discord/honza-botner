@@ -23,8 +23,10 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("send")]
         [Description("Sends a text message to the specified channel.")]
         public async Task SendMessage(CommandContext ctx,
-            [Description("Channel to send a text message to.")] DiscordChannel channel,
-            [RemainingText, Description("Text of the message to send.")] string text)
+            [Description("Channel to send a text message to.")]
+            DiscordChannel channel,
+            [RemainingText, Description("Text of the message to send.")]
+            string text)
         {
             await channel.SendMessageAsync(text);
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
@@ -34,7 +36,8 @@ namespace HonzaBotner.Discord.Services.Commands
         [Description("Edits previously send text message authored by this bot.")]
         public async Task EditMessage(CommandContext ctx,
             [Description("URL of the message.")] string url,
-            [RemainingText, Description("New text of the message.")] string newText)
+            [RemainingText, Description("New text of the message.")]
+            string newText)
         {
             DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(ctx.Message.Channel.Guild, url);
 

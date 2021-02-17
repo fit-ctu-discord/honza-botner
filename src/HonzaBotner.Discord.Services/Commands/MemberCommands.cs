@@ -33,7 +33,9 @@ namespace HonzaBotner.Discord.Services.Commands
         [Aliases("about", "whois")]
         [Description("Provides info about a member.")]
         [Priority(2)]
-        public async Task MemberInfo(CommandContext ctx, [Description("Member to show info about.")] DiscordMember member)
+        public async Task MemberInfo(CommandContext ctx,
+            [Description("Member to show info about.")]
+            DiscordMember member)
         {
             Verification? databaseRecord = await _dbContext.Verifications
                 .FirstOrDefaultAsync(v => v.UserId == member.Id);
@@ -53,7 +55,9 @@ namespace HonzaBotner.Discord.Services.Commands
         [Aliases("delete", "remove")]
         [Description("Erases database record of the member.")]
         [Priority(2)]
-        public async Task MemberErase(CommandContext ctx, [Description("Discord member to erase.")] DiscordMember member)
+        public async Task MemberErase(CommandContext ctx,
+            [Description("Discord member to erase.")]
+            DiscordMember member)
         {
             Verification? databaseRecord =
                 await _dbContext.Verifications.FirstOrDefaultAsync(v => v.UserId == member.Id);
@@ -62,7 +66,9 @@ namespace HonzaBotner.Discord.Services.Commands
 
         [Command("erase")]
         [Priority(1)]
-        public async Task MemberErase(CommandContext ctx, [Description("CVUT username of member to erase.")] string cvutUsername)
+        public async Task MemberErase(CommandContext ctx,
+            [Description("CVUT username of member to erase.")]
+            string cvutUsername)
         {
             string authId = _hashService.Hash(cvutUsername);
             Verification? databaseRecord = await _dbContext.Verifications.FirstOrDefaultAsync(v => v.AuthId == authId);
@@ -97,13 +103,15 @@ namespace HonzaBotner.Discord.Services.Commands
                     }
                 }
 
-                await ctx.Channel.SendMessageAsync($"Authenticated: {authenticatedCount}, All: {ctx.Guild.Members.Count.ToString()}");
+                await ctx.Channel.SendMessageAsync(
+                    $"Authenticated: {authenticatedCount}, All: {ctx.Guild.Members.Count.ToString()}");
             }
 
             [Command("roleOr")]
             [Aliases("or")]
             [Description("Counts all members which have AT LEAST ONE of the provided roles.")]
-            public async Task CountRoleOr(CommandContext ctx, [Description("Roles to check.")] params DiscordRole[] roles)
+            public async Task CountRoleOr(CommandContext ctx,
+                [Description("Roles to check.")] params DiscordRole[] roles)
             {
                 int count = 0;
 
@@ -125,7 +133,8 @@ namespace HonzaBotner.Discord.Services.Commands
             [Command("roleAnd")]
             [Aliases("and")]
             [Description("Counts all members which have ALL of the provided roles.")]
-            public async Task CountRoleAnd(CommandContext ctx, [Description("Roles to check.")] params DiscordRole[] roles)
+            public async Task CountRoleAnd(CommandContext ctx,
+                [Description("Roles to check.")] params DiscordRole[] roles)
             {
                 int count = 0;
 

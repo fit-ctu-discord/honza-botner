@@ -11,7 +11,8 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("emotes")]
     [Aliases("emote", "emojis", "emoji")]
-    [Description("Commands to display stats about emote usage. You can also use additional switches `animated` and `nonanimated`.")]
+    [Description(
+        "Commands to display stats about emote usage. You can also use additional switches `animated` and `nonanimated`.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class EmoteCommands : BaseCommandModule
     {
@@ -84,6 +85,7 @@ namespace HonzaBotner.Discord.Services.Commands
             {
                 await ctx.RespondAsync(builder.ToString());
             }
+
             builder.Clear();
         }
     }
