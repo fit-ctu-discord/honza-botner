@@ -93,6 +93,7 @@ namespace HonzaBotner.Services
 
                     await _dbContext.Verifications.AddAsync(verification);
                     await _dbContext.SaveChangesAsync();
+                    await _roleManager.RevokeHostRolesAsync(userId);
                     return IAuthorizationService.AuthorizeResult.OK;
                 }
 

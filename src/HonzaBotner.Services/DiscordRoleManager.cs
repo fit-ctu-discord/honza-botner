@@ -64,7 +64,7 @@ namespace HonzaBotner.Services
 
             IDictionary<string, ulong[]> rolesMapping = rolesPool switch
             {
-                RolesPool.Auth => _roleConfig.RoleMapping,
+                RolesPool.Auth => _roleConfig.AuthRoleMapping,
                 RolesPool.Staff => _roleConfig.StaffRoleMapping,
                 _ => throw new ArgumentOutOfRangeException(nameof(rolesPool), rolesPool, null)
             };
@@ -106,10 +106,9 @@ namespace HonzaBotner.Services
         {
             HashSet<DiscordRole> discordRoles = new();
 
-
             IDictionary<string, ulong[]> roles = rolesPool switch
             {
-                RolesPool.Auth => _roleConfig.RoleMapping,
+                RolesPool.Auth => _roleConfig.AuthRoleMapping,
                 RolesPool.Staff => _roleConfig.StaffRoleMapping,
                 _ => throw new ArgumentOutOfRangeException(nameof(rolesPool), rolesPool, null)
             };
@@ -130,6 +129,26 @@ namespace HonzaBotner.Services
             }
 
             return discordRoles;
+        }
+
+        public async Task RevokeHostRolesAsync(ulong userId)
+        {
+            DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
+            DiscordMember member = await guild.GetMemberAsync(userId);
+
+            // TODO: somehow merge with Revoke part later.
+            foreach (ulong roleId in _roleConfig.HostRoleIds)
+            {
+                try
+                {
+                    DRole role = guild.GetRole(roleId);
+                    await member.RevokeRoleAsync(role);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Revoking host role '{0}' failed.", roleId);
+                }
+            }
         }
     }
 }
