@@ -73,11 +73,11 @@ namespace HonzaBotner.Discord.Services
                 DiscordChannel newChannel =
                     await channelToCloneFrom.CloneAsync($"Member {userName} created new voice channel.");
 
-                await EditChannelAsync(member.VoiceState.Channel, name, limit, userName);
+                await EditChannelAsync(newChannel, name, limit, userName);
 
                 try
                 {
-                    if (member.VoiceState.Channel != null)
+                    if (member.VoiceState?.Channel != null)
                     {
                         await member.PlaceInAsync(newChannel);
                     }
@@ -102,7 +102,7 @@ namespace HonzaBotner.Discord.Services
 
         public async Task<bool> EditVoiceChannelAsync(DiscordMember member, string? newName = null, int? limit = 0)
         {
-            if (member.VoiceState.Channel == null || member.VoiceState.Channel.Id == _voiceConfig.ClickChannelId)
+            if (member.VoiceState?.Channel == null || member.VoiceState?.Channel.Id == _voiceConfig.ClickChannelId)
             {
                 return false;
             }
@@ -111,7 +111,7 @@ namespace HonzaBotner.Discord.Services
 
             DiscordChannel customVoiceCategory = member.Guild.GetChannel(_voiceConfig.ClickChannelId).Parent;
 
-            if (!customVoiceCategory.Equals(member.VoiceState.Channel.Parent))
+            if (!customVoiceCategory.Equals(member.VoiceState?.Channel?.Parent))
             {
                 return false;
             }
@@ -119,7 +119,7 @@ namespace HonzaBotner.Discord.Services
             try
             {
                 string? userName = ConvertStringToValidState(member.Nickname, member.Username);
-                await EditChannelAsync(member.VoiceState.Channel, newName, limit, userName);
+                await EditChannelAsync(member.VoiceState?.Channel, newName, limit, userName);
                 return true;
             }
             catch (Exception e)
@@ -171,8 +171,10 @@ namespace HonzaBotner.Discord.Services
             return input.Substring(0, Math.Min(input.Length, 30));
         }
 
-        private async Task EditChannelAsync(DiscordChannel channel, string? name, int? limit, string? userName)
+        private async Task EditChannelAsync(DiscordChannel? channel, string? name, int? limit, string? userName)
         {
+            if (channel == null) return;
+
             await channel.ModifyAsync(model =>
             {
                 model.Name = name ?? $"{userName ?? "FIŤÁK"}'s channel";
