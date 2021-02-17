@@ -8,6 +8,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
+using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
@@ -19,10 +20,12 @@ namespace HonzaBotner.Discord.Services.Commands
     public class EmoteCommands : BaseCommandModule
     {
         private readonly IEmojiCounterService _emojiCounterService;
+        private readonly ILogger<EmoteCommands> _logger;
 
-        public EmoteCommands(IEmojiCounterService emojiCounterService)
+        public EmoteCommands(IEmojiCounterService emojiCounterService, ILogger<EmoteCommands> logger)
         {
             _emojiCounterService = emojiCounterService;
+            _logger = logger;
         }
 
         [GroupCommand]
@@ -55,30 +58,37 @@ namespace HonzaBotner.Discord.Services.Commands
 
             foreach (CountedEmoji result in results)
             {
-                DiscordEmoji emoji = await ctx.Guild.GetEmojiAsync(result.Id);
-
+                try
                 {
-                    string label = total ? "×" : "×/day";
+                    DiscordEmoji emoji = await ctx.Guild.GetEmojiAsync(result.Id);
 
-                    builder.Append(emoji)
-                        .Append("`")
-                        .Append(
-                            (total
-                                ? result.Used.ToString()
-                                : $"{result.UsagePerDay:0.00}").PadLeft(10, ' '))
-                        .Append(label)
-                        .Append("`")
-                        .Append(emojisAppended % 3 == 2 ? "\n" : "\t");
+                    {
+                        string label = total ? "×" : "×/day";
 
-                    emojisAppended++;
+                        builder.Append(emoji)
+                            .Append("`")
+                            .Append(
+                                (total
+                                    ? result.Used.ToString()
+                                    : $"{result.UsagePerDay:0.00}").PadLeft(10, ' '))
+                            .Append(label)
+                            .Append("`")
+                            .Append(emojisAppended % 3 == 2 ? "\n" : "\t");
+
+                        emojisAppended++;
+                    }
+
+                    if (emojisAppended == chunkSize)
+                    {
+                        await ctx.RespondAsync(builder.ToString());
+                        builder.Clear();
+                        builder.Append("\n");
+                        emojisAppended = 0;
+                    }
                 }
-
-                if (emojisAppended == chunkSize)
+                catch(Exception e)
                 {
-                    await ctx.RespondAsync(builder.ToString());
-                    builder.Clear();
-                    builder.Append("\n");
-                    emojisAppended = 0;
+                    _logger.LogWarning(e, "Couldn't find emote with id {0}", result.Id);
                 }
             }
 

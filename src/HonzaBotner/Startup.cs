@@ -70,7 +70,8 @@ namespace HonzaBotner
                 {
                     reactions.AddReaction<VerificationReactionHandler>()
                         .AddReaction<StaffVerificationReactionHandler>()
-                        .AddReaction<EmojiCounterHandler>();
+                        .AddReaction<EmojiCounterHandler>()
+                        .AddReaction<PinHandler>();
                 });
 
             services.AddSingleton<IVoiceManager, VoiceManager>();

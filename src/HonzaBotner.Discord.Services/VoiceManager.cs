@@ -88,23 +88,28 @@ namespace HonzaBotner.Discord.Services
                     model.Userlimit = limit;
                 });
 
-                if (member.VoiceState.Channel != null)
+                try
                 {
-                    await member.PlaceInAsync(newChannel);
-                }
-                else
-                {
-                    // Placing the member in the channel failed, so remove it after some time.
-                    var _ = Task.Run(async () =>
+                    if (member.VoiceState.Channel != null)
                     {
-                        await Task.Delay(1000 * _voiceConfig.RemoveAfterCommandInSeconds);
-                        await DeleteUnusedVoiceChannelAsync(newChannel);
-                    });
+                        await member.PlaceInAsync(newChannel);
+                    }
                 }
+                catch
+                {
+                    // User disconnected while we were placing them.
+                }
+
+                // Placing the member in the channel failed, so remove it after some time.
+                var _ = Task.Run(async () =>
+                {
+                    await Task.Delay(1000 * _voiceConfig.RemoveAfterCommandInSeconds);
+                    await DeleteUnusedVoiceChannelAsync(newChannel);
+                });
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e , "Creating voice channel failed.");
+                _logger.LogError(e, "Creating voice channel failed.");
             }
         }
 
