@@ -10,6 +10,9 @@ namespace HonzaBotner.Discord.Services.Commands
     [Description("Commands to create polls.")]
     public class PollCommands : BaseCommandModule
     {
+        private readonly string _pollErrorMessage =
+            "Poll build failed. Make sure question has less than 256 characters and each option less than 1024 characters";
+
         [GroupCommand]
         [Description("Creates either yes/no or ABC poll.")]
         [Priority(1)]
@@ -39,8 +42,15 @@ namespace HonzaBotner.Discord.Services.Commands
                 return;
             }
 
-            await poll.Post(ctx.Client, ctx.Channel);
-            await ctx.Message.DeleteAsync();
+            try
+            {
+                await poll.Post(ctx.Client, ctx.Channel);
+                await ctx.Message.DeleteAsync();
+            }
+            catch
+            {
+                await ctx.RespondAsync(_pollErrorMessage);
+            }
         }
 
         [Command("yesno")]
@@ -50,9 +60,16 @@ namespace HonzaBotner.Discord.Services.Commands
             [RemainingText, Description("Poll's question.")]
             string question)
         {
-            await new YesNoPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question)
-                .Post(ctx.Client, ctx.Channel);
-            await ctx.Message.DeleteAsync();
+            try
+            {
+                await new YesNoPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question)
+                    .Post(ctx.Client, ctx.Channel);
+                await ctx.Message.DeleteAsync();
+            }
+            catch
+            {
+                await ctx.RespondAsync(_pollErrorMessage);
+            }
         }
 
         [Command("abc")]
@@ -62,9 +79,16 @@ namespace HonzaBotner.Discord.Services.Commands
             [Description("Poll's question.")] string question,
             [Description("Poll's options.")] params string[] answers)
         {
-            await new AbcPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question, answers.ToList())
-                .Post(ctx.Client, ctx.Channel);
-            await ctx.Message.DeleteAsync();
+            try
+            {
+                await new AbcPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question, answers.ToList())
+                    .Post(ctx.Client, ctx.Channel);
+                await ctx.Message.DeleteAsync();
+            }
+            catch
+            {
+                await ctx.RespondAsync(_pollErrorMessage);
+            }
         }
     }
 }
