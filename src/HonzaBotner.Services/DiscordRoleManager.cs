@@ -136,6 +136,7 @@ namespace HonzaBotner.Services
             DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
             DiscordMember member = await guild.GetMemberAsync(userId);
 
+            // TODO: somehow merge with Revoke part later.
             foreach (ulong roleId in _roleConfig.HostRoleIds)
             {
                 try
@@ -143,9 +144,9 @@ namespace HonzaBotner.Services
                     DRole role = guild.GetRole(roleId);
                     await member.RevokeRoleAsync(role);
                 }
-                catch
+                catch (Exception e)
                 {
-                    _logger.LogError("Revoking host role '{0}' failed.", roleId);
+                    _logger.LogError(e, "Revoking host role '{0}' failed.", roleId);
                 }
             }
         }
