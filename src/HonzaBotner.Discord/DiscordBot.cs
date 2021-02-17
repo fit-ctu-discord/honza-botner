@@ -55,9 +55,11 @@ namespace HonzaBotner.Discord
             return Task.CompletedTask;
         }
 
-        private async Task Client_GuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
+        private Task Client_GuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
         {
             sender.Logger.LogInformation($"Guild available: {e.Guild.Name}");
+            
+            return Task.CompletedTask;
         }
 
         private async Task Client_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs e)
