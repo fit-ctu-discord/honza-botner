@@ -49,9 +49,9 @@ namespace HonzaBotner.Discord.Services.Reactions
                                 ulong roleId = UInt64.Parse(keyValuePair.Key);
                                 roleToScore.Add(roleId, keyValuePair.Value);
                             }
-                            catch
+                            catch (Exception e)
                             {
-                                _logger.LogError("Failed to parse role id {0}.", keyValuePair.Key);
+                                _logger.LogError(e, "Failed to parse role id {0}.", keyValuePair.Key);
                             }
                         }
 
