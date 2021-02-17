@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -9,6 +10,7 @@ using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Commands
@@ -22,11 +24,13 @@ namespace HonzaBotner.Discord.Services.Commands
     {
         private readonly HonzaBotnerDbContext _dbContext;
         private readonly IHashService _hashService;
+        private readonly ILogger<MemberCommands> _logger;
 
-        public MemberCommands(HonzaBotnerDbContext dbContext, IHashService hashService)
+        public MemberCommands(HonzaBotnerDbContext dbContext, IHashService hashService, ILogger<MemberCommands> logger)
         {
             _dbContext = dbContext;
             _hashService = hashService;
+            _logger = logger;
         }
 
         [Command("info")]
@@ -188,9 +192,10 @@ namespace HonzaBotner.Discord.Services.Commands
                 await _dbContext.SaveChangesAsync();
                 await ctx.Channel.SendMessageAsync("Member has been erased.");
             }
-            catch
+            catch (Exception e)
             {
                 await ctx.Channel.SendMessageAsync("Member erase failed.");
+                _logger.LogWarning(e, "Member erase failed.");
             }
         }
 

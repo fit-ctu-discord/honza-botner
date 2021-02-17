@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -71,9 +72,9 @@ namespace HonzaBotner.Discord.Services.Commands
                 {
                     await oldMessage.CreateReactionAsync(emoji);
                 }
-                catch
+                catch (Exception e)
                 {
-                    _logger.LogWarning("Could't react with emoji {0}.", emoji);
+                    _logger.LogWarning(e, "Could't react with emoji {0}.", emoji);
                     await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":bug:"));
                     return;
                 }

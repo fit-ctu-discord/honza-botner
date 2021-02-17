@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -35,9 +36,9 @@ namespace HonzaBotner.Discord.Services.Commands
             {
                 cloned = await channel.CloneAsync();
             }
-            catch
+            catch (Exception e)
             {
-                _logger.LogError("Failed to clone channel {0} with name {1}.", channel, name);
+                _logger.LogError(e, "Failed to clone channel {0} with name {1}.", channel, name);
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
             }
 
@@ -53,9 +54,9 @@ namespace HonzaBotner.Discord.Services.Commands
                 {
                     await cloned.AddOverwriteAsync(role, Permissions.AccessChannels);
                 }
-                catch
+                catch (Exception e)
                 {
-                    _logger.LogWarning("Failed to grant access to role {0} in channel {1}.", role, channel);
+                    _logger.LogWarning(e, "Failed to grant access to role {0} in channel {1}.", role, channel);
                 }
             }
 
