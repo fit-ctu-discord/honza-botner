@@ -179,7 +179,7 @@ namespace HonzaBotner.Discord.Services
 
                 if (limit != null)
                 {
-                    model.Userlimit = Math.Max(Math.Min(limit.Value, 99), 0);;
+                    model.Userlimit = Math.Max(Math.Min(limit.Value, 99), 0);
                 }
             });
         }
