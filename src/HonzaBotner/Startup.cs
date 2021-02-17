@@ -48,9 +48,10 @@ namespace HonzaBotner
                 .AddCommandOptions(Configuration)
                 .AddDiscordBot(config =>
                 {
-                    //config.RegisterCommands<AuthorizeCommands>();
+                    config.RegisterCommands<AuthorizeCommands>();
                     config.RegisterCommands<AdminCommands>();
                     config.RegisterCommands<EmoteCommands>();
+                    config.RegisterCommands<MemberCommands>();
                     config.RegisterCommands<VoiceCommands>();
                     // config.AddCommand<HiCommand>(HiCommand.ChatCommand);
                     // config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
