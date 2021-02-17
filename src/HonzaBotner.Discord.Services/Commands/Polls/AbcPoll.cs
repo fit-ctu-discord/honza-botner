@@ -56,13 +56,13 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
 
         public async Task Post(DiscordClient client, DiscordChannel channel)
         {
-            var pollMessage = await client.SendMessageAsync(channel, embed: Build(client));
+            DiscordMessage pollMessage = await client.SendMessageAsync(channel, embed: Build(client));
             await AddReactions(client, pollMessage);
         }
 
         private async Task AddReactions(DiscordClient client, DiscordMessage message)
         {
-            foreach (var emoji in _optionsEmoji.Take(_answers.Count))
+            foreach (string emoji in _optionsEmoji.Take(_answers.Count))
             {
                 await message.CreateReactionAsync(DiscordEmoji.FromName(client, emoji));
             }
@@ -70,7 +70,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
 
         private DiscordEmbed Build(DiscordClient client)
         {
-            var builder = new DiscordEmbedBuilder
+            DiscordEmbedBuilder builder = new DiscordEmbedBuilder
             {
                 Author = new DiscordEmbedBuilder.EmbedAuthor {Name = _authorUsername, IconUrl = _authorAvatarUrl},
                 Title = _question
