@@ -65,36 +65,19 @@ namespace HonzaBotner.Discord.Services
             DiscordChannel channelToCloneFrom, DiscordMember member,
             string? name = null, int? limit = 0)
         {
-            name = Regex.Replace(name ?? "", @"[^\u0000-\u007F]+", string.Empty);
-
-            if (name.Trim().Length == 0)
-            {
-                name = null;
-            }
-            else
-            {
-                name = name.Substring(0, Math.Min(name.Length, 30));
-            }
+            name = ConvertStringToValidState(name);
 
             try
             {
-                string userName = member.Nickname;
-                if (userName == null || userName.Trim().Length == 0)
-                {
-                    userName = member.Username;
-                }
-
+                string? userName = ConvertStringToValidState(member.Nickname, member.Username);
                 DiscordChannel newChannel =
                     await channelToCloneFrom.CloneAsync($"Member {userName} created new voice channel.");
-                await newChannel.ModifyAsync(model =>
-                {
-                    model.Name = name ?? $"{userName}'s channel";
-                    model.Userlimit = limit;
-                });
+
+                await EditChannelAsync(newChannel, name, limit, userName);
 
                 try
                 {
-                    if (member.VoiceState.Channel != null)
+                    if (member.VoiceState?.Channel != null)
                     {
                         await member.PlaceInAsync(newChannel);
                     }
@@ -119,52 +102,29 @@ namespace HonzaBotner.Discord.Services
 
         public async Task<bool> EditVoiceChannelAsync(DiscordMember member, string? newName = null, int? limit = 0)
         {
-            if (member.VoiceState.Channel == null || member.VoiceState.Channel.Id == _voiceConfig.ClickChannelId)
+            if (member.VoiceState?.Channel == null || member.VoiceState?.Channel.Id == _voiceConfig.ClickChannelId)
             {
                 return false;
             }
 
-            newName = Regex.Replace(newName ?? "", @"[^\u0000-\u007F]+", string.Empty);
-
-            if (newName?.Trim().Length == 0)
-            {
-                newName = null;
-            }
-            else
-            {
-                newName = newName?.Substring(0, Math.Min(newName.Length, 30));
-            }
+            newName = ConvertStringToValidState(newName);
 
             DiscordChannel customVoiceCategory = member.Guild.GetChannel(_voiceConfig.ClickChannelId).Parent;
 
-            if (!customVoiceCategory.Equals(member.VoiceState.Channel.Parent))
+            if (!customVoiceCategory.Equals(member.VoiceState?.Channel?.Parent))
             {
                 return false;
             }
 
             try
             {
-                string userName = member.Nickname;
-                if (userName == null || userName.Trim().Length == 0)
-                {
-                    userName = member.Username;
-                }
-
-                await member.VoiceState.Channel.ModifyAsync(model =>
-                {
-                    model.Name = newName ?? $"{userName}'s channel";
-                    ;
-
-                    if (limit != null)
-                    {
-                        model.Userlimit = limit;
-                    }
-                });
+                string? userName = ConvertStringToValidState(member.Nickname, member.Username);
+                await EditChannelAsync(member.VoiceState?.Channel, newName, limit, userName);
                 return true;
             }
-            catch
+            catch (Exception e)
             {
-                // ignored
+                _logger.LogWarning(e, "Editing voice channel failed.");
             }
 
             return false;
@@ -197,6 +157,33 @@ namespace HonzaBotner.Discord.Services
             {
                 await DeleteUnusedVoiceChannelAsync(discordChannel);
             }
+        }
+
+        private string? ConvertStringToValidState(string? input, string? defaultValue = null)
+        {
+            input = Regex.Replace(input ?? "", @"[^\u0000-\u007F]+", string.Empty);
+
+            if (input.Trim().Length == 0)
+            {
+                return defaultValue;
+            }
+
+            return input.Substring(0, Math.Min(input.Length, 30));
+        }
+
+        private async Task EditChannelAsync(DiscordChannel? channel, string? name, int? limit, string? userName)
+        {
+            if (channel == null) return;
+
+            await channel.ModifyAsync(model =>
+            {
+                model.Name = name ?? $"{userName ?? "FIŤÁK"}'s channel";
+
+                if (limit != null)
+                {
+                    model.Userlimit = Math.Max(Math.Min(limit.Value, 99), 0);
+                }
+            });
         }
     }
 }

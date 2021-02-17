@@ -42,7 +42,7 @@ namespace HonzaBotner.Discord.Services.Commands
             await _voiceManager.AddNewVoiceChannelAsync(ctx.Guild.GetChannel(_voiceConfig.ClickChannelId),
                 ctx.Member, name, limit);
 
-            await ctx.RespondAsync($"I have created new voice channel for you!");
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
         }
 
         [Command("edit")]
@@ -50,7 +50,8 @@ namespace HonzaBotner.Discord.Services.Commands
         [Description("Edits the name (and limit) of the voice channel you are connected to.")]
         public async Task EditVoiceChannel(
             CommandContext ctx,
-            [Description("New name of the channel.")] string newName,
+            [Description("New name of the channel.")]
+            string newName,
             [Description("Limit number of members who can join.")]
             int? limit = null
         )
