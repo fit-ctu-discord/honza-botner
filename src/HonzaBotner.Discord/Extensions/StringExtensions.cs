@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
@@ -11,7 +10,8 @@ namespace HonzaBotner.Discord.Extensions
     {
         private static readonly List<string> _special = new() {"everyone", "here"};
 
-        public static string RemoveDiscordMentions(this string? stringObject, DiscordGuild guild, ILogger? logger = null)
+        public static string RemoveDiscordMentions(this string? stringObject, DiscordGuild guild,
+            ILogger? logger = null)
         {
             string value = stringObject ?? "";
 
@@ -41,7 +41,7 @@ namespace HonzaBotner.Discord.Extensions
                                 return role.Name;
                             default:
                                 // This is not a mention.
-                                return "";
+                                return match.Value;
                         }
                     }
                     catch (Exception e)
