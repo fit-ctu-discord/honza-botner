@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Services.Attributes;
 using Microsoft.Extensions.Logging;
 
@@ -29,8 +30,18 @@ namespace HonzaBotner.Discord.Services.Commands
             [RemainingText, Description("Text of the message to send.")]
             string text)
         {
-            await channel.SendMessageAsync(text);
-            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+            string valueToSend = text.RemoveDiscordMentions(ctx.Guild);
+
+            try
+            {
+                await channel.SendMessageAsync(valueToSend);
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+            }
+            catch (Exception e)
+            {
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
+                _logger.LogWarning(e, "Failed to send message '{0}'. It might have been empty.", valueToSend);
+            }
         }
 
         [Command("edit")]
