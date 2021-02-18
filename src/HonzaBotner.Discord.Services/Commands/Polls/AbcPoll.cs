@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using HonzaBotner.Discord.Extensions;
 
 namespace HonzaBotner.Discord.Services.Commands.Polls
 {
@@ -56,7 +57,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
 
         public async Task Post(DiscordClient client, DiscordChannel channel)
         {
-            DiscordMessage pollMessage = await client.SendMessageAsync(channel, embed: Build(client));
+            DiscordMessage pollMessage = await client.SendMessageAsync(channel, embed: Build(client, channel.Guild));
 
             var _ = Task.Run(async () => { await AddReactions(client, pollMessage); });
         }
@@ -69,12 +70,12 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
             }
         }
 
-        private DiscordEmbed Build(DiscordClient client)
+        private DiscordEmbed Build(DiscordClient client, DiscordGuild guild)
         {
             DiscordEmbedBuilder builder = new()
             {
                 Author = new DiscordEmbedBuilder.EmbedAuthor {Name = _authorUsername, IconUrl = _authorAvatarUrl},
-                Title = _question
+                Title = _question.RemoveDiscordMentions(guild)
             };
 
             if (_options.Count > _optionsEmoji.Count)
@@ -88,7 +89,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
 
                 builder.AddField(
                     DiscordEmoji.FromName(client, emojiName).ToString(),
-                    answer,
+                    answer.RemoveDiscordMentions(guild),
                     true);
             });
 

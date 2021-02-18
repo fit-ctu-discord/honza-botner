@@ -1,6 +1,6 @@
 ﻿using DSharpPlus.Entities;
 
-namespace HonzaBotner.Discord.Services
+namespace HonzaBotner.Discord.Extensions
 {
     public static class DiscordMemberExtensions
     {
