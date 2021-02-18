@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Services.Attributes;
 using Microsoft.Extensions.Logging;
 
@@ -30,6 +31,7 @@ namespace HonzaBotner.Discord.Services.Commands
             string text)
         {
             await channel.SendMessageAsync(text);
+            await channel.SendMessageAsync(text.RemoveDiscordMentions(ctx.Guild));
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
         }
 
