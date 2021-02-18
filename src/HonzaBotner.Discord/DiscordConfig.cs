@@ -6,6 +6,6 @@ namespace HonzaBotner.Discord
 
         public string? Token { get; set; }
         public ulong? GuildId { get; set; }
-        public string[] Prefixes { get; set; } = new[] {"!"};
+        public string[] Prefixes { get; set; } = null!;
     }
 }

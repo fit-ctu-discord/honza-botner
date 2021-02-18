@@ -17,8 +17,7 @@ namespace HonzaBotner.Discord
         public CommandsNextExtension Commands { get; }
         public InteractivityExtension Interactivity { get; }
 
-        public DiscordWrapper(IOptions<DiscordConfig> options, IServiceProvider services,
-            CommandConfigurator configurator, ILoggerFactory loggerFactory)
+        public DiscordWrapper(IOptions<DiscordConfig> options, IServiceProvider services, ILoggerFactory loggerFactory)
         {
             DiscordConfig optionsConfig = options.Value;
             var config = new DiscordConfiguration()
@@ -37,7 +36,7 @@ namespace HonzaBotner.Discord
             };
             Commands = Client.UseCommandsNext(cConfig);
 
-            InteractivityConfiguration iConfig = new InteractivityConfiguration()
+            InteractivityConfiguration iConfig = new()
             {
                 PollBehaviour = PollBehaviour.KeepEmojis, Timeout = TimeSpan.FromSeconds(30)
             };
