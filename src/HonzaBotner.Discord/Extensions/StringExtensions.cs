@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
@@ -8,18 +7,24 @@ namespace HonzaBotner.Discord.Extensions
 {
     public static class StringExtension
     {
-        public static string RemoveDiscordMentions(this string? stringObject, DiscordGuild guild,
+        /// <summary>
+        /// Sanitizes string of Discord mentions. If method fails, empty string is returned.
+        /// </summary>
+        /// <param name="stringObject">String to process.</param>
+        /// <param name="guild">Discord guild to search name content of the mentioned user or group.</param>
+        /// <param name="logger">Logger to log to.</param>
+        /// <returns>Sanitized string of Discord mentions.</returns>
+        public static string RemoveDiscordMentions(this string stringObject, DiscordGuild guild,
             ILogger? logger = null)
         {
-            string value = stringObject ?? "";
+            string value = stringObject;
 
-            value = Regex.Replace(value ?? "", @"<@(.)(.*?)>", match =>
+            // Replace all user and group mentions by their name from.
+            value = Regex.Replace(value, @"<@(.)(.*?)>", match =>
                 {
                     if (!match.Groups.TryGetValue("1", out Group? mentionTypeGroup)) return "";
                     if (!match.Groups.TryGetValue("2", out Group? idValueGroup)) return "";
-
-                    string idString = idValueGroup.Value;
-                    if (!ulong.TryParse(idString, out ulong id)) return "";
+                    if (!ulong.TryParse(idValueGroup.Value, out ulong id)) return "";
 
                     try
                     {
@@ -33,7 +38,7 @@ namespace HonzaBotner.Discord.Extensions
                                 DiscordRole role = guild.GetRole(id);
                                 return role.Name;
                             default:
-                                // This is not a mention.
+                                // This is not a mention, no sanitation needed.
                                 return match.Value;
                         }
                     }
@@ -45,7 +50,8 @@ namespace HonzaBotner.Discord.Extensions
                 }
             );
 
-            value = Regex.Replace(value ?? "", @"@", String.Empty);
+            // Replace all remaining @ characters.
+            value = Regex.Replace(value, @"@", string.Empty);
 
             return value;
         }

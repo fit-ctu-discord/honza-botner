@@ -11,7 +11,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Description("Commands to create polls.")]
     public class PollCommands : BaseCommandModule
     {
-        private readonly string _pollErrorMessage =
+        private const string PollErrorMessage =
             "Poll build failed. Make sure the question has less than 256 characters and each option has less than 1024 characters.";
 
         [GroupCommand]
@@ -45,12 +45,12 @@ namespace HonzaBotner.Discord.Services.Commands
 
             try
             {
-                await poll.Post(ctx.Client, ctx.Channel);
+                await poll.PostAsync(ctx.Client, ctx.Channel);
                 await ctx.Message.DeleteAsync();
             }
             catch
             {
-                await ctx.RespondAsync(_pollErrorMessage);
+                await ctx.RespondAsync(PollErrorMessage);
             }
         }
 
@@ -64,12 +64,12 @@ namespace HonzaBotner.Discord.Services.Commands
             try
             {
                 await new YesNoPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question)
-                    .Post(ctx.Client, ctx.Channel);
+                    .PostAsync(ctx.Client, ctx.Channel);
                 await ctx.Message.DeleteAsync();
             }
             catch
             {
-                await ctx.RespondAsync(_pollErrorMessage);
+                await ctx.RespondAsync(PollErrorMessage);
             }
         }
 
@@ -83,12 +83,12 @@ namespace HonzaBotner.Discord.Services.Commands
             try
             {
                 await new AbcPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question, answers.ToList())
-                    .Post(ctx.Client, ctx.Channel);
+                    .PostAsync(ctx.Client, ctx.Channel);
                 await ctx.Message.DeleteAsync();
             }
             catch
             {
-                await ctx.RespondAsync(_pollErrorMessage);
+                await ctx.RespondAsync(PollErrorMessage);
             }
         }
     }

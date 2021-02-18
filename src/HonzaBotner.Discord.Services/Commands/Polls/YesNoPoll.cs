@@ -18,7 +18,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
             _question = question;
         }
 
-        public async Task Post(DiscordClient client, DiscordChannel channel)
+        public async Task PostAsync(DiscordClient client, DiscordChannel channel)
         {
             DiscordMessage pollMessage = await client.SendMessageAsync(channel, embed: Build(channel.Guild));
 

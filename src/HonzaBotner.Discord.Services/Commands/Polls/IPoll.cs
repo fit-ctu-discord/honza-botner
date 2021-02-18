@@ -6,6 +6,6 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
 {
     public interface IPoll
     {
-        Task Post(DiscordClient client, DiscordChannel channel);
+        Task PostAsync(DiscordClient client, DiscordChannel channel);
     }
 }
