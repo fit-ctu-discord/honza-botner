@@ -30,7 +30,6 @@ namespace HonzaBotner.Discord.Services.Commands
             [RemainingText, Description("Text of the message to send.")]
             string text)
         {
-            await channel.SendMessageAsync(text);
             await channel.SendMessageAsync(text.RemoveDiscordMentions(ctx.Guild));
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
         }

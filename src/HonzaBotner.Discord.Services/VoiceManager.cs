@@ -19,7 +19,7 @@ namespace HonzaBotner.Discord.Services
         private readonly CustomVoiceOptions _voiceConfig;
         private readonly ILogger<VoiceManager> _logger;
 
-        private bool initialized;
+        private bool _initialized;
 
         private DiscordClient Client => _discordWrapper.Client;
 
@@ -34,9 +34,9 @@ namespace HonzaBotner.Discord.Services
 
         public async Task Init()
         {
-            if (!initialized)
+            if (!_initialized)
             {
-                initialized = true;
+                _initialized = true;
 
                 Client.VoiceStateUpdated += Client_VoiceStateUpdated;
 

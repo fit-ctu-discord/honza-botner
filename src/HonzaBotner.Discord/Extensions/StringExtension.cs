@@ -9,13 +9,13 @@ namespace HonzaBotner.Discord.Extensions
 {
     public static class StringExtension
     {
-        private static readonly List<string> special = new() {"everyone", "here"};
+        private static readonly List<string> _special = new() {"everyone", "here"};
 
-        public static string RemoveDiscordMentions(this string? stringObject, DiscordGuild guild, ILogger? logger)
+        public static string RemoveDiscordMentions(this string? stringObject, DiscordGuild guild, ILogger? logger = null)
         {
             string value = stringObject ?? "";
 
-            foreach (string s in special)
+            foreach (string s in _special)
             {
                 value = Regex.Replace(value ?? "", @$"@{s}", s);
             }
