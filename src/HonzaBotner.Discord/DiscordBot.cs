@@ -38,6 +38,7 @@ namespace HonzaBotner.Discord
             Client.ClientErrored += Client_ClientError;
             Client.MessageReactionAdded += Client_MessageReactionAdded;
             Client.MessageReactionRemoved += Client_MessageReactionRemoved;
+            Client.GuildDownloadCompleted += Client_GuildDownloadCompleted;
 
             Commands.CommandExecuted += Commands_CommandExecuted;
             Commands.CommandErrored += Commands_CommandErrored;
@@ -54,10 +55,17 @@ namespace HonzaBotner.Discord
             return Task.CompletedTask;
         }
 
-        private async Task Client_GuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
+        private Task Client_GuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
         {
             sender.Logger.LogInformation($"Guild available: {e.Guild.Name}");
+            return Task.CompletedTask;
+        }
 
+        private async Task Client_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs e)
+        {
+            sender.Logger.LogInformation($"Guild download completed.");
+
+            // Run managers.
             await _voiceManager.Init();
         }
 

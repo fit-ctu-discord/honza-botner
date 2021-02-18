@@ -7,5 +7,7 @@ namespace HonzaBotner.Database
         [Key]
         public ulong UserId { get; set; }
         public string? AuthId { get; set; }
+
+        public override string ToString() => $"Discord: <@{UserId}>, auth hash: {AuthId}";
     }
 }

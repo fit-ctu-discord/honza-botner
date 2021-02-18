@@ -49,8 +49,10 @@ namespace HonzaBotner
                 .AddDiscordBot(config =>
                 {
                     //config.RegisterCommands<AuthorizeCommands>();
-                    config.RegisterCommands<AdminCommands>();
+                    config.RegisterCommands<ChannelCommands>();
                     config.RegisterCommands<EmoteCommands>();
+                    config.RegisterCommands<MemberCommands>();
+                    config.RegisterCommands<MessageCommands>();
                     config.RegisterCommands<VoiceCommands>();
                     config.RegisterCommands<PollCommands>();
                     // config.AddCommand<HiCommand>(HiCommand.ChatCommand);
@@ -69,7 +71,8 @@ namespace HonzaBotner
                 {
                     reactions.AddReaction<VerificationReactionHandler>()
                         .AddReaction<StaffVerificationReactionHandler>()
-                        .AddReaction<EmojiCounterHandler>();
+                        .AddReaction<EmojiCounterHandler>()
+                        .AddReaction<PinHandler>();
                 });
 
             services.AddSingleton<IVoiceManager, VoiceManager>();
@@ -91,10 +94,10 @@ namespace HonzaBotner
             else
             {
                 UpdateDatabase(app);
+                app.UseReverseProxyHttpsEnforcer();
             }
 
             app.UseHttpsRedirection();
-            app.UseReverseProxyHttpsEnforcer();
             app.UseRouting();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }

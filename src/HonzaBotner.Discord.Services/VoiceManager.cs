@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -63,13 +65,15 @@ namespace HonzaBotner.Discord.Services
             DiscordChannel channelToCloneFrom, DiscordMember member,
             string? name = null, int? limit = 0)
         {
-            if (name?.Trim().Length == 0)
+            name = Regex.Replace(name ?? "", @"[^\u0000-\u007F]+", string.Empty);
+
+            if (name.Trim().Length == 0)
             {
                 name = null;
             }
             else
             {
-                name = name?.Substring(0, Math.Min(name.Length, 30));
+                name = name.Substring(0, Math.Min(name.Length, 30));
             }
 
             try
@@ -88,32 +92,47 @@ namespace HonzaBotner.Discord.Services
                     model.Userlimit = limit;
                 });
 
-                if (member.VoiceState.Channel != null)
+                try
                 {
-                    await member.PlaceInAsync(newChannel);
-                }
-                else
-                {
-                    // Placing the member in the channel failed, so remove it after some time.
-                    var _ = Task.Run(async () =>
+                    if (member.VoiceState.Channel != null)
                     {
-                        await Task.Delay(1000 * _voiceConfig.RemoveAfterCommandInSeconds);
-                        await DeleteUnusedVoiceChannelAsync(newChannel);
-                    });
+                        await member.PlaceInAsync(newChannel);
+                    }
                 }
+                catch
+                {
+                    // User disconnected while we were placing them.
+                }
+
+                // Placing the member in the channel failed, so remove it after some time.
+                var _ = Task.Run(async () =>
+                {
+                    await Task.Delay(1000 * _voiceConfig.RemoveAfterCommandInSeconds);
+                    await DeleteUnusedVoiceChannelAsync(newChannel);
+                });
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e , "Creating voice channel failed.");
+                _logger.LogError(e, "Creating voice channel failed.");
             }
         }
 
         public async Task<bool> EditVoiceChannelAsync(DiscordMember member, string? newName = null, int? limit = 0)
         {
-
-            if (member.VoiceState.Channel == null)
+            if (member.VoiceState.Channel == null || member.VoiceState.Channel.Id == _voiceConfig.ClickChannelId)
             {
                 return false;
+            }
+
+            newName = Regex.Replace(newName ?? "", @"[^\u0000-\u007F]+", string.Empty);
+
+            if (newName?.Trim().Length == 0)
+            {
+                newName = null;
+            }
+            else
+            {
+                newName = newName?.Substring(0, Math.Min(newName.Length, 30));
             }
 
             DiscordChannel customVoiceCategory = member.Guild.GetChannel(_voiceConfig.ClickChannelId).Parent;
@@ -125,9 +144,16 @@ namespace HonzaBotner.Discord.Services
 
             try
             {
+                string userName = member.Nickname;
+                if (userName == null || userName.Trim().Length == 0)
+                {
+                    userName = member.Username;
+                }
+
                 await member.VoiceState.Channel.ModifyAsync(model =>
                 {
-                    model.Name = newName;
+                    model.Name = newName ?? $"{userName}'s channel";
+                    ;
 
                     if (limit != null)
                     {

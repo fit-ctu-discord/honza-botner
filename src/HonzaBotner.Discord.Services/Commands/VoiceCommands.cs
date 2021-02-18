@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -11,7 +10,7 @@ using Microsoft.Extensions.Options;
 namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("voice")]
-    [Description("Commands to control custom voice channels.")]
+    [Description("Commands to control (and only works in) custom voice channels.")]
     public class VoiceCommands : BaseCommandModule
     {
         private readonly IVoiceManager _voiceManager;
@@ -24,6 +23,7 @@ namespace HonzaBotner.Discord.Services.Commands
         }
 
         [Command("add")]
+        [Aliases("new")]
         [Description("Create new voice channel. Users has 30 seconds to join.")]
         public async Task AddVoiceChannel(
             CommandContext ctx,
@@ -39,20 +39,18 @@ namespace HonzaBotner.Discord.Services.Commands
                 return;
             }
 
-            name = name.Substring(0, Math.Min(name.Length, 30));
-
             await _voiceManager.AddNewVoiceChannelAsync(ctx.Guild.GetChannel(_voiceConfig.ClickChannelId),
-                ctx.Member,
-                name, limit);
+                ctx.Member, name, limit);
 
             await ctx.RespondAsync($"I have created new voice channel for you!");
         }
 
         [Command("edit")]
-        [Description("Create new voice channel. Users has 30 seconds to join.")]
+        [Aliases("rename")]
+        [Description("Edits the name (and limit) of the voice channel you are connected to.")]
         public async Task EditVoiceChannel(
             CommandContext ctx,
-            [Description("Name of the channel.")] string newName,
+            [Description("New name of the channel.")] string newName,
             [Description("Limit number of members who can join.")]
             int? limit = null
         )
@@ -62,8 +60,6 @@ namespace HonzaBotner.Discord.Services.Commands
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
                 return;
             }
-
-            newName = newName.Substring(0, Math.Min(newName.Length, 30));
 
             bool success = await _voiceManager.EditVoiceChannelAsync(ctx.Member, newName, limit);
 
