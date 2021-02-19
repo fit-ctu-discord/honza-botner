@@ -98,6 +98,7 @@ namespace HonzaBotner.Discord.Services.Commands
         }
 
         [Group("bind")]
+        [Description("Module used for binding roles to emoji reaction")]
         [ModuleLifespan(ModuleLifespan.Transient)]
         public class RoleBindingsCommands : BaseCommandModule
         {
@@ -111,6 +112,7 @@ namespace HonzaBotner.Discord.Services.Commands
             }
 
             [GroupCommand]
+            [Description("Adds binding to message")]
             [Command("add")]
             public async Task AddBinding(CommandContext ctx, [Description("URL of the message.")] string url,
                 [Description("Emoji to react with.")] DiscordEmoji emoji,
@@ -140,6 +142,7 @@ namespace HonzaBotner.Discord.Services.Commands
             }
 
             [Command("remove")]
+            [Description("Removes binding from message")]
             public async Task RemoveBinding(CommandContext ctx, [Description("URL of the message.")] string url,
                 [Description("Emoji to react with.")] DiscordEmoji emoji,
                 [Description("Roles which will be toggled after reaction")]
@@ -171,6 +174,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 }
             }
 
+/*
             [Command("dump")]
             public async Task Dump(CommandContext ctx, [Description("URL of the message.")] string url)
             {
@@ -188,7 +192,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
                 // TODO: Pretty print of associated bindings with message
                 await ctx.Message.RespondAsync($"TODO: {roles.Count}");
-            }
+            }*/
         }
     }
 }

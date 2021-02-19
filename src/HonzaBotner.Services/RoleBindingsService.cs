@@ -19,7 +19,7 @@ namespace HonzaBotner.Services
             _logger = logger;
         }
 
-        public async Task<IList<ulong>> FindMappingAsync(ulong channelId, ulong messageId, string? emojiName)
+        public async Task<IList<ulong>> FindMappingAsync(ulong channelId, ulong messageId, string? emojiName = null)
         {
             bool ignoreEmoji = emojiName == null;
 
