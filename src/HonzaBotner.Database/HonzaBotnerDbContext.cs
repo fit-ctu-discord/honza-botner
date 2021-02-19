@@ -17,6 +17,7 @@ namespace HonzaBotner.Database
 
             new VerificationMapper().Map(builder.Entity<Verification>());
             new CountedEmojiMapper().Map(builder.Entity<CountedEmoji>());
+            new RoleBindingMapper().Map(builder.Entity<RoleBinding>());
         }
 
         public DbSet<Verification> Verifications { get; set; }

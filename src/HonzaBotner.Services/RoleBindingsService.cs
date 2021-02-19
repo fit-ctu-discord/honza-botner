@@ -53,19 +53,19 @@ namespace HonzaBotner.Services
 
         public async Task RemoveBindingsAsync(ulong channelId, ulong messageId, string emoji, HashSet<ulong>? roleIds)
         {
-            List<RoleBinding> bindingToRemove;
+            List<RoleBinding> bindingsToRemove;
 
             RoleBinding binding = new() {ChannelId = channelId, MessageId = messageId, Emoji = emoji};
 
             if (roleIds == null)
             {
-                bindingToRemove =  await _dbContext.RoleBindings
+                bindingsToRemove =  await _dbContext.RoleBindings
                     .Where(r => Same(r, binding, false))
                     .ToListAsync();
             }
             else
             {
-                bindingToRemove = new List<RoleBinding>();
+                bindingsToRemove = new List<RoleBinding>();
 
                 foreach (ulong roleId in roleIds)
                 {
@@ -74,12 +74,12 @@ namespace HonzaBotner.Services
 
                     if (toDelete != null)
                     {
-                        bindingToRemove.Add(toDelete);
+                        bindingsToRemove.Add(toDelete);
                     }
                 }
             }
 
-            _dbContext.RoleBindings.RemoveRange(bindingToRemove);
+            _dbContext.RoleBindings.RemoveRange(bindingsToRemove);
             await _dbContext.RoleBindings.SingleOrDefaultAsync();
         }
 

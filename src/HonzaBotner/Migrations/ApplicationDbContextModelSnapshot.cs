@@ -36,6 +36,25 @@ namespace HonzaBotner.Migrations
                     b.ToTable("CountedEmojis");
                 });
 
+            modelBuilder.Entity("HonzaBotner.Database.RoleBinding", b =>
+                {
+                    b.Property<string>("Emoji")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("ChannelId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal>("MessageId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal>("RoleId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("Emoji", "ChannelId", "MessageId", "RoleId");
+
+                    b.ToTable("RoleBindings");
+                });
+
             modelBuilder.Entity("HonzaBotner.Database.Verification", b =>
                 {
                     b.Property<decimal>("UserId")
