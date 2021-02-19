@@ -57,7 +57,7 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("yesno")]
         [Description("Creates a yesno pool.")]
         [Priority(2)]
-        public async Task YesnoPollCommand(CommandContext ctx,
+        public async Task YesNoPollCommand(CommandContext ctx,
             [RemainingText, Description("Poll's question.")]
             string question)
         {

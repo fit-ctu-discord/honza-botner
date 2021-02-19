@@ -1,11 +1,9 @@
 using System;
-using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 
 namespace HonzaBotner.Controllers

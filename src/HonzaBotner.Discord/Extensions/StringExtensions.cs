@@ -44,7 +44,7 @@ namespace HonzaBotner.Discord.Extensions
                     }
                     catch (Exception e)
                     {
-                        logger?.LogWarning(e, "Removing mention failed.");
+                        logger?.LogWarning(e, "Removing mention failed");
                         return "";
                     }
                 }

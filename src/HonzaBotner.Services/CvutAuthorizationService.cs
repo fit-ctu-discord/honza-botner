@@ -64,10 +64,10 @@ namespace HonzaBotner.Services
 
                 if (verificationExists)
                 {
-                    bool ungranted = await _roleManager.RevokeRolesPoolAsync(userId, rolesPool);
-                    if (!ungranted)
+                    bool revoked = await _roleManager.RevokeRolesPoolAsync(userId, rolesPool);
+                    if (!revoked)
                     {
-                        _logger.LogWarning("Ungranting roles pool {2} for {0} (id {1}) failed.", username, userId, rolesPool);
+                        _logger.LogWarning("Revoking roles pool {2} for {0} (id {1}) failed", username, userId, rolesPool);
                         return IAuthorizationService.AuthorizeResult.Failed;
                     }
                     bool granted = await _roleManager.GrantRolesAsync(userId, discordRoles);

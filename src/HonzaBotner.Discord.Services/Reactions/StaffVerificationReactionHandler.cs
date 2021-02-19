@@ -52,10 +52,10 @@ namespace HonzaBotner.Discord.Services.Reactions
                 return IReactionHandler.Result.Continue;
             if (!eventArgs.Emoji.Name.Equals(_config.StaffVerificationEmojiName)) return IReactionHandler.Result.Continue;
 
-            bool ungranted = await _roleManager.RevokeRolesPoolAsync(eventArgs.User.Id, RolesPool.Staff);
-            if (!ungranted)
+            bool revoked = await _roleManager.RevokeRolesPoolAsync(eventArgs.User.Id, RolesPool.Staff);
+            if (!revoked)
             {
-                _logger.LogWarning("Ungranting roles for user {0} (id {1}) failed.", eventArgs.User.Username, eventArgs.User.Id);
+                _logger.LogWarning("Ungranting roles for user {0} (id {1}) failed", eventArgs.User.Username, eventArgs.User.Id);
                 DiscordDmChannel channel = await eventArgs.Guild.Members[eventArgs.User.Id].CreateDmChannelAsync();
                 await channel.SendMessageAsync("Staff role se nepodařilo odebrat. Prosím, kontaktujte moderátory.");
             }
