@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using HonzaBotner.Database;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Services.Attributes;
+using HonzaBotner.Services.Contract;
 using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Commands
@@ -91,6 +95,104 @@ namespace HonzaBotner.Discord.Services.Commands
             }
 
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+        }
+
+        [Group("bind")]
+        [Description("Module used for binding roles to emoji reaction")]
+        [ModuleLifespan(ModuleLifespan.Transient)]
+        public class RoleBindingsCommands : BaseCommandModule
+        {
+            private readonly IRoleBindingsService _roleBindingsService;
+            private readonly ILogger<RoleBindingsCommands> _logger;
+
+            public RoleBindingsCommands(IRoleBindingsService roleBindingsService, ILogger<RoleBindingsCommands> logger)
+            {
+                _roleBindingsService = roleBindingsService;
+                _logger = logger;
+            }
+
+            [GroupCommand]
+            [Description("Adds binding to message")]
+            [Command("add")]
+            public async Task AddBinding(CommandContext ctx, [Description("URL of the message.")] string url,
+                [Description("Emoji to react with.")] DiscordEmoji emoji,
+                [Description("Roles which will be toggled after reaction.")]
+                params DiscordRole[] roles)
+            {
+                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+                if (message == null)
+                {
+                    throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
+                }
+
+                ulong channelId = message.ChannelId;
+                ulong messageId = message.Id;
+
+                await _roleBindingsService.AddBindingsAsync(channelId, messageId, emoji.Name,
+                    roles.Select(r => r.Id).ToHashSet());
+                try
+                {
+                    await message.CreateReactionAsync(emoji);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Couldn't add reaction for emoji: {0} on {1}",
+                        emoji.Name, url);
+                }
+            }
+
+            [Command("remove")]
+            [Description("Removes binding from message")]
+            public async Task RemoveBinding(CommandContext ctx, [Description("URL of the message.")] string url,
+                [Description("Emoji to react with.")] DiscordEmoji emoji,
+                [Description("Roles which will be toggled after reaction")]
+                params DiscordRole[] roles)
+            {
+                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+                if (message == null)
+                {
+                    throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
+                }
+
+                ulong channelId = message.ChannelId;
+                ulong messageId = message.Id;
+
+                bool someRemained = await _roleBindingsService.RemoveBindingsAsync(channelId, messageId, emoji.Name,
+                    roles.Select(r => r.Id).ToHashSet());
+
+                if (!someRemained)
+                {
+                    try
+                    {
+                        await message.DeleteReactionsEmojiAsync(emoji);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, "Couldn't add reaction for emoji: {0} on {1}",
+                            emoji.Name, url);
+                    }
+                }
+            }
+
+/*
+            [Command("dump")]
+            public async Task Dump(CommandContext ctx, [Description("URL of the message.")] string url)
+            {
+                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+                if (message == null)
+                {
+                    throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
+                }
+
+                ulong channelId = message.ChannelId;
+                ulong messageId = message.Id;
+
+                IList<ulong> roles = await _roleBindingsService.FindMappingAsync(channelId, messageId);
+
+
+                // TODO: Pretty print of associated bindings with message
+                await ctx.Message.RespondAsync($"TODO: {roles.Count}");
+            }*/
         }
     }
 }

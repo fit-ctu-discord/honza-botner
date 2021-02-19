@@ -72,6 +72,7 @@ namespace HonzaBotner
                     reactions.AddReaction<VerificationReactionHandler>()
                         .AddReaction<StaffVerificationReactionHandler>()
                         .AddReaction<EmojiCounterHandler>()
+                       // .AddReaction<RoleBindingsHandler>()
                         .AddReaction<PinHandler>();
                 });
 
