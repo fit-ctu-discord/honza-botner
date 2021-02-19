@@ -3,18 +3,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using HonzaBotner.Database;
 using HonzaBotner.Services.Contract;
-using HonzaBotner.Services.Contract.Dto;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Services
 {
     public class RoleBindingsService : IRoleBindingsService
     {
         private readonly HonzaBotnerDbContext _dbContext;
+        private readonly ILogger<RoleBindingsService> _logger;
 
-        public RoleBindingsService(HonzaBotnerDbContext dbContext)
+        public RoleBindingsService(HonzaBotnerDbContext dbContext, ILogger<RoleBindingsService> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         public async Task<IList<ulong>> FindMappingAsync(ulong channelId, ulong messageId, string emojiName)
@@ -23,6 +25,70 @@ namespace HonzaBotner.Services
                 .Where(z => z.ChannelId == channelId && z.MessageId == messageId && z.Emoji == emojiName)
                 .Select(z => z.RoleId)
                 .ToListAsync();
+        }
+
+        public async Task AddBindingsAsync(ulong channelId, ulong messageId, string emoji, HashSet<ulong> roleIds)
+        {
+            List<RoleBinding> bindingsToAdd = new();
+
+            foreach (ulong roleId in roleIds)
+            {
+                RoleBinding binding = new()
+                {
+                    ChannelId = channelId, MessageId = messageId, Emoji = emoji, RoleId = roleId
+                };
+
+                if (await _dbContext.RoleBindings.AnyAsync(r => Same(r, binding, true)))
+                {
+                    _logger.LogInformation("Binding for this combination already exists (roleId: {0})", roleId);
+                    continue;
+                }
+
+                bindingsToAdd.Add(binding);
+            }
+
+            await _dbContext.RoleBindings.AddRangeAsync(bindingsToAdd);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task RemoveBindingsAsync(ulong channelId, ulong messageId, string emoji, HashSet<ulong>? roleIds)
+        {
+            List<RoleBinding> bindingToRemove;
+
+            RoleBinding binding = new() {ChannelId = channelId, MessageId = messageId, Emoji = emoji};
+
+            if (roleIds == null)
+            {
+                bindingToRemove =  await _dbContext.RoleBindings
+                    .Where(r => Same(r, binding, false))
+                    .ToListAsync();
+            }
+            else
+            {
+                bindingToRemove = new List<RoleBinding>();
+
+                foreach (ulong roleId in roleIds)
+                {
+                    if (await _dbContext.RoleBindings.AnyAsync(r => Same(r, binding, true)))
+                    {
+                        _logger.LogInformation("Binding for this combination already exists (roleId: {0})",
+                            roleId);
+                        continue;
+                    }
+
+                    bindingToRemove.Add(binding);
+                }
+            }
+
+            _dbContext.RoleBindings.RemoveRange(bindingToRemove);
+            await _dbContext.RoleBindings.SingleOrDefaultAsync();
+        }
+
+        private static bool Same(RoleBinding fromDb, RoleBinding roleBinding, bool requireRoleId)
+        {
+            return fromDb.Emoji == roleBinding.Emoji && fromDb.ChannelId == roleBinding.ChannelId
+                                                     && fromDb.MessageId == roleBinding.MessageId
+                                                     && (fromDb.RoleId == roleBinding.RoleId || !requireRoleId);
         }
     }
 }
