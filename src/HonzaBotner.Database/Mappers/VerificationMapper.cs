@@ -11,4 +11,12 @@ namespace HonzaBotner.Database.Mappers
                 .IsUnique(); // By default it is "IS UNIQUE IF NOT NULL"
         }
     }
+
+    internal sealed class ZiraMapper : IEntityMapper<Zira>
+    {
+        public void Map(EntityTypeBuilder<Zira> builder)
+        {
+
+        }
+    }
 }

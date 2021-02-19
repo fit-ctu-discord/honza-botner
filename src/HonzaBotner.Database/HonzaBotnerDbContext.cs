@@ -21,5 +21,7 @@ namespace HonzaBotner.Database
 
         public DbSet<Verification> Verifications { get; set; }
         public DbSet<CountedEmoji> CountedEmojis { get; set; }
+
+        public DbSet<Zira> Ziras { get; set; }
     }
 }
