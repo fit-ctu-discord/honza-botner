@@ -106,6 +106,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 _roleBindingsService = roleBindingsService;
             }
 
+            [GroupCommand()]
             [Command("add")]
             public async Task AddBinding(CommandContext ctx, [Description("URL of the message.")] string url,
                 [Description("Emoji to react with.")] DiscordEmoji emoji,
