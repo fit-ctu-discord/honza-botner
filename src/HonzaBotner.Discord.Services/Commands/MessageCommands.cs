@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using HonzaBotner.Database;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Services.Contract;
@@ -146,8 +148,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
                 if (message == null)
                 {
-                    throw new ArgumentOutOfRangeException($"Couldn't find message with link: {0} on {1}",
-                        emoji.Name, url);
+                    throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
                 }
 
                 ulong channelId = message.ChannelId;
@@ -164,9 +165,29 @@ namespace HonzaBotner.Discord.Services.Commands
                     }
                     catch (Exception e)
                     {
-                        _logger.LogWarning(e, "Couldn't delete reaction for emoji: {0}", emoji.Name);
+                        _logger.LogError(e, "Couldn't add reaction for emoji: {0} on {1}",
+                            emoji.Name, url);
                     }
                 }
+            }
+
+            [Command("dump")]
+            public async Task Dump(CommandContext ctx, [Description("URL of the message.")] string url)
+            {
+                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+                if (message == null)
+                {
+                    throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
+                }
+
+                ulong channelId = message.ChannelId;
+                ulong messageId = message.Id;
+
+                IList<ulong> roles = await _roleBindingsService.FindMappingAsync(channelId, messageId);
+
+
+                // TODO: Pretty print of associated bindings with message
+                await ctx.Message.RespondAsync($"TODO: {roles.Count}");
             }
         }
     }

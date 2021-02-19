@@ -5,7 +5,7 @@ namespace HonzaBotner.Services.Contract
 {
     public interface IRoleBindingsService
     {
-        Task<IList<ulong>> FindMappingAsync(ulong channelId, ulong messageId, string emojiName);
+        Task<IList<ulong>> FindMappingAsync(ulong channelId, ulong messageId, string? emojiName = null);
         Task AddBindingsAsync(ulong channelId, ulong messageId, string emoji, HashSet<ulong> roleIds);
 
         /// <summary>

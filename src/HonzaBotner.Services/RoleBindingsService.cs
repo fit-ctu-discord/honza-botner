@@ -19,10 +19,13 @@ namespace HonzaBotner.Services
             _logger = logger;
         }
 
-        public async Task<IList<ulong>> FindMappingAsync(ulong channelId, ulong messageId, string emojiName)
+        public async Task<IList<ulong>> FindMappingAsync(ulong channelId, ulong messageId, string? emojiName)
         {
+            bool ignoreEmoji = emojiName == null;
+
             return await _dbContext.RoleBindings
-                .Where(z => z.ChannelId == channelId && z.MessageId == messageId && z.Emoji == emojiName)
+                .Where(z => z.ChannelId == channelId && z.MessageId == messageId &&
+                            (z.Emoji == emojiName || ignoreEmoji))
                 .Select(z => z.RoleId)
                 .ToListAsync();
         }
@@ -55,7 +58,8 @@ namespace HonzaBotner.Services
         }
 
         /// <inheritdoc />
-        public async Task<bool> RemoveBindingsAsync(ulong channelId, ulong messageId, string emoji, HashSet<ulong>? roleIds)
+        public async Task<bool> RemoveBindingsAsync(ulong channelId, ulong messageId, string emoji,
+            HashSet<ulong>? roleIds)
         {
             List<RoleBinding> bindingsToRemove;
 
