@@ -69,14 +69,13 @@ namespace HonzaBotner.Services
 
                 foreach (ulong roleId in roleIds)
                 {
-                    if (await _dbContext.RoleBindings.AnyAsync(r => Same(r, binding, true)))
-                    {
-                        _logger.LogInformation("Binding for this combination already exists (roleId: {0})",
-                            roleId);
-                        continue;
-                    }
+                    binding.RoleId = roleId;
+                    RoleBinding toDelete = await _dbContext.RoleBindings.FirstOrDefaultAsync(r => Same(r, binding, true));
 
-                    bindingToRemove.Add(binding);
+                    if (toDelete != null)
+                    {
+                        bindingToRemove.Add(toDelete);
+                    }
                 }
             }
 
