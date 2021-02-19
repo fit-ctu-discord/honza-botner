@@ -7,19 +7,19 @@ using HonzaBotner.Services.Contract;
 
 namespace HonzaBotner.Discord.Services.Reactions
 {
-    public class ZiraHandler : IReactionHandler
+    public class RoleBindingsHandler : IReactionHandler
     {
-        private readonly IZiraService _ziraService;
+        private readonly IRoleBindingsService _roleBindingsService;
 
-        public ZiraHandler(IZiraService ziraService)
+        public RoleBindingsHandler(IRoleBindingsService roleBindingsService)
         {
-            _ziraService = ziraService;
+            _roleBindingsService = roleBindingsService;
         }
 
         public async Task<IReactionHandler.Result> HandleAddAsync(MessageReactionAddEventArgs eventArgs)
         {
             ICollection<ulong> mappings =
-                await _ziraService.FindMappingAsync(eventArgs.Channel.Id, eventArgs.Message.Id, eventArgs.Emoji.Name);
+                await _roleBindingsService.FindMappingAsync(eventArgs.Channel.Id, eventArgs.Message.Id, eventArgs.Emoji.Name);
             if (!mappings.Any())
                 return IReactionHandler.Result.Continue;
 
@@ -40,7 +40,7 @@ namespace HonzaBotner.Discord.Services.Reactions
         public async Task<IReactionHandler.Result> HandleRemoveAsync(MessageReactionRemoveEventArgs eventArgs)
         {
             ICollection<ulong> mappings =
-                await _ziraService.FindMappingAsync(eventArgs.Channel.Id, eventArgs.Message.Id, eventArgs.Emoji.Name);
+                await _roleBindingsService.FindMappingAsync(eventArgs.Channel.Id, eventArgs.Message.Id, eventArgs.Emoji.Name);
             if (!mappings.Any())
                 return IReactionHandler.Result.Continue;
 

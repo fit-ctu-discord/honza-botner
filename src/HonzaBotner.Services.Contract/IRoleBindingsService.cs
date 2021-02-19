@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace HonzaBotner.Services.Contract
 {
-    public interface IZiraService
+    public interface IRoleBindingsService
     {
         Task<IList<ulong>> FindMappingAsync(ulong channelId, ulong messageId, string emojiName);
     }

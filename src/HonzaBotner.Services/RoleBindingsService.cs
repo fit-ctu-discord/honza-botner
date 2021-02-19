@@ -8,18 +8,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HonzaBotner.Services
 {
-    public class ZiraService : IZiraService
+    public class RoleBindingsService : IRoleBindingsService
     {
         private readonly HonzaBotnerDbContext _dbContext;
 
-        public ZiraService(HonzaBotnerDbContext dbContext)
+        public RoleBindingsService(HonzaBotnerDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
         public async Task<IList<ulong>> FindMappingAsync(ulong channelId, ulong messageId, string emojiName)
         {
-            return await _dbContext.Ziras
+            return await _dbContext.RoleBindings
                 .Where(z => z.ChannelId == channelId && z.MessageId == messageId && z.Emoji == emojiName)
                 .Select(z => z.RoleId)
                 .ToListAsync();

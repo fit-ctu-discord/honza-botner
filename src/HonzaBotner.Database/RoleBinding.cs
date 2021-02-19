@@ -1,7 +1,7 @@
 ﻿namespace HonzaBotner.Database
 {
     // TODO: Find better name
-    public class Zira
+    public class RoleBinding
     {
         public ulong RoleId { get; set; }
         public ulong ChannelId { get; set; }
