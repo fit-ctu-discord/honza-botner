@@ -1,5 +1,4 @@
-﻿using HonzaBotner.Discord;
-using HonzaBotner.Services.Contract;
+﻿using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

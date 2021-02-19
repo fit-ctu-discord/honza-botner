@@ -17,7 +17,7 @@ namespace HonzaBotner
             if (h[ForwardedProtoHeader] == string.Empty || h[ForwardedProtoHeader] == "https") {
                 await _next(ctx);
             } else if (h[ForwardedProtoHeader] != "https") {
-                string? withHttps = $"https://{ctx.Request.Host}{ctx.Request.Path}{ctx.Request.QueryString}";
+                string withHttps = $"https://{ctx.Request.Host}{ctx.Request.Path}{ctx.Request.QueryString}";
                 ctx.Response.Redirect(withHttps);
             }
         }

@@ -79,7 +79,7 @@ namespace HonzaBotner.Services
                     if (role == null)
                     {
                         returnValue = false;
-                        _logger.LogError("Revoking roles for user id {0} failed for role key:{1} = value:{2}.",
+                        _logger.LogError("Revoking roles for user id {0} failed for role key:{1} = value:{2}",
                             userId, key, value);
                     }
                     else
@@ -146,7 +146,7 @@ namespace HonzaBotner.Services
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, "Revoking host role '{0}' failed.", roleId);
+                    _logger.LogError(e, "Revoking host role '{0}' failed", roleId);
                 }
             }
         }

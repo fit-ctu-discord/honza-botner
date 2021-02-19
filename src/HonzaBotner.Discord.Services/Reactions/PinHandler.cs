@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.Services.Options;
-using HonzaBotner.Services.Contract;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -51,7 +50,7 @@ namespace HonzaBotner.Discord.Services.Reactions
                             }
                             catch (Exception e)
                             {
-                                _logger.LogError(e, "Failed to parse role id {0}.", keyValuePair.Key);
+                                _logger.LogError(e, "Failed to parse role id {0}", keyValuePair.Key);
                             }
                         }
 
@@ -82,7 +81,7 @@ namespace HonzaBotner.Discord.Services.Reactions
             }
             catch
             {
-                _logger.LogError("Failed to create discord emoji from name {0}.", _pinOptions.EmojiName);
+                _logger.LogError("Failed to create discord emoji from name {0}", _pinOptions.EmojiName);
             }
 
             return IReactionHandler.Result.Continue;

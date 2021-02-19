@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -57,13 +54,13 @@ namespace HonzaBotner.Discord
 
         private Task Client_GuildAvailable(DiscordClient sender, GuildCreateEventArgs e)
         {
-            sender.Logger.LogInformation($"Guild available: {e.Guild.Name}");
+            sender.Logger.LogInformation("Guild available: {0}", e.Guild.Name);
             return Task.CompletedTask;
         }
 
         private async Task Client_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs e)
         {
-            sender.Logger.LogInformation($"Guild download completed.");
+            sender.Logger.LogInformation("Guild download completed");
 
             // Run managers.
             await _voiceManager.Init();
@@ -78,15 +75,16 @@ namespace HonzaBotner.Discord
         private Task Commands_CommandExecuted(CommandsNextExtension sender, CommandExecutionEventArgs e)
         {
             e.Context.Client.Logger.LogInformation(
-                $"{e.Context.User.Username} successfully executed '{e.Command.QualifiedName}'");
+                "{0} successfully executed '{1}'", e.Context.User.Username, e.Command.QualifiedName);
             return Task.CompletedTask;
         }
 
         private async Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
         {
-            e.Context.Client.Logger.LogError(
-                $"{e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}",
-                DateTime.Now);
+            e.Context.Client.Logger.LogError(e.Exception,
+                "{0} tried executing '{1}' but it errored: {2}: {3}", e.Context.User.Username,
+                    e.Command?.QualifiedName ?? "<unknown command>", e.Exception.GetType(),
+                    e.Exception.Message);
 
             if (e.Exception is ChecksFailedException)
             {

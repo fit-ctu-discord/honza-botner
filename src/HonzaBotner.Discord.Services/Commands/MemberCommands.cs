@@ -18,7 +18,6 @@ namespace HonzaBotner.Discord.Services.Commands
     [Group("member")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     [Description("Commands to interact with members.")]
-    [Hidden]
     [RequireMod]
     public class MemberCommands : BaseCommandModule
     {
@@ -175,7 +174,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
             var emoji = DiscordEmoji.FromName(ctx.Client, ":ok_hand:");
             var reactMessage =
-                await ctx.Channel.SendMessageAsync($"To approve erase of `{userName}`, react with {emoji.ToString()}");
+                await ctx.Channel.SendMessageAsync($"To approve erase of `{userName}`, react with {emoji}");
             await reactMessage.CreateReactionAsync(emoji);
             var result = await reactMessage.WaitForReactionAsync(ctx.Member, emoji);
 
@@ -195,7 +194,7 @@ namespace HonzaBotner.Discord.Services.Commands
             catch (Exception e)
             {
                 await ctx.Channel.SendMessageAsync("Member erase failed.");
-                _logger.LogWarning(e, "Member erase failed.");
+                _logger.LogWarning(e, "Member erase failed");
             }
         }
 

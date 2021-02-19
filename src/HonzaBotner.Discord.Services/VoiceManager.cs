@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -96,7 +95,7 @@ namespace HonzaBotner.Discord.Services
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Creating voice channel failed.");
+                _logger.LogError(e, "Creating voice channel failed");
             }
         }
 
@@ -124,7 +123,7 @@ namespace HonzaBotner.Discord.Services
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "Editing voice channel failed.");
+                _logger.LogWarning(e, "Editing voice channel failed");
             }
 
             return false;

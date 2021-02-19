@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HonzaBotner.Discord
 {
     public class ReactionListBuilder
     {
-        private static readonly Type _reactionHandlerType = typeof(IReactionHandler);
-
         private readonly IServiceCollection _serviceCollection;
         private readonly OrderedReactionHandlersList _reactionHandlersHandlers = new();
 

@@ -1,4 +1,3 @@
-using System;
 using HonzaBotner.Services.Contract;
 using Xunit;
 

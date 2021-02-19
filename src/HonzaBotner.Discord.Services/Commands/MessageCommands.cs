@@ -11,13 +11,12 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("message")]
     [Description("Commands to interact with messages.")]
-    [Hidden]
     [RequireMod]
     public class MessageCommands : BaseCommandModule
     {
-        private readonly ILogger<MemberCommands> _logger;
+        private readonly ILogger<MessageCommands> _logger;
 
-        public MessageCommands(ILogger<MemberCommands> logger)
+        public MessageCommands(ILogger<MessageCommands> logger)
         {
             _logger = logger;
         }
@@ -40,7 +39,7 @@ namespace HonzaBotner.Discord.Services.Commands
             catch (Exception e)
             {
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
-                _logger.LogWarning(e, "Failed to send message '{0}'. It might have been empty.", valueToSend);
+                _logger.LogWarning(e, "Failed to send message '{0}'. It might have been empty", valueToSend);
             }
         }
 
@@ -85,7 +84,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 }
                 catch (Exception e)
                 {
-                    _logger.LogWarning(e, "Could't react with emoji {0}.", emoji);
+                    _logger.LogWarning(e, "Couldn't react with emoji {0}", emoji);
                     await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":bug:"));
                     return;
                 }

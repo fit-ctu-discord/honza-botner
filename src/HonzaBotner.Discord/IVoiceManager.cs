@@ -1,8 +1,5 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using DSharpPlus;
+﻿using System.Threading.Tasks;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
 
 namespace HonzaBotner.Discord
 {
