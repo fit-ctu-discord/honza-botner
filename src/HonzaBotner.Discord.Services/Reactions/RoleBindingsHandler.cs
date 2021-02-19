@@ -34,7 +34,7 @@ namespace HonzaBotner.Discord.Services.Reactions
                     if (role == null)
                         continue;
 
-                    await member.GrantRoleAsync(role, "Zira");
+                    await member.GrantRoleAsync(role, "Add role from binding");
                 }
             });
 

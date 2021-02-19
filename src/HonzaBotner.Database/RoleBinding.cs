@@ -1,6 +1,5 @@
 ﻿namespace HonzaBotner.Database
 {
-    // TODO: Find better name
     public class RoleBinding
     {
         public ulong RoleId { get; set; }
