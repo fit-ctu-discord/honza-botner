@@ -59,7 +59,7 @@ namespace HonzaBotner.Discord.Services.Reactions
                     if (role == null)
                         continue;
 
-                    await member.RevokeRoleAsync(role, "Zira");
+                    await member.RevokeRoleAsync(role, "Remove role because of binding");
                 }
             });
 
