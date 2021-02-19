@@ -109,7 +109,7 @@ namespace HonzaBotner.Discord.Services.Commands
             [Command("add")]
             public async Task AddBinding(CommandContext ctx, [Description("URL of the message.")] string url,
                 [Description("Emoji to react with.")] DiscordEmoji emoji,
-                [Description("Roles which will be toggled after reaction")] params DiscordRole[] roles)
+                [Description("Roles which will be toggled after reaction.")] params DiscordRole[] roles)
             {
                 DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
                 if (message == null)
