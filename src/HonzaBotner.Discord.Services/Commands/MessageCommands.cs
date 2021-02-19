@@ -164,7 +164,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 {
                     try
                     {
-                        await message.DeleteReactionsEmojiAsync(emoji);
+                        // await message.DeleteReactionsEmojiAsync(emoji);
                     }
                     catch (Exception e)
                     {
