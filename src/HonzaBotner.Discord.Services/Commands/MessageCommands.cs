@@ -100,17 +100,20 @@ namespace HonzaBotner.Discord.Services.Commands
         public class RoleBindingsCommands : BaseCommandModule
         {
             private readonly IRoleBindingsService _roleBindingsService;
+            private readonly ILogger<RoleBindingsCommands> _logger;
 
-            public RoleBindingsCommands(IRoleBindingsService roleBindingsService)
+            public RoleBindingsCommands(IRoleBindingsService roleBindingsService, ILogger<RoleBindingsCommands> logger)
             {
                 _roleBindingsService = roleBindingsService;
+                _logger = logger;
             }
 
-            [GroupCommand()]
+            [GroupCommand]
             [Command("add")]
             public async Task AddBinding(CommandContext ctx, [Description("URL of the message.")] string url,
                 [Description("Emoji to react with.")] DiscordEmoji emoji,
-                [Description("Roles which will be toggled after reaction.")] params DiscordRole[] roles)
+                [Description("Roles which will be toggled after reaction.")]
+                params DiscordRole[] roles)
             {
                 DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
                 if (message == null)
@@ -123,42 +126,47 @@ namespace HonzaBotner.Discord.Services.Commands
 
                 await _roleBindingsService.AddBindingsAsync(channelId, messageId, emoji.Name,
                     roles.Select(r => r.Id).ToHashSet());
-            }
-
-            [Command("remove")]
-            [Priority(1)]
-            public async Task RemoveBinding(CommandContext ctx, [Description("URL of the message.")] string url,
-                [Description("Emoji to react with.")] DiscordEmoji emoji)
-            {
-                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
-                if (message == null)
+                try
                 {
-                    throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
+                    await message.CreateReactionAsync(emoji);
                 }
-
-                ulong channelId = message.ChannelId;
-                ulong messageId = message.Id;
-
-                await _roleBindingsService.RemoveBindingsAsync(channelId, messageId, emoji.Name, null);
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Couldn't add reaction for emoji: {0} on {1}",
+                        emoji.Name, url);
+                }
             }
 
             [Command("remove")]
-            [Priority(2)]
             public async Task RemoveBinding(CommandContext ctx, [Description("URL of the message.")] string url,
                 [Description("Emoji to react with.")] DiscordEmoji emoji,
-                [Description("Roles which will be toggled after reaction")] params DiscordRole[] roles)
+                [Description("Roles which will be toggled after reaction")]
+                params DiscordRole[] roles)
             {
                 DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
                 if (message == null)
                 {
-                    throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
+                    throw new ArgumentOutOfRangeException($"Couldn't find message with link: {0} on {1}",
+                        emoji.Name, url);
                 }
 
                 ulong channelId = message.ChannelId;
                 ulong messageId = message.Id;
 
-                await _roleBindingsService.RemoveBindingsAsync(channelId, messageId, emoji.Name,
+                bool someRemained = await _roleBindingsService.RemoveBindingsAsync(channelId, messageId, emoji.Name,
                     roles.Select(r => r.Id).ToHashSet());
+
+                if (!someRemained)
+                {
+                    try
+                    {
+                        await message.DeleteReactionsEmojiAsync(emoji);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogWarning(e, "Couldn't delete reaction for emoji: {0}", emoji.Name);
+                    }
+                }
             }
         }
     }

@@ -38,7 +38,10 @@ namespace HonzaBotner.Services
                     ChannelId = channelId, MessageId = messageId, Emoji = emoji, RoleId = roleId
                 };
 
-                if (await _dbContext.RoleBindings.AnyAsync(r => Same(r, binding, true)))
+                if (await _dbContext.RoleBindings.AnyAsync(db => db.Emoji == binding.Emoji &&
+                                                                 db.ChannelId == binding.ChannelId
+                                                                 && db.MessageId == binding.MessageId
+                                                                 && db.RoleId == binding.RoleId))
                 {
                     _logger.LogInformation("Binding for this combination already exists (roleId: {0})", roleId);
                     continue;
@@ -51,26 +54,24 @@ namespace HonzaBotner.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task RemoveBindingsAsync(ulong channelId, ulong messageId, string emoji, HashSet<ulong>? roleIds)
+        /// <inheritdoc />
+        public async Task<bool> RemoveBindingsAsync(ulong channelId, ulong messageId, string emoji, HashSet<ulong>? roleIds)
         {
             List<RoleBinding> bindingsToRemove;
 
             RoleBinding binding = new() {ChannelId = channelId, MessageId = messageId, Emoji = emoji};
 
-            if (roleIds == null)
-            {
-                bindingsToRemove =  await _dbContext.RoleBindings
-                    .Where(r => Same(r, binding, false))
-                    .ToListAsync();
-            }
-            else
+            if (roleIds != null && roleIds.Any())
             {
                 bindingsToRemove = new List<RoleBinding>();
 
                 foreach (ulong roleId in roleIds)
                 {
                     binding.RoleId = roleId;
-                    RoleBinding toDelete = await _dbContext.RoleBindings.FirstOrDefaultAsync(r => Same(r, binding, true));
+                    RoleBinding toDelete = await _dbContext.RoleBindings.FirstOrDefaultAsync(db =>
+                        db.Emoji == binding.Emoji && db.ChannelId == binding.ChannelId
+                                                  && db.MessageId == binding.MessageId
+                                                  && db.RoleId == binding.RoleId);
 
                     if (toDelete != null)
                     {
@@ -78,16 +79,21 @@ namespace HonzaBotner.Services
                     }
                 }
             }
+            else
+            {
+                bindingsToRemove = await _dbContext.RoleBindings
+                    .Where(db => db.Emoji == binding.Emoji && db.ChannelId == binding.ChannelId
+                                                           && db.MessageId == binding.MessageId)
+                    .ToListAsync();
+            }
+
 
             _dbContext.RoleBindings.RemoveRange(bindingsToRemove);
-            await _dbContext.RoleBindings.SingleOrDefaultAsync();
-        }
+            await _dbContext.SaveChangesAsync();
 
-        private static bool Same(RoleBinding fromDb, RoleBinding roleBinding, bool requireRoleId)
-        {
-            return fromDb.Emoji == roleBinding.Emoji && fromDb.ChannelId == roleBinding.ChannelId
-                                                     && fromDb.MessageId == roleBinding.MessageId
-                                                     && (fromDb.RoleId == roleBinding.RoleId || !requireRoleId);
+            return await _dbContext.RoleBindings
+                .AnyAsync(db => db.Emoji == binding.Emoji && db.ChannelId == binding.ChannelId
+                                                          && db.MessageId == binding.MessageId);
         }
     }
 }

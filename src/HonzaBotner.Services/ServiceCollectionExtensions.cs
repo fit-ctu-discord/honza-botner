@@ -28,6 +28,7 @@ namespace HonzaBotner.Services
             serviceCollection.AddTransient<IUrlProvider, AppUrlProvider>();
             serviceCollection.AddTransient<IHashService, Sha256HashService>();
             serviceCollection.AddScoped<IEmojiCounterService, EmojiCounterService>();
+            serviceCollection.AddScoped<IRoleBindingsService, RoleBindingsService>();
 
             return serviceCollection;
         }
