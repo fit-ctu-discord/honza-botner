@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -34,7 +35,7 @@ namespace HonzaBotner.Discord.Services.Commands
         [Description("Displays per day usage of emotes.")]
         public Task PerDayCommand(CommandContext ctx, [RemainingText] string parameters)
         {
-            return Display(ctx, false, parameters);
+            return Display(ctx, false, parameters, emoji => emoji.UsagePerDay);
         }
 
         [Command("total")]
@@ -42,25 +43,33 @@ namespace HonzaBotner.Discord.Services.Commands
         [Description("Displays total usage of emotes.")]
         public Task TotalCommand(CommandContext ctx)
         {
-            return Display(ctx, true, "");
+            return Display(ctx, true, "", emoji => emoji.Used);
         }
 
-        private async Task Display(CommandContext ctx, bool total, string parameters)
+        private async Task Display<TKey>(CommandContext ctx, bool total, string parameters,
+            Func<CountedEmoji, TKey> comparer)
         {
             IEnumerable<CountedEmoji> results = await _emojiCounterService.ListAsync();
+            IOrderedEnumerable<CountedEmoji> orderedResults = results.OrderByDescending(comparer);
+
             await ctx.RespondAsync("**Statistika používání custom emotes**");
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             builder.Append("\n");
 
             int emojisAppended = 0;
             const int chunkSize = 30;
 
-            foreach (CountedEmoji result in results)
+            IReadOnlyDictionary<ulong, DiscordEmoji> emojis = ctx.Guild.Emojis;
+
+            foreach (CountedEmoji result in orderedResults)
             {
                 try
                 {
-                    DiscordEmoji emoji = await ctx.Guild.GetEmojiAsync(result.Id);
+                    if (!emojis.TryGetValue(result.Id, out DiscordEmoji? emoji) || emoji == null)
+                    {
+                        continue;
+                    }
 
                     {
                         string label = total ? "×" : "×/day";
@@ -86,7 +95,7 @@ namespace HonzaBotner.Discord.Services.Commands
                         emojisAppended = 0;
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     _logger.LogWarning(e, "Couldn't find emote with id {0}", result.Id);
                 }
