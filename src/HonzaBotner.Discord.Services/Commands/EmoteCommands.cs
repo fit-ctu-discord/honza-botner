@@ -139,7 +139,7 @@ namespace HonzaBotner.Discord.Services.Commands
                         animated = true;
                         break;
                     case "nonanimated":
-                        nonAnimated = false;
+                        nonAnimated = true;
                         break;
                     default:
                         _logger.LogInformation("Unknown flag was used in emoji print: {0}", parameter);
