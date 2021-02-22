@@ -55,18 +55,6 @@ namespace HonzaBotner
                     config.RegisterCommands<MessageCommands>();
                     config.RegisterCommands<VoiceCommands>();
                     config.RegisterCommands<PollCommands>();
-                    // config.AddCommand<HiCommand>(HiCommand.ChatCommand);
-                    // config.AddCommand<AuthorizeCommand>(AuthorizeCommand.ChatCommand);
-                    // config.AddCommand<CountCommand>(CountCommand.ChatCommand);
-                    // config.AddCommand<Activity>(Activity.ChatCommand);
-                    // config.AddCommand<HugCommand>(HugCommand.ChatCommand);
-                    // // Messages
-                    // config.AddCommand<SendMessage>(SendMessage.ChatCommand);
-                    // config.AddCommand<EditMessage>(EditMessage.ChatCommand);
-                    // config.AddCommand<SendImage>(SendImage.ChatCommand);
-                    // config.AddCommand<EditImage>(EditImage.ChatCommand);
-                    // // Polls
-                    // config.AddCommand<PollCommand>(PollCommand.ChatCommand);
                 }, reactions =>
                 {
                     reactions.AddReaction<VerificationReactionHandler>()

@@ -87,7 +87,7 @@ namespace HonzaBotner.Discord.Services.Commands
                             ? result.Used.ToString()
                             : $"{result.UsagePerDay:0.00}").PadLeft(10, ' '))
                     .Append(label)
-                    .Append("`")
+                    .Append(" `")
                     .Append(emojisAppended % 3 == 2 ? "\n" : "\t");
 
                 emojisAppended++;
@@ -112,8 +112,7 @@ namespace HonzaBotner.Discord.Services.Commands
                     },
                     Title = "Statistika používání custom emotes",
                 };
-                var pages = interactivity.GeneratePagesInEmbed(builder.ToString(),
-                    SplitType.Line, embedBuilder);
+                var pages = interactivity.GeneratePages(builder.ToString(), embedBuilder, 12);
                 await ctx.Channel.SendPaginatedMessageAsync(ctx.Member, pages);
             }
         }
