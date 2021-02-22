@@ -33,8 +33,8 @@ Example file structure:
 CVUT id and secret can be found on [auth manager][oauth]. In case you don't have a project there, you will need to create one
 and then create an app in it (Web application). This project also needs to have access to the following services:
 
-- urn:ctu:oauth:umapi.read
-- cvut:umapi:read
+- `urn:ctu:oauth:umapi.read`
+- `cvut:umapi:read`
 
 Discord token can be found on [Discord developer portal][discordDev].
 
