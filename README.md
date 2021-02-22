@@ -55,7 +55,7 @@ docker-compose up -d
 ```
 if everything went well you will see `Starting postgres-botner ... done`.
 
-After that, you can start up the project in your favorite IDE or by typing `dotnet run --project .\src\HonzaBotner\`.
+After that, you can start up the project in your favorite IDE or by typing `dotnet run --project ./src/HonzaBotner/`.
 
 ## Migrations
 
