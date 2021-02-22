@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -16,7 +18,6 @@ namespace HonzaBotner.Discord.Services.Commands
     [Description(
         "Commands to display stats about emote usage. You can also use additional switches `animated` and `nonanimated`.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
-    [Cooldown(2, 120, CooldownBucketType.User)]
     public class EmoteCommands : BaseCommandModule
     {
         private readonly IEmojiCounterService _emojiCounterService;
@@ -32,51 +33,68 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("perday")]
         [Aliases("daily")]
         [Description("Displays per day usage of emotes.")]
-        public Task PerDayCommand(CommandContext ctx, [RemainingText] string parameters)
+        public Task PerDayCommand(CommandContext ctx, params string[] parameters)
         {
-            return Display(ctx, false, parameters);
+            return Display(ctx, false, parameters, emoji => emoji.UsagePerDay);
         }
 
         [Command("total")]
         [Aliases("all")]
         [Description("Displays total usage of emotes.")]
-        public Task TotalCommand(CommandContext ctx)
+        public Task TotalCommand(CommandContext ctx, params string[] parameters)
         {
-            return Display(ctx, true, "");
+            return Display(ctx, true, parameters, emoji => emoji.Used);
         }
 
-        private async Task Display(CommandContext ctx, bool total, string parameters)
+        private async Task Display<TKey>(CommandContext ctx, bool total, string[] parameters,
+            Func<CountedEmoji, TKey> comparer)
         {
+            GetFlags(parameters, out bool animated, out bool nonAnimated, out bool debug);
+            bool all = animated == nonAnimated;
+
             IEnumerable<CountedEmoji> results = await _emojiCounterService.ListAsync();
+            IOrderedEnumerable<CountedEmoji> orderedResults = results.OrderByDescending(comparer);
+
+            Stopwatch stopwatch = new();
+            stopwatch.Start();
+
             await ctx.RespondAsync("**Statistika používání custom emotes**");
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             builder.Append("\n");
 
             int emojisAppended = 0;
             const int chunkSize = 30;
 
-            foreach (CountedEmoji result in results)
+            IReadOnlyDictionary<ulong, DiscordEmoji> emojis = ctx.Guild.Emojis;
+
+            foreach (CountedEmoji result in orderedResults)
             {
                 try
                 {
-                    DiscordEmoji emoji = await ctx.Guild.GetEmojiAsync(result.Id);
-
+                    if (!emojis.TryGetValue(result.Id, out DiscordEmoji? emoji) || emoji == null)
                     {
-                        string label = total ? "×" : "×/day";
-
-                        builder.Append(emoji)
-                            .Append("`")
-                            .Append(
-                                (total
-                                    ? result.Used.ToString()
-                                    : $"{result.UsagePerDay:0.00}").PadLeft(10, ' '))
-                            .Append(label)
-                            .Append("`")
-                            .Append(emojisAppended % 3 == 2 ? "\n" : "\t");
-
-                        emojisAppended++;
+                        continue;
                     }
+
+                    if (!(emoji.IsAnimated == animated || all))
+                    {
+                        continue;
+                    }
+
+                    string label = total ? "×" : "×/day";
+
+                    builder.Append(emoji)
+                        .Append("`")
+                        .Append(
+                            (total
+                                ? result.Used.ToString()
+                                : $"{result.UsagePerDay:0.00}").PadLeft(10, ' '))
+                        .Append(label)
+                        .Append("`")
+                        .Append(emojisAppended % 3 == 2 ? "\n" : "\t");
+
+                    emojisAppended++;
 
                     if (emojisAppended == chunkSize)
                     {
@@ -86,7 +104,7 @@ namespace HonzaBotner.Discord.Services.Commands
                         emojisAppended = 0;
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     _logger.LogWarning(e, "Couldn't find emote with id {0}", result.Id);
                 }
@@ -99,6 +117,35 @@ namespace HonzaBotner.Discord.Services.Commands
             }
 
             builder.Clear();
+
+            stopwatch.Stop();
+            if (debug)
+            {
+                await ctx.RespondAsync($"Execution of emoji print took: {stopwatch.Elapsed}");
+            }
+        }
+
+        private void GetFlags(string[] parameters, out bool animated, out bool nonAnimated, out bool debug)
+        {
+            debug = animated = nonAnimated = false;
+            foreach (string parameter in parameters)
+            {
+                switch (parameter)
+                {
+                    case "debug":
+                        debug = true;
+                        break;
+                    case "animated":
+                        animated = true;
+                        break;
+                    case "nonanimated":
+                        nonAnimated = false;
+                        break;
+                    default:
+                        _logger.LogInformation("Unknown flag was used in emoji print: {0}", parameter);
+                        break;
+                }
+            }
         }
     }
 }
