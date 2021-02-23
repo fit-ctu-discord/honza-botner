@@ -9,7 +9,7 @@ namespace HonzaBotner.Services
         public string Hash(string input)
         {
             byte[] toBeHashed = Encoding.UTF8.GetBytes(input);
-            using var sha256 = SHA256.Create();
+            using SHA256 sha256 = SHA256.Create();
             byte[] bytes = sha256.ComputeHash(toBeHashed);
 
             StringBuilder strB = new();

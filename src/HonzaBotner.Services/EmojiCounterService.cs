@@ -24,7 +24,7 @@ namespace HonzaBotner.Services
 
         public async Task IncrementAsync(ulong emojiId)
         {
-            var emoji = await _dbContext.CountedEmojis.FindAsync(emojiId);
+            Database.CountedEmoji emoji = await _dbContext.CountedEmojis.FindAsync(emojiId);
 
             if (emoji == null)
             {
@@ -38,7 +38,7 @@ namespace HonzaBotner.Services
 
         public async Task DecrementAsync(ulong emojiId)
         {
-            var emoji = await _dbContext.CountedEmojis.FindAsync(emojiId);
+            Database.CountedEmoji emoji = await _dbContext.CountedEmojis.FindAsync(emojiId);
 
             if (emoji == null) return;
 

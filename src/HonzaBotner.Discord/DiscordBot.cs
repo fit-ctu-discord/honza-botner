@@ -88,9 +88,9 @@ namespace HonzaBotner.Discord
 
             if (e.Exception is ChecksFailedException)
             {
-                var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
+                DiscordEmoji emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
 
-                var embed = new DiscordEmbedBuilder
+                DiscordEmbedBuilder embed = new()
                 {
                     Title = "Přístup zakázán",
                     Description =

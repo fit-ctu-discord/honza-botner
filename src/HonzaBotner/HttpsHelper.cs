@@ -13,7 +13,7 @@ namespace HonzaBotner
         }
 
         public async Task Invoke(HttpContext ctx) {
-            var h = ctx.Request.Headers;
+            IHeaderDictionary h = ctx.Request.Headers;
             if (h[ForwardedProtoHeader] == string.Empty || h[ForwardedProtoHeader] == "https") {
                 await _next(ctx);
             } else if (h[ForwardedProtoHeader] != "https") {

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using HonzaBotner.Discord.Extensions;
@@ -91,19 +92,11 @@ namespace HonzaBotner.Discord.Services.Commands
                     .Append(emojisAppended % 3 == 2 ? "\n" : "\t");
 
                 emojisAppended++;
-
-                /*if (emojisAppended == chunkSize)
-                {
-                    await ctx.RespondAsync(builder.ToString());
-                    builder.Clear();
-                    builder.Append("\n");
-                    emojisAppended = 0;
-                }*/
             }
 
             if (emojisAppended > 0)
             {
-                var interactivity = ctx.Client.GetInteractivity();
+                InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
                 DiscordEmbedBuilder embedBuilder = new()
                 {
                     Author = new DiscordEmbedBuilder.EmbedAuthor
@@ -112,7 +105,7 @@ namespace HonzaBotner.Discord.Services.Commands
                     },
                     Title = "Statistika používání custom emotes",
                 };
-                var pages = interactivity.GeneratePages(builder.ToString(), embedBuilder, 12);
+                IEnumerable<Page> pages = interactivity.GeneratePages(builder.ToString(), embedBuilder, 12);
                 await ctx.Channel.SendPaginatedMessageAsync(ctx.Member, pages);
             }
         }

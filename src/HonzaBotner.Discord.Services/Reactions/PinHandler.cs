@@ -32,7 +32,7 @@ namespace HonzaBotner.Discord.Services.Reactions
 
                 if (eventArgs.Emoji.Equals(pinEmoji))
                 {
-                    var reactions = await eventArgs.Message.GetReactionsAsync(pinEmoji);
+                    IReadOnlyList<DiscordUser> reactions = await eventArgs.Message.GetReactionsAsync(pinEmoji);
 
                     if (reactions.Count >= _pinOptions.Treshold)
                     {
@@ -41,16 +41,16 @@ namespace HonzaBotner.Discord.Services.Reactions
                     else
                     {
                         Dictionary<ulong, int> roleToScore = new Dictionary<ulong, int>();
-                        foreach (var keyValuePair in _pinOptions.RoleToWeightMapping)
+                        foreach ((string? key, int value) in _pinOptions.RoleToWeightMapping)
                         {
                             try
                             {
-                                ulong roleId = ulong.Parse(keyValuePair.Key);
-                                roleToScore.Add(roleId, keyValuePair.Value);
+                                ulong roleId = ulong.Parse(key);
+                                roleToScore.Add(roleId, value);
                             }
                             catch (Exception e)
                             {
-                                _logger.LogError(e, "Failed to parse role id {0}", keyValuePair.Key);
+                                _logger.LogError(e, "Failed to parse role id {0}", key);
                             }
                         }
 

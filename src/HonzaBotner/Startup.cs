@@ -93,10 +93,10 @@ namespace HonzaBotner
 
         private static void UpdateDatabase(IApplicationBuilder app)
         {
-            using var serviceScope = app.ApplicationServices
+            using IServiceScope serviceScope = app.ApplicationServices
                 .GetRequiredService<IServiceScopeFactory>()
                 .CreateScope();
-            using var context = serviceScope.ServiceProvider.GetService<HonzaBotnerDbContext>();
+            using HonzaBotnerDbContext? context = serviceScope.ServiceProvider.GetService<HonzaBotnerDbContext>();
             context?.Database.Migrate();
         }
     }

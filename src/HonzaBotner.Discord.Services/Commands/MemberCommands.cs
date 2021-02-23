@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
+using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using HonzaBotner.Database;
 using HonzaBotner.Discord.Services.Attributes;
@@ -172,11 +174,12 @@ namespace HonzaBotner.Discord.Services.Commands
                 return;
             }
 
-            var emoji = DiscordEmoji.FromName(ctx.Client, ":ok_hand:");
-            var reactMessage =
+            DiscordEmoji emoji = DiscordEmoji.FromName(ctx.Client, ":ok_hand:");
+            DiscordMessage reactMessage =
                 await ctx.Channel.SendMessageAsync($"To approve erase of `{userName}`, react with {emoji}");
             await reactMessage.CreateReactionAsync(emoji);
-            var result = await reactMessage.WaitForReactionAsync(ctx.Member, emoji);
+            InteractivityResult<MessageReactionAddEventArgs> result =
+                await reactMessage.WaitForReactionAsync(ctx.Member, emoji);
 
             await ctx.TriggerTypingAsync();
             if (result.TimedOut)

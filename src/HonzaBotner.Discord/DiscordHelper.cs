@@ -43,7 +43,7 @@ namespace HonzaBotner.Discord
                 bool channelParseSuccess = ulong.TryParse(match.Groups[1].Value, out ulong channelId);
                 if (!channelParseSuccess) return null;
 
-                var channel = guild.GetChannel(channelId);
+                DiscordChannel? channel = guild.GetChannel(channelId);
 
                 if (channel.Type != ChannelType.Text) return null;
 

@@ -20,7 +20,7 @@ namespace HonzaBotner.Discord.Extensions
             if (string.IsNullOrEmpty(input))
                 throw new ArgumentException("You must provide a string that is not null or empty!");
 
-            var embed = embedBase ?? new DiscordEmbedBuilder();
+            DiscordEmbedBuilder embed = embedBase ?? new DiscordEmbedBuilder();
 
             List<Page> result = new();
 

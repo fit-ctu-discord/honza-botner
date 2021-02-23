@@ -18,7 +18,7 @@ namespace HonzaBotner.Discord
         public DiscordWrapper(IOptions<DiscordConfig> options, IServiceProvider services, ILoggerFactory loggerFactory)
         {
             DiscordConfig optionsConfig = options.Value;
-            var config = new DiscordConfiguration()
+            DiscordConfiguration config = new()
             {
                 LoggerFactory = loggerFactory,
                 Token = optionsConfig.Token,

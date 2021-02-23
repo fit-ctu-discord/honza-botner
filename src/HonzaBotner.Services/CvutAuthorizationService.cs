@@ -135,7 +135,7 @@ namespace HonzaBotner.Services
                 {"grant_type", "authorization_code"}, {"code", code}, {"redirect_uri", redirectUri}
             };
 
-            var uriBuilder = new UriBuilder(tokenUri) {Query = GetQueryString(queryCollection)};
+            UriBuilder uriBuilder = new(tokenUri) {Query = GetQueryString(queryCollection)};
 
             HttpRequestMessage requestMessage = new()
             {
@@ -157,14 +157,14 @@ namespace HonzaBotner.Services
         {
             const string checkTokenUri = "https://auth.fit.cvut.cz/oauth/check_token";
 
-            var uriBuilder = new UriBuilder(checkTokenUri) {Query = $"token={accessToken}"};
-            var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
+            UriBuilder uriBuilder = new(checkTokenUri) {Query = $"token={accessToken}"};
+            HttpRequestMessage request = new(HttpMethod.Get, uriBuilder.Uri);
 
             HttpResponseMessage response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
             string responseText = await response.Content.ReadAsStringAsync();
-            var user = JsonDocument.Parse(responseText);
+            JsonDocument user = JsonDocument.Parse(responseText);
 
             return user.RootElement.GetProperty("user_name").GetString()
                    ?? throw new InvalidOperationException("Couldn't load information about user");
