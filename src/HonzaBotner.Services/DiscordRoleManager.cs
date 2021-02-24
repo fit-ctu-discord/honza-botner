@@ -45,7 +45,7 @@ namespace HonzaBotner.Services
             }
 
             // TODO: job queue
-            var _ = Task.Run(async () =>
+            Task _ = Task.Run(async () =>
             {
                 DiscordMember member = await guild.GetMemberAsync(userId);
                 foreach (DRole role in roles)
@@ -71,7 +71,7 @@ namespace HonzaBotner.Services
 
             List<DRole> roles = new();
 
-            foreach ((var key, ulong[] roleIds) in rolesMapping)
+            foreach ((string? key, ulong[] roleIds) in rolesMapping)
             {
                 foreach (ulong value in roleIds)
                 {

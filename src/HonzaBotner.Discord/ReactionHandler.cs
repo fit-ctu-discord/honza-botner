@@ -24,7 +24,7 @@ namespace HonzaBotner.Discord
             {
                 IReactionHandler handler = scope.ServiceProvider.GetService(reactionHandlerType) as IReactionHandler
                                            ?? throw new ArgumentOutOfRangeException();
-                var shouldStop = await handler.HandleAddAsync(eventArgs).ConfigureAwait(false);
+                IReactionHandler.Result shouldStop = await handler.HandleAddAsync(eventArgs).ConfigureAwait(false);
                 if (shouldStop == IReactionHandler.Result.Stop) return;
             }
         }
@@ -37,7 +37,7 @@ namespace HonzaBotner.Discord
             {
                 IReactionHandler handler = scope.ServiceProvider.GetService(reactionHandlerType) as IReactionHandler
                                            ?? throw new ArgumentOutOfRangeException();
-                var shouldStop = await handler.HandleRemoveAsync(eventArgs).ConfigureAwait(false);
+                IReactionHandler.Result shouldStop = await handler.HandleRemoveAsync(eventArgs).ConfigureAwait(false);
                 if (shouldStop == IReactionHandler.Result.Stop) return;
             }
         }

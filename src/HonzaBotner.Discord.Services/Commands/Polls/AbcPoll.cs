@@ -49,7 +49,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
         {
             DiscordMessage pollMessage = await client.SendMessageAsync(channel, embed: Build(client, channel.Guild));
 
-            var _ = Task.Run(async () => { await AddReactions(client, pollMessage); });
+            Task _ = Task.Run(async () => { await AddReactions(client, pollMessage); });
         }
 
         private async Task AddReactions(DiscordClient client, DiscordMessage message)
@@ -75,7 +75,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
 
             _options.Zip(_optionsEmoji).ToList().ForEach(pair =>
             {
-                var (answer, emojiName) = pair;
+                (string? answer, string? emojiName) = pair;
 
                 builder.AddField(
                     DiscordEmoji.FromName(client, emojiName).ToString(),
