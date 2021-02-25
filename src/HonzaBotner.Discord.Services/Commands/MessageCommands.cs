@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using HonzaBotner.Database;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Services.Attributes;
@@ -34,6 +37,22 @@ namespace HonzaBotner.Discord.Services.Commands
             string text)
         {
             string valueToSend = text.RemoveDiscordMentions(ctx.Guild);
+
+            if (text != valueToSend)
+            {
+                DiscordEmoji emoji = DiscordEmoji.FromName(ctx.Client, ":ok_hand:");
+                DiscordMessage reactMessage =
+                    await ctx.Channel.SendMessageAsync(
+                        $"To approve sending message with ping, react with {emoji}. (15 seconds timeout to send without pings.)");
+                await reactMessage.CreateReactionAsync(emoji);
+                InteractivityResult<MessageReactionAddEventArgs> result =
+                    await reactMessage.WaitForReactionAsync(ctx.Member, emoji, TimeSpan.FromSeconds(15));
+
+                if (!result.TimedOut)
+                {
+                    valueToSend = text;
+                }
+            }
 
             try
             {
