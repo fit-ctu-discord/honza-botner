@@ -18,6 +18,9 @@ namespace HonzaBotner.Discord.Services.Reactions
 
         public async Task<IReactionHandler.Result> HandleAddAsync(MessageReactionAddEventArgs eventArgs)
         {
+            if (eventArgs.Channel.Id != 687602748988063764)
+                return IReactionHandler.Result.Continue;
+
             ICollection<ulong> mappings =
                 await _roleBindingsService.FindMappingAsync(eventArgs.Channel.Id, eventArgs.Message.Id,
                     eventArgs.Emoji.Name);
@@ -43,6 +46,9 @@ namespace HonzaBotner.Discord.Services.Reactions
 
         public async Task<IReactionHandler.Result> HandleRemoveAsync(MessageReactionRemoveEventArgs eventArgs)
         {
+            if (eventArgs.Channel.Id != 687602748988063764)
+                return IReactionHandler.Result.Continue;
+
             ICollection<ulong> mappings =
                 await _roleBindingsService.FindMappingAsync(eventArgs.Channel.Id, eventArgs.Message.Id,
                     eventArgs.Emoji.Name);
