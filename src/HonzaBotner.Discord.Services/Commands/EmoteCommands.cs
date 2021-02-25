@@ -22,6 +22,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Description(
         "Commands to display stats about emote usage. You can also use additional switches `animated` and `nonanimated`.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
+    [Cooldown(1, 60, CooldownBucketType.Guild)]
     public class EmoteCommands : BaseCommandModule
     {
         private readonly IEmojiCounterService _emojiCounterService;
