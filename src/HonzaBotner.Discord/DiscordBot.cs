@@ -82,11 +82,6 @@ namespace HonzaBotner.Discord
 
         private async Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
         {
-            e.Context.Client.Logger.LogError(e.Exception,
-                $"{0} tried executing '{1}' but it errored: {2}: {3}", e.Context.User.Username,
-                e.Command?.QualifiedName ?? "<unknown command>", e.Exception.GetType(),
-                e.Exception.Message);
-
             switch (e.Exception)
             {
                 case CommandNotFoundException:
@@ -125,8 +120,11 @@ namespace HonzaBotner.Discord
                     break;
                 }
                 default:
-                    e.Context.Client.Logger.LogError(e.Exception, "Unhandled CommandsNext exception");
                     await e.Context.RespondAsync("Něco se pokazilo. Hups. :scream_cat:");
+                    e.Context.Client.Logger.LogError(e.Exception,
+                        $"{0} tried executing '{1}' but it errored: {2}: {3}", e.Context.User.Username,
+                        e.Command?.QualifiedName ?? "<unknown command>", e.Exception.GetType(),
+                        e.Exception.Message);
                     break;
             }
         }
