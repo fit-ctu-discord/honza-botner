@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -82,22 +83,51 @@ namespace HonzaBotner.Discord
         private async Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
         {
             e.Context.Client.Logger.LogError(e.Exception,
-                "{0} tried executing '{1}' but it errored: {2}: {3}", e.Context.User.Username,
-                    e.Command?.QualifiedName ?? "<unknown command>", e.Exception.GetType(),
-                    e.Exception.Message);
+                $"{0} tried executing '{1}' but it errored: {2}: {3}", e.Context.User.Username,
+                e.Command?.QualifiedName ?? "<unknown command>", e.Exception.GetType(),
+                e.Exception.Message);
 
-            if (e.Exception is ChecksFailedException)
+            switch (e.Exception)
             {
-                DiscordEmoji emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
-
-                DiscordEmbedBuilder embed = new()
+                case CommandNotFoundException:
                 {
-                    Title = "Přístup zakázán",
-                    Description =
-                        $"{emoji} Na vykonání příkazu nemáte dostatečná práva. Pokud si myslíte že ano, kontaktujte svého MODa.",
-                    Color = new DiscordColor(0xFF0000) // red
-                };
-                await e.Context.RespondAsync("", embed: embed);
+                    await e.Context.RespondAsync("Tento příkaz neznám.");
+                    CommandContext? fakeContext = Commands.CreateFakeContext(e.Context.Member, e.Context.Channel,
+                        $"help", e.Context.Prefix,
+                        Commands.FindCommand($"help", out string args), args
+                    );
+                    await Commands.ExecuteCommandAsync(fakeContext);
+                    break;
+                }
+                case InvalidOperationException:
+                case ArgumentException:
+                {
+                    await e.Context.RespondAsync("Příkaz jsi zadal špatně.");
+                    CommandContext? fakeContext = Commands.CreateFakeContext(e.Context.Member, e.Context.Channel,
+                        $"help {e.Command?.QualifiedName}", e.Context.Prefix,
+                        Commands.FindCommand($"help {e.Command?.QualifiedName}", out string args), args
+                    );
+                    await Commands.ExecuteCommandAsync(fakeContext);
+                    break;
+                }
+                case ChecksFailedException:
+                {
+                    DiscordEmoji emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
+
+                    DiscordEmbedBuilder embed = new()
+                    {
+                        Title = "Přístup zakázán",
+                        Description =
+                            $"{emoji} Na vykonání příkazu nemáte dostatečná práva. Pokud si myslíte že ano, kontaktujte svého MODa.",
+                        Color = new DiscordColor(0xFF0000) // red
+                    };
+                    await e.Context.RespondAsync("", embed: embed);
+                    break;
+                }
+                default:
+                    e.Context.Client.Logger.LogError(e.Exception, "Unhandled CommandsNext exception");
+                    await e.Context.RespondAsync("Něco se pokazilo. Hups. :scream_cat:");
+                    break;
             }
         }
 
