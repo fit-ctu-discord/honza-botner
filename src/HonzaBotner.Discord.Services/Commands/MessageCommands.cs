@@ -147,16 +147,21 @@ namespace HonzaBotner.Discord.Services.Commands
                 ulong channelId = message.ChannelId;
                 ulong messageId = message.Id;
 
+
                 await _roleBindingsService.AddBindingsAsync(channelId, messageId, emoji.Name,
                     roles.Select(r => r.Id).ToHashSet());
                 try
                 {
                     await message.CreateReactionAsync(emoji);
+                    DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client,":+1:");
+                    await ctx.Message.CreateReactionAsync(thumbsUp);
                 }
                 catch (Exception e)
                 {
                     _logger.LogError(e, "Couldn't add reaction for emoji: {0} on {1}",
                         emoji.Name, url);
+                    DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client,":-1:");
+                    await ctx.Message.CreateReactionAsync(thumbsUp);
                 }
             }
 
@@ -178,6 +183,9 @@ namespace HonzaBotner.Discord.Services.Commands
 
                 bool someRemained = await _roleBindingsService.RemoveBindingsAsync(channelId, messageId, emoji.Name,
                     roles.Select(r => r.Id).ToHashSet());
+
+                DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client,":+1:");
+                await ctx.Message.CreateReactionAsync(thumbsUp);
 
                 if (!someRemained)
                 {
