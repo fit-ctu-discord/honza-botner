@@ -160,7 +160,7 @@ namespace HonzaBotner.Discord.Services
 
         private string? ConvertStringToValidState(string? input, string? defaultValue = null)
         {
-            input = Regex.Replace(input ?? "", @"[^\u0000-\u007F]+", string.Empty);
+            input = Regex.Replace(input ?? "", @"[^\u0000-\u007FěščřžýáíéťďňĚŠČŘŽÝÁÍÉŤĎŇ]+", string.Empty);
 
             if (input.Trim().Length == 0)
             {
