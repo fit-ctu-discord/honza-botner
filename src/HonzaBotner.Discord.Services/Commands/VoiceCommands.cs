@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -24,10 +25,61 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("add")]
         [Aliases("new")]
         [Description("Create new voice channel. Users has 30 seconds to join.")]
-        public async Task AddVoiceChannel(
+        [Priority(2)]
+        public async Task AddVoiceChannelWithLimit(
             CommandContext ctx,
             [Description("Name of the channel.")] string name,
             [Description("Limit number of members who can join.")]
+            int limit = 0
+        )
+        {
+            await AddVoiceAsync(ctx, name, limit);
+        }
+
+        [Command("add")]
+        [Priority(1)]
+        public async Task AddVoiceChannel(
+            CommandContext ctx,
+            [RemainingText, Description("Name of the channel.")] string name
+        )
+        {
+            await AddVoiceAsync(ctx, name);
+        }
+
+        [Command("edit")]
+        [Aliases("rename")]
+        [Description("Edits the name (and limit) of the voice channel you are connected to.")]
+        [Priority(2)]
+        public async Task EditVoiceChannelWithLimit(
+            CommandContext ctx,
+            [Description("New name of the channel.")]
+            string newName,
+            [Description("Limit number of members who can join.")]
+            int? limit = null
+        )
+        {
+            await EditVoiceAsync(ctx, newName, limit);
+        }
+
+        [Command("edit")]
+        [Priority(1)]
+        public async Task EditVoiceChannel(
+            CommandContext ctx,
+            [RemainingText, Description("New name of the channel.")]
+            string newName
+        )
+        {
+            await EditVoiceAsync(ctx, newName);
+        }
+
+        private bool InValidChannel(DiscordChannel channel)
+        {
+            return _voiceConfig.CommandChannelsIds.Contains(channel.Id);
+        }
+
+        private async Task AddVoiceAsync(
+            CommandContext ctx,
+            string name,
             int limit = 0
         )
         {
@@ -44,38 +96,36 @@ namespace HonzaBotner.Discord.Services.Commands
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
         }
 
-        [Command("edit")]
-        [Aliases("rename")]
-        [Description("Edits the name (and limit) of the voice channel you are connected to.")]
-        public async Task EditVoiceChannel(
+        private async Task EditVoiceAsync(
             CommandContext ctx,
-            [Description("New name of the channel.")]
             string newName,
-            [Description("Limit number of members who can join.")]
             int? limit = null
         )
         {
-            if (!InValidChannel(ctx.Channel))
+            try
             {
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
-                return;
+                if (!InValidChannel(ctx.Channel))
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
+                    return;
+                }
+
+                bool success = await _voiceManager.EditVoiceChannelAsync(ctx.Member, newName, limit);
+
+                if (success)
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+                }
+                else
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
+                }
+            }
+            catch (Exception e)
+            {
+
             }
 
-            bool success = await _voiceManager.EditVoiceChannelAsync(ctx.Member, newName, limit);
-
-            if (success)
-            {
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
-            }
-            else
-            {
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
-            }
-        }
-
-        private bool InValidChannel(DiscordChannel channel)
-        {
-            return _voiceConfig.CommandChannelsIds.Contains(channel.Id);
         }
     }
 }
