@@ -1,4 +1,4 @@
-# Honza Botner
+# Honza Botner test test
 
 Bot for student FIT CTU discord server.
 
