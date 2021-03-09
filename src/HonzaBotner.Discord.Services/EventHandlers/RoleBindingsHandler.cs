@@ -3,11 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using HonzaBotner.Discord.EventHandler;
 using HonzaBotner.Services.Contract;
 
-namespace HonzaBotner.Discord.Services.Reactions
+namespace HonzaBotner.Discord.Services.EventHandlers
 {
-    public class RoleBindingsHandler : IReactionHandler
+    public class RoleBindingsHandler : IEventHandler<MessageReactionAddEventArgs>,
+        IEventHandler<MessageReactionRemoveEventArgs>
     {
         private readonly IRoleBindingsService _roleBindingsService;
 
@@ -16,16 +18,16 @@ namespace HonzaBotner.Discord.Services.Reactions
             _roleBindingsService = roleBindingsService;
         }
 
-        public async Task<IReactionHandler.Result> HandleAddAsync(MessageReactionAddEventArgs eventArgs)
+        public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs eventArgs)
         {
             if (eventArgs.User.IsBot)
-                return IReactionHandler.Result.Continue;
+                return EventHandlerResult.Continue;
 
             ICollection<ulong> mappings =
                 await _roleBindingsService.FindMappingAsync(eventArgs.Channel.Id, eventArgs.Message.Id,
                     eventArgs.Emoji.Name);
             if (!mappings.Any())
-                return IReactionHandler.Result.Continue;
+                return EventHandlerResult.Continue;
 
             DiscordMember member = await eventArgs.Guild.GetMemberAsync(eventArgs.User.Id);
 
@@ -41,19 +43,19 @@ namespace HonzaBotner.Discord.Services.Reactions
                 }
             });
 
-            return IReactionHandler.Result.Stop;
+            return EventHandlerResult.Stop;
         }
 
-        public async Task<IReactionHandler.Result> HandleRemoveAsync(MessageReactionRemoveEventArgs eventArgs)
+        public async Task<EventHandlerResult> Handle(MessageReactionRemoveEventArgs eventArgs)
         {
             if (eventArgs.User.IsBot)
-                return IReactionHandler.Result.Continue;
+                return EventHandlerResult.Continue;
 
             ICollection<ulong> mappings =
                 await _roleBindingsService.FindMappingAsync(eventArgs.Channel.Id, eventArgs.Message.Id,
                     eventArgs.Emoji.Name);
             if (!mappings.Any())
-                return IReactionHandler.Result.Continue;
+                return EventHandlerResult.Continue;
 
             DiscordMember member = await eventArgs.Guild.GetMemberAsync(eventArgs.User.Id);
 
@@ -69,7 +71,7 @@ namespace HonzaBotner.Discord.Services.Reactions
                 }
             });
 
-            return IReactionHandler.Result.Stop;
+            return EventHandlerResult.Stop;
         }
     }
 }

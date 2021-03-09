@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using HonzaBotner.Discord.EventHandler;
 using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace HonzaBotner.Discord.Services.Reactions
+namespace HonzaBotner.Discord.Services.EventHandlers
 {
-    public class PinHandler : IReactionHandler
+    public class PinHandler : IEventHandler<MessageReactionAddEventArgs>
     {
         private readonly PinOptions _pinOptions;
         private readonly DiscordWrapper _discordWrapper;
@@ -22,9 +23,9 @@ namespace HonzaBotner.Discord.Services.Reactions
             _logger = logger;
         }
 
-        public async Task<IReactionHandler.Result> HandleAddAsync(MessageReactionAddEventArgs eventArgs)
+        public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs eventArgs)
         {
-            if (eventArgs.Message.Pinned) return IReactionHandler.Result.Continue;
+            if (eventArgs.Message.Pinned) return EventHandlerResult.Continue;
 
             try
             {
@@ -50,7 +51,7 @@ namespace HonzaBotner.Discord.Services.Reactions
                             }
                             catch (Exception e)
                             {
-                                _logger.LogError(e, "Failed to parse role id {0}", key);
+                                _logger.LogError(e, "Failed to parse role id {Key}", key);
                             }
                         }
 
@@ -69,6 +70,7 @@ namespace HonzaBotner.Discord.Services.Reactions
                                     }
                                 }
                             }
+
                             score += maxRoleScore;
                         }
 
@@ -81,10 +83,10 @@ namespace HonzaBotner.Discord.Services.Reactions
             }
             catch
             {
-                _logger.LogError("Failed to create discord emoji from name {0}", _pinOptions.EmojiName);
+                _logger.LogError("Failed to create discord emoji from name {EmojiName}", _pinOptions.EmojiName);
             }
 
-            return IReactionHandler.Result.Continue;
+            return EventHandlerResult.Continue;
         }
     }
 }

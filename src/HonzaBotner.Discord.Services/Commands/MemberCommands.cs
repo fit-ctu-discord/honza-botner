@@ -18,8 +18,8 @@ using Microsoft.Extensions.Options;
 namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("member")]
-    [ModuleLifespan(ModuleLifespan.Transient)]
     [Description("Commands to interact with members.")]
+    [ModuleLifespan(ModuleLifespan.Transient)]
     [RequireMod]
     public class MemberCommands : BaseCommandModule
     {

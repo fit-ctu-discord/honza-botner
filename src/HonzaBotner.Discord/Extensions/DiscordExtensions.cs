@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Enums;
 
 namespace HonzaBotner.Discord.Extensions
 {

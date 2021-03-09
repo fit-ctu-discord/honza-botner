@@ -8,11 +8,12 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Attributes
 {
-    public class RequireModAttribute: CheckBaseAttribute
+    public class RequireModAttribute : CheckBaseAttribute
     {
         public override Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
-            CommonCommandOptions? options = ctx.CommandsNext.Services.GetService<IOptions<CommonCommandOptions>>()?.Value;
+            CommonCommandOptions? options =
+                ctx.CommandsNext.Services.GetService<IOptions<CommonCommandOptions>>()?.Value;
             return Task.FromResult(ctx.Member.Roles.Contains(ctx.Guild.GetRole(options?.ModRoleId ?? 0)));
         }
     }

@@ -40,7 +40,7 @@ namespace HonzaBotner.Discord
             };
             Interactivity = Client.UseInteractivity(iConfig);
 
-            Client.Logger.LogInformation("Starting with secret: {0}", options.Value.Token);
+            Client.Logger.LogInformation("Starting with secret: {Token}", options.Value.Token);
         }
     }
 }
