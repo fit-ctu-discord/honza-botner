@@ -3,15 +3,17 @@ using System;
 using HonzaBotner.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace HonzaBotner.Migrations
 {
     [DbContext(typeof(HonzaBotnerDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210309170217_Warning")]
+    partial class Warning
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,10 +76,9 @@ namespace HonzaBotner.Migrations
 
             modelBuilder.Entity("HonzaBotner.Database.Warning", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<decimal>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .UseIdentityByDefaultColumn();
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("IssuedAt")
                         .HasColumnType("timestamp without time zone");
