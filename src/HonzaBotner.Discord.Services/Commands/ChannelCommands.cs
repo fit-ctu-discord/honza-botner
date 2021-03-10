@@ -37,7 +37,7 @@ namespace HonzaBotner.Discord.Services.Commands
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Failed to clone channel {0} with name {1}", channel, name);
+                _logger.LogError(e, "Failed to clone channel {Channel} with name {Name}", channel, name);
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
             }
 
@@ -55,7 +55,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 }
                 catch (Exception e)
                 {
-                    _logger.LogWarning(e, "Failed to grant access to role {0} in channel {1}", role, channel);
+                    _logger.LogWarning(e, "Failed to grant access to role {Role} in channel {Channel}", role, channel);
                 }
             }
 

@@ -40,7 +40,8 @@ namespace HonzaBotner.Services
             _logger = logger;
         }
 
-        public async Task<IAuthorizationService.AuthorizeResult> AuthorizeAsync(string accessToken, string username, ulong userId, RolesPool rolesPool)
+        public async Task<IAuthorizationService.AuthorizeResult> AuthorizeAsync(string accessToken, string username,
+            ulong userId, RolesPool rolesPool)
         {
             bool discordIdPresent = await IsUserVerified(userId);
 
@@ -67,11 +68,15 @@ namespace HonzaBotner.Services
                     bool revoked = await _roleManager.RevokeRolesPoolAsync(userId, rolesPool);
                     if (!revoked)
                     {
-                        _logger.LogWarning("Revoking roles pool {2} for {0} (id {1}) failed", username, userId, rolesPool);
+                        _logger.LogWarning("Revoking roles pool {RolesPool} for {Username} (id {Id}) failed", userId,
+                            username, rolesPool);
                         return IAuthorizationService.AuthorizeResult.Failed;
                     }
+
                     bool granted = await _roleManager.GrantRolesAsync(userId, discordRoles);
-                    return granted ? IAuthorizationService.AuthorizeResult.OK : IAuthorizationService.AuthorizeResult.Failed;
+                    return granted
+                        ? IAuthorizationService.AuthorizeResult.OK
+                        : IAuthorizationService.AuthorizeResult.Failed;
                 }
 
                 return IAuthorizationService.AuthorizeResult.DifferentMember;

@@ -82,7 +82,8 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             try
             {
-                await new AbcPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question, answers.ToList())
+                await new AbcPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question,
+                        answers.ToList())
                     .PostAsync(ctx.Client, ctx.Channel);
                 await ctx.Message.DeleteAsync();
             }

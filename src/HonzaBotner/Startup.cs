@@ -1,8 +1,10 @@
 using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
+using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services;
-using HonzaBotner.Discord.Services.Reactions;
+using HonzaBotner.Discord.Services.EventHandlers;
+using HonzaBotner.Discord.Services.Managers;
 using HonzaBotner.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,41 +34,49 @@ namespace HonzaBotner
 
             string connectionString = PsqlConnectionStringParser.GetEFConnectionString(Configuration["DATABASE_URL"]);
 
-            services.AddDbContext<HonzaBotnerDbContext>(options =>
-                options.UseNpgsql(connectionString, b => b.MigrationsAssembly("HonzaBotner")));
+            services
+                .AddDbContext<HonzaBotnerDbContext>(options =>
+                    options.UseNpgsql(connectionString, b => b.MigrationsAssembly("HonzaBotner"))
+                )
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "HonzaBotner", Version = "v1"});
-            });
+                // Swagger
+                .AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "HonzaBotner", Version = "v1"}); })
 
-            services.AddBotnerServicesOptions(Configuration)
+                // Botner
+                .AddBotnerServicesOptions(Configuration)
                 .AddHttpClient()
-                .AddBotnerServices();
+                .AddBotnerServices()
 
-            services.AddDiscordOptions(Configuration)
+                // Discord
+                .AddDiscordOptions(Configuration)
                 .AddCommandOptions(Configuration)
                 .AddDiscordBot(config =>
-                {
-                    //config.RegisterCommands<AuthorizeCommands>();
-                    config.RegisterCommands<ChannelCommands>();
-                    config.RegisterCommands<EmoteCommands>();
-                    config.RegisterCommands<InfoCommands>();
-                    config.RegisterCommands<MemberCommands>();
-                    config.RegisterCommands<MessageCommands>();
-                    config.RegisterCommands<VoiceCommands>();
-                    config.RegisterCommands<PollCommands>();
-                    config.RegisterCommands<WarningCommands>();
-                }, reactions =>
-                {
-                    reactions.AddReaction<VerificationReactionHandler>()
-                        .AddReaction<StaffVerificationReactionHandler>()
-                        .AddReaction<EmojiCounterHandler>()
-                        .AddReaction<RoleBindingsHandler>()
-                        .AddReaction<PinHandler>();
-                });
+                    {
+                        //config.RegisterCommands<AuthorizeCommands>();
+                        config.RegisterCommands<ChannelCommands>();
+                        config.RegisterCommands<EmoteCommands>();
+                        config.RegisterCommands<InfoCommands>();
+                        config.RegisterCommands<MemberCommands>();
+                        config.RegisterCommands<MessageCommands>();
+                        config.RegisterCommands<PollCommands>();
+                        config.RegisterCommands<VoiceCommands>();
+                        config.RegisterCommands<WarningCommands>();
+                    }, reactions =>
+                    {
+                        reactions
+                            .AddEventHandler<EmojiCounterHandler>()
+                            .AddEventHandler<PinHandler>()
+                            .AddEventHandler<RoleBindingsHandler>()
+                            .AddEventHandler<StaffVerificationEventHandler>()
+                            .AddEventHandler<VerificationEventHandler>()
+                            .AddEventHandler<VoiceHandler>()
+                            ;
+                    }
+                )
 
-            services.AddSingleton<IVoiceManager, VoiceManager>();
+                // Managers
+                .AddTransient<IVoiceManager, VoiceManager>()
+                ;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

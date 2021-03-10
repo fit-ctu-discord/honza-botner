@@ -2,67 +2,31 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
+using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace HonzaBotner.Discord.Services
+namespace HonzaBotner.Discord.Services.Managers
 {
     public class VoiceManager : IVoiceManager
     {
         private readonly IGuildProvider _guildProvider;
-        private readonly DiscordWrapper _discordWrapper;
         private readonly CustomVoiceOptions _voiceConfig;
         private readonly ILogger<VoiceManager> _logger;
 
-        private bool _initialized;
-
-        private DiscordClient Client => _discordWrapper.Client;
-
-        public VoiceManager(IGuildProvider guildProvider, DiscordWrapper discordWrapper,
-            IOptions<CustomVoiceOptions> options, ILogger<VoiceManager> logger)
+        public VoiceManager(IGuildProvider guildProvider, IOptions<CustomVoiceOptions> options,
+            ILogger<VoiceManager> logger)
         {
             _guildProvider = guildProvider;
-            _discordWrapper = discordWrapper;
             _voiceConfig = options.Value;
             _logger = logger;
         }
 
-        public async Task Init()
-        {
-            if (!_initialized)
-            {
-                _initialized = true;
-
-                Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-
-                // Startup cleaning.
-                await DeleteAllUnusedVoiceChannelsAsync();
-            }
-        }
-
-        private async Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs args)
-        {
-            if (args.After.Channel?.Id == _voiceConfig.ClickChannelId)
-            {
-                await AddNewVoiceChannelAsync(args.Channel, await args.Guild.GetMemberAsync(args.User.Id));
-            }
-
-            if (args.Before?.Channel != null)
-            {
-                if (args.Before.Channel.Id != _voiceConfig.ClickChannelId)
-                {
-                    await DeleteUnusedVoiceChannelAsync(args.Before.Channel);
-                }
-            }
-        }
-
         public async Task AddNewVoiceChannelAsync(
             DiscordChannel channelToCloneFrom, DiscordMember member,
-            string? name = null, int? limit = 0)
+            string? name, int? limit)
         {
             name = ConvertStringToValidState(name);
 
@@ -129,7 +93,7 @@ namespace HonzaBotner.Discord.Services
             return false;
         }
 
-        private async Task DeleteUnusedVoiceChannelAsync(DiscordChannel channel)
+        public async Task DeleteUnusedVoiceChannelAsync(DiscordChannel channel)
         {
             if (channel.Id == _voiceConfig.ClickChannelId) return;
 
@@ -148,7 +112,7 @@ namespace HonzaBotner.Discord.Services
             }
         }
 
-        private async Task DeleteAllUnusedVoiceChannelsAsync()
+        public async Task DeleteAllUnusedVoiceChannelsAsync()
         {
             DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
             DiscordChannel customVoiceCategory = guild.GetChannel(_voiceConfig.ClickChannelId).Parent;

@@ -25,4 +25,20 @@
     <ProjectReference Include="..\HonzaBotner.Services\HonzaBotner.Services.csproj" />
     <ProjectReference Include="..\HonzaBotner.Services.Contract\HonzaBotner.Services.Contract.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="Migrations\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Migrations\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Migrations\**" />
+  </ItemGroup>
 </Project>

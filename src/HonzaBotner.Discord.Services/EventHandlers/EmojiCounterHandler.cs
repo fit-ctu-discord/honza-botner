@@ -1,11 +1,13 @@
 ﻿using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using HonzaBotner.Discord.EventHandler;
 using HonzaBotner.Services.Contract;
 
-namespace HonzaBotner.Discord.Services.Reactions
+namespace HonzaBotner.Discord.Services.EventHandlers
 {
-    public class EmojiCounterHandler : IReactionHandler
+    public class EmojiCounterHandler : IEventHandler<MessageReactionAddEventArgs>,
+        IEventHandler<MessageReactionRemoveEventArgs>
     {
         private readonly IEmojiCounterService _emojiCounterService;
 
@@ -14,7 +16,7 @@ namespace HonzaBotner.Discord.Services.Reactions
             _emojiCounterService = emojiCounterService;
         }
 
-        public async Task<IReactionHandler.Result> HandleAddAsync(MessageReactionAddEventArgs eventArgs)
+        public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs eventArgs)
         {
             DiscordEmoji emoji = eventArgs.Emoji;
 
@@ -23,10 +25,10 @@ namespace HonzaBotner.Discord.Services.Reactions
                 await _emojiCounterService.IncrementAsync(emoji.Id);
             }
 
-            return IReactionHandler.Result.Continue;
+            return EventHandlerResult.Continue;
         }
 
-        public async Task<IReactionHandler.Result> HandleRemoveAsync(MessageReactionRemoveEventArgs eventArgs)
+        public async Task<EventHandlerResult> Handle(MessageReactionRemoveEventArgs eventArgs)
         {
             DiscordEmoji emoji = eventArgs.Emoji;
 
@@ -35,7 +37,7 @@ namespace HonzaBotner.Discord.Services.Reactions
                 await _emojiCounterService.DecrementAsync(emoji.Id);
             }
 
-            return IReactionHandler.Result.Continue;
+            return EventHandlerResult.Continue;
         }
     }
 }
