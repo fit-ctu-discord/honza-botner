@@ -56,8 +56,8 @@ namespace HonzaBotner.Discord.Services.Commands
             await MemberInfoAsync(ctx, databaseRecord);
         }
 
-        [Command("erase")]
-        [Aliases("delete", "remove")]
+        [Command("delete")]
+        [Aliases("erase", "remove")]
         [Description("Erases database record of the member.")]
         [Priority(2)]
         public async Task MemberErase(CommandContext ctx,
