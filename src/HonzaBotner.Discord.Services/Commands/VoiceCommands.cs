@@ -5,6 +5,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Services.Options;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Commands
@@ -15,11 +16,14 @@ namespace HonzaBotner.Discord.Services.Commands
     {
         private readonly IVoiceManager _voiceManager;
         private readonly CustomVoiceOptions _voiceConfig;
+        private readonly ILogger<VoiceCommands> _logger;
 
-        public VoiceCommands(IVoiceManager voiceManager, IOptions<CustomVoiceOptions> options)
+        public VoiceCommands(IVoiceManager voiceManager, IOptions<CustomVoiceOptions> options,
+            ILogger<VoiceCommands> logger)
         {
             _voiceManager = voiceManager;
             _voiceConfig = options.Value;
+            _logger = logger;
         }
 
         [Command("add")]
@@ -40,7 +44,8 @@ namespace HonzaBotner.Discord.Services.Commands
         [Priority(1)]
         public async Task AddVoiceChannel(
             CommandContext ctx,
-            [RemainingText, Description("Name of the channel.")] string name
+            [RemainingText, Description("Name of the channel.")]
+            string name
         )
         {
             await AddVoiceAsync(ctx, name);
@@ -83,17 +88,24 @@ namespace HonzaBotner.Discord.Services.Commands
             int limit = 0
         )
         {
-            await ctx.TriggerTypingAsync();
-            if (!InValidChannel(ctx.Channel))
+            try
             {
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
-                return;
+                await ctx.TriggerTypingAsync();
+                if (!InValidChannel(ctx.Channel))
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
+                    return;
+                }
+
+                await _voiceManager.AddNewVoiceChannelAsync(ctx.Guild.GetChannel(_voiceConfig.ClickChannelId),
+                    ctx.Member, name, limit);
+
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
             }
-
-            await _voiceManager.AddNewVoiceChannelAsync(ctx.Guild.GetChannel(_voiceConfig.ClickChannelId),
-                ctx.Member, name, limit);
-
-            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "Couldn't add a voice channel");
+            }
         }
 
         private async Task EditVoiceAsync(
@@ -123,9 +135,8 @@ namespace HonzaBotner.Discord.Services.Commands
             }
             catch (Exception e)
             {
-
+                _logger.LogWarning(e, "Couldn't edit a voice channel");
             }
-
         }
     }
 }
