@@ -102,7 +102,7 @@ namespace HonzaBotner.Discord.Services.Commands
                     {
                         IconUrl = ctx.Member.AvatarUrl, Name = ctx.Member.RatherNicknameThanUsername()
                     },
-                    Title = "Statistika používání custom emotes",
+                    Title = "Statistika používání custom emotes"
                 };
                 IEnumerable<Page> pages = interactivity.GeneratePages(builder.ToString(), embedBuilder, 12);
                 await ctx.Channel.SendPaginatedMessageAsync(ctx.Member, pages);

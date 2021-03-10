@@ -55,6 +55,7 @@ namespace HonzaBotner
                         //config.RegisterCommands<AuthorizeCommands>();
                         config.RegisterCommands<ChannelCommands>();
                         config.RegisterCommands<EmoteCommands>();
+                        config.RegisterCommands<InfoCommands>();
                         config.RegisterCommands<MemberCommands>();
                         config.RegisterCommands<MessageCommands>();
                         config.RegisterCommands<PollCommands>();

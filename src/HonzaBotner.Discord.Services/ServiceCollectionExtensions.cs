@@ -13,6 +13,7 @@ namespace HonzaBotner.Discord.Services
                 configuration.GetSection(CommonCommandOptions.ConfigName));
             serviceCollection.Configure<CustomVoiceOptions>(configuration.GetSection(CustomVoiceOptions.ConfigName));
             serviceCollection.Configure<PinOptions>(configuration.GetSection(PinOptions.ConfigName));
+            serviceCollection.Configure<InfoOptions>(configuration.GetSection(InfoOptions.ConfigName));
 
             return serviceCollection;
         }
