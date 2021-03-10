@@ -160,14 +160,8 @@ namespace HonzaBotner.Discord.Services
 
         private string? ConvertStringToValidState(string? input, string? defaultValue = null)
         {
-            input = Regex.Replace(input ?? "", @"[^\u0000-\u007F]+", string.Empty);
-
-            if (input.Trim().Length == 0)
-            {
-                return defaultValue;
-            }
-
-            return input.Substring(0, Math.Min(input.Length, 30));
+            input = Regex.Replace(input ?? "", @"\p{C}+", string.Empty);
+            return input.Trim().Length == 0 ? defaultValue : input.Substring(0, Math.Min(input.Length, 30));
         }
 
         private async Task EditChannelAsync(DiscordChannel? channel, string? name, int? limit, string? userName)
