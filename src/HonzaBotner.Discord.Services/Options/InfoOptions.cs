@@ -1,5 +1,4 @@
 #nullable disable
-using System.Collections.Generic;
 
 namespace HonzaBotner.Discord.Services.Options
 {
@@ -9,6 +8,5 @@ namespace HonzaBotner.Discord.Services.Options
 
         public string RepositoryUrl { get; set; }
         public string IssueTrackerUrl { get; set; }
-        public string AvatarUrl { get; set; }
     }
 }
