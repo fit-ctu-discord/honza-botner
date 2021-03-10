@@ -60,7 +60,7 @@ namespace HonzaBotner.Services
             return true;
         }
 
-        public async Task<(bool, int)> AddWarningAsync(ulong userId, string reason)
+        public async Task<int?> AddWarningAsync(ulong userId, string reason)
         {
             Warning warning = new() {UserId = userId, Reason = reason};
 
@@ -72,11 +72,11 @@ namespace HonzaBotner.Services
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Couldn't add warning {Warning}", warning);
-                return (false, -1);
+                _logger.LogError(e, "Couldn't add warning {@Warning}", warning);
+                return null;
             }
 
-            return (true, warning.Id);
+            return warning.Id;
         }
 
         public async Task<int> GetNumberOfWarnings(ulong userId)

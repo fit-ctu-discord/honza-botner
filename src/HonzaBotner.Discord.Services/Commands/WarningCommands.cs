@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("warning")]
-    [Aliases("warn", "takheledebílku")]
+    [Aliases("warn", "takheledebilku")]
     [Description("Commands to warn and list warnings.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     [RequireMod]
@@ -38,8 +38,7 @@ namespace HonzaBotner.Discord.Services.Commands
         public async Task AddWarning(
             CommandContext ctx,
             [Description("Member to warn.")] DiscordMember member,
-            [Description("Reason for issuing a warning.")] [RemainingText]
-            string reason
+            [Description("Reason for issuing a warning.")] [RemainingText] string reason
         )
         {
             await ctx.TriggerTypingAsync();
@@ -51,8 +50,7 @@ namespace HonzaBotner.Discord.Services.Commands
         public async Task AddSilentWarning(
             CommandContext ctx,
             [Description("Member to warn.")] DiscordMember member,
-            [Description("Reason for issuing a warning.")] [RemainingText]
-            string reason
+            [Description("Reason for issuing a warning.")] [RemainingText] string reason
         )
         {
             await ctx.TriggerTypingAsync();
@@ -151,9 +149,9 @@ namespace HonzaBotner.Discord.Services.Commands
             bool silent
         )
         {
-            (bool success, int warningId) = await _warningService.AddWarningAsync(member.Id, reason);
+            int? warningId = await _warningService.AddWarningAsync(member.Id, reason);
 
-            if (success)
+            if (warningId.HasValue)
             {
                 int numberOfWarnings = await _warningService.GetNumberOfWarnings(member.Id);
 

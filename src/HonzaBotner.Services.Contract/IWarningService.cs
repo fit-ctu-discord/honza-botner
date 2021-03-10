@@ -14,7 +14,7 @@ namespace HonzaBotner.Services.Contract
 
         Task<bool> DeleteWarningAsync(int id);
 
-        Task<(bool, int)> AddWarningAsync(ulong userId, string reason);
+        Task<int?> AddWarningAsync(ulong userId, string reason);
 
         Task<int> GetNumberOfWarnings(ulong userId);
     }
