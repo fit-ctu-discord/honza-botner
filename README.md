@@ -38,6 +38,11 @@ We collect stats on using custom emotes in the server.
 That helps us in the matter of deciding what emoji we can erase and what is top-notch.
 You can see the stats using `::emotes`.
 
+#### `::info`
+
+Shows basic info about the bot,
+mainly a link to this repository and a link to the issue tracker.
+
 #### Mods' commands
 
 Besides already shown commands, mods can use a few more commands that help to moderate the server.
