@@ -10,9 +10,9 @@ The easiest way to contribute to this project is to [file issues][issues].
 
 You can also contribute code as described in [Contributing](CONTRIBUTING.md).
 
-## Functionality
+## Features
 
-This is a list, not necessarily exhaustive, of the functionality of this bot.
+This is a list, not necessarily exhaustive, of the features of this bot.
 
 ### Commands
 
@@ -42,17 +42,15 @@ You can see the stats using `::emotes`.
 
 Besides already shown commands, mods can use a few more commands that help to moderate the server.
 Such commands provide the ability to:
-- **channel** cloning, 
+- **channel** cloning,
 - **member** counting,
 - **message** sending, editing, reacting, and binding reactions to get some roles.
 
-### Other
+### Discord events features
 
 Beside the commands,
 this bot also has special features,
-that can handle Discord events or other 3rd party functionality.
-
-### Discord events
+that can handle Discord events or other 3rd party features.
 
 #### Roles granting
 
@@ -78,9 +76,9 @@ we handle adding a 📌 (`:pushpin:`) reaction in a way that we count the number
 and if it reaches the specified threshold,
 the bot pins the message so other people can see it in the future.
 
-#### 3rd party
+### 3rd party features
 
-We do not yet provide any functionality that works with a 3rd party functionality.
+We do not yet provide any functionality that works with a 3rd party features.
 
 ## License
 
