@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using HonzaBotner.Database;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Services.Contract;
+using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Commands

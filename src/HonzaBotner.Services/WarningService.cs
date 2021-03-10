@@ -6,6 +6,7 @@ using HonzaBotner.Database;
 using HonzaBotner.Services.Contract;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Warning = HonzaBotner.Services.Contract.Dto.Warning;
 
 namespace HonzaBotner.Services
 {
@@ -22,23 +23,23 @@ namespace HonzaBotner.Services
 
         public async Task<List<Warning>> GetAllWarningsAsync()
         {
-            return await _dbContext.Warnings.OrderByDescending(w => w.IssuedAt).ToListAsync();
+            return (await _dbContext.Warnings.OrderByDescending(w => w.IssuedAt).ToListAsync()).Select(GetDto).ToList();
         }
 
         public async Task<List<Warning>> GetWarningsAsync(ulong userId)
         {
-            return await _dbContext.Warnings.Where(w => w.UserId == userId)
-                .OrderByDescending(w => w.IssuedAt).ToListAsync();
+            return (await _dbContext.Warnings.Where(w => w.UserId == userId)
+                .OrderByDescending(w => w.IssuedAt).ToListAsync()).Select(GetDto).ToList();
         }
 
         public async Task<Warning?> GetWarningAsync(int id)
         {
-            return await _dbContext.Warnings.FirstOrDefaultAsync(w => w.Id == id);
+            return GetDto(await _dbContext.Warnings.FirstOrDefaultAsync(w => w.Id == id));
         }
 
         public async Task<bool> DeleteWarningAsync(int id)
         {
-            Warning? warning = await _dbContext.Warnings.FirstOrDefaultAsync(w => w.Id == id);
+            Database.Warning? warning = await _dbContext.Warnings.FirstOrDefaultAsync(w => w.Id == id);
 
             if (warning == null)
             {
@@ -62,7 +63,7 @@ namespace HonzaBotner.Services
 
         public async Task<int?> AddWarningAsync(ulong userId, string reason)
         {
-            Warning warning = new() {UserId = userId, Reason = reason};
+            Database.Warning warning = new() {UserId = userId, Reason = reason};
 
             await _dbContext.Warnings.AddAsync(warning);
 
@@ -83,5 +84,8 @@ namespace HonzaBotner.Services
         {
             return await _dbContext.Warnings.Where(w => w.UserId == userId).CountAsync();
         }
+
+        private static Warning GetDto(Database.Warning warning) =>
+            new(warning.Id, warning.UserId, warning.Reason, warning.IssuedAt);
     }
 }
