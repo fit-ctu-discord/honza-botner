@@ -15,5 +15,8 @@
         public string VerificationEmojiName { get; set; } = "";
 
         public string StaffVerificationEmojiName { get; set; } = "";
+
+        public ulong HornyJailRoleId { get; set; }
+        public ulong HornyJailChannelId { get; set; }
     }
 }

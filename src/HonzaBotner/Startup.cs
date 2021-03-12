@@ -65,6 +65,7 @@ namespace HonzaBotner
                     {
                         reactions
                             .AddEventHandler<EmojiCounterHandler>()
+                            .AddEventHandler<HornyJailHandler>()
                             .AddEventHandler<PinHandler>()
                             .AddEventHandler<RoleBindingsHandler>()
                             .AddEventHandler<StaffVerificationEventHandler>()
