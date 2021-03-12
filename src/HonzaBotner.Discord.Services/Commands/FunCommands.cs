@@ -11,7 +11,6 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("fun")]
     [Description("Commands that bring fun!")]
-    [ModuleLifespan(ModuleLifespan.Transient)]
     public class FunCommands : BaseCommandModule
     {
         private readonly ILogger<FunCommands> _logger;
