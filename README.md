@@ -43,6 +43,12 @@ You can see the stats using `::emotes`.
 Shows basic info about the bot,
 mainly a link to this repository and a link to the issue tracker.
 
+#### `::fun`
+
+Provides some basic commands for entertainment.
+Currently only `::fun choose` is available.
+This command picks one of the provided options.
+
 #### Mods' commands
 
 Besides already shown commands, mods can use a few more commands that help to moderate the server.
