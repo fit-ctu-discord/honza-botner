@@ -47,10 +47,6 @@ namespace HonzaBotner.Discord.Services.Commands
                 await ctx.Client.UpdateStatusAsync(activity);
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
             }
-            catch (ArgumentOutOfRangeException)
-            {
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
-            }
             catch (Exception e)
             {
                 _logger.LogWarning(e, "Couldn't update bot's status");
