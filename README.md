@@ -27,7 +27,8 @@ The bot can also guess the type without you specifying it.
 
 #### `::voice`
 
-This command allows you to create (`::voice add`) your custom voice channel that will be available to join for the next 30 seconds.
+This command allows you to create (`::voice add`) your custom voice channel
+that will be available to join for the next 30 seconds.
 After somebody joins, it stays in the server until somebody is in it.
 You can also edit (`::voice edit`) the name and/or limitations of such a channel,
 but be aware that Discord has rate limits that prevent editing multiple times in a row.
@@ -38,18 +39,22 @@ We collect stats on using custom emotes in the server.
 That helps us in the matter of deciding what emoji we can erase and what is top-notch.
 You can see the stats using `::emotes`.
 
-#### `::info`
+#### `::bot`
 
-Shows basic info about the bot,
+Using `::bot info`,
+member can see basic info about the bot,
 mainly a link to this repository and a link to the issue tracker.
 
 #### Mods' commands
 
-Besides already shown commands, mods can use a few more commands that help to moderate the server.
+Besides already shown commands,
+mods can use a few more commands that help to moderate the server.
 Such commands provide the ability to:
+
 - **channel** cloning,
 - **member** counting,
-- **message** sending, editing, reacting, and binding reactions to get some roles.
+- **message** sending, editing, reacting, and binding reactions to get some roles,
+- **bot** activity updating.
 
 ### Discord events features
 
