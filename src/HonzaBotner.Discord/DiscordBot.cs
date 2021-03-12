@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -45,6 +46,7 @@ namespace HonzaBotner.Discord
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
 
             _configurator.Config(Commands);
+            Commands.RegisterConverter(new EnumConverter<ActivityType>());
 
             await Client.ConnectAsync();
             await Task.Delay(-1, cancellationToken);

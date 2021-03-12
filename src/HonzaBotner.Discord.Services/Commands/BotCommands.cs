@@ -28,27 +28,21 @@ namespace HonzaBotner.Discord.Services.Commands
         [Description("Changes bot's activity status.")]
         [RequireMod]
         public async Task Activity(CommandContext ctx,
-            [Description("Type of the activity. Allowed values: competing, playing, streaming, watching or listening.")]
-            string type,
+            [Description("Type of the activity. Allowed values: competing, playing, watching or listeningTo.")]
+            ActivityType type,
             [Description("Status value of the activity."), RemainingText]
             string status
         )
         {
+            if (type == ActivityType.Custom || type == ActivityType.Streaming)
+            {
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
+                return;
+            }
+
             try
             {
-                DiscordActivity activity = new()
-                {
-                    ActivityType = type.ToLower() switch
-                    {
-                        "competing" => ActivityType.Competing,
-                        "playing" => ActivityType.Playing,
-                        "streaming" => ActivityType.Streaming,
-                        "watching" => ActivityType.Watching,
-                        "listening" => ActivityType.ListeningTo,
-                        _ => throw new ArgumentOutOfRangeException()
-                    },
-                    Name = status,
-                };
+                DiscordActivity activity = new() {ActivityType = type, Name = status};
 
                 await ctx.Client.UpdateStatusAsync(activity);
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
