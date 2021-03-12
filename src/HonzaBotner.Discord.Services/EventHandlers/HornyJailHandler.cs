@@ -39,7 +39,10 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             try
             {
                 DiscordChannel channel = eventArgs.Guild.GetChannel(_commonOptions.HornyJailChannelId);
-                await channel.SendMessageAsync("https://github.com/fit-ctu-discord/honza-botner/blob/master/docs/logo.png?raw=true");
+                await channel.SendFileAsync(
+                    _commonOptions.HornyJailFilePath,
+                    $"Ajaj, <@{eventArgs.Member.Id}>, další dirty coder!"
+                );
             }
             catch (Exception e)
             {
