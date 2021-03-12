@@ -11,22 +11,51 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
-    [Group("info")]
+    [Group("bot")]
     [Description("Commands to get you info about Discord bot and other things.")]
-    [RequireMod]
-    public class InfoCommands : BaseCommandModule
+    public class BotCommands : BaseCommandModule
     {
-        private readonly ILogger<InfoCommands> _logger;
+        private readonly ILogger<BotCommands> _logger;
         private readonly InfoOptions _infoOptions;
 
-        public InfoCommands(ILogger<InfoCommands> logger, IOptions<InfoOptions> infoOptions)
+        public BotCommands(ILogger<BotCommands> logger, IOptions<InfoOptions> infoOptions)
         {
             _logger = logger;
             _infoOptions = infoOptions.Value;
         }
 
-        [GroupCommand]
-        [Description("Clones specified channel.")]
+        [Command("activity")]
+        [Description("Changes bot's activity status.")]
+        [RequireMod]
+        public async Task Activity(CommandContext ctx,
+            [Description("Type of the activity. Allowed values: competing, playing, watching or listeningTo.")]
+            ActivityType type,
+            [Description("Status value of the activity."), RemainingText]
+            string status
+        )
+        {
+            if (type == ActivityType.Custom || type == ActivityType.Streaming)
+            {
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
+                return;
+            }
+
+            try
+            {
+                DiscordActivity activity = new() {ActivityType = type, Name = status};
+
+                await ctx.Client.UpdateStatusAsync(activity);
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "Couldn't update bot's status");
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
+            }
+        }
+
+        [Command("info")]
+        [Description("Command to get you info about Discord bot and other things.")]
         public async Task BotInfo(CommandContext ctx)
         {
             StringBuilder stringBuilder = new();
