@@ -68,6 +68,7 @@ namespace HonzaBotner
                             .AddEventHandler<EmojiCounterHandler>()
                             .AddEventHandler<PinHandler>()
                             .AddEventHandler<RoleBindingsHandler>()
+                            .AddEventHandler<ServerBoosterHandler>()
                             .AddEventHandler<StaffVerificationEventHandler>()
                             .AddEventHandler<VerificationEventHandler>()
                             .AddEventHandler<VoiceHandler>()
