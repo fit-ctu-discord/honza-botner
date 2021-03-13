@@ -3,7 +3,10 @@ using System.Collections.Generic;
 
 namespace HonzaBotner.Discord.EventHandler
 {
-    internal sealed class OrderedEventHandlersList : List<(Type, EventHandlerPriority)>
+    internal sealed class OrderedEventHandlersList : List<Type>
     {
+        public OrderedEventHandlersList(IEnumerable<Type> types) : base(types)
+        {
+        }
     }
 }
