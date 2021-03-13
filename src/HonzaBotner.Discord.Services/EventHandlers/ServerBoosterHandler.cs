@@ -49,12 +49,6 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             HashSet<ulong> newSubscribers = subscribersAfter.Except(subscribersBefore).ToHashSet();
 
-            if (!newSubscribers.Any())
-            {
-                _logger.LogError("No new subscriber even while count after is greater than count before");
-                return EventHandlerResult.Continue;
-            }
-
             foreach (ulong newSubscriberId in newSubscribers)
             {
                 try
@@ -63,7 +57,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                     DiscordChannel channel = eventArgs.GuildAfter.GetChannel(_commonOptions.GentlemenChannelId);
                     await channel.SendFileAsync(
                         _commonOptions.GentlemenFilePath,
-                        $"Šálí mě snad zrak? Další gentleman! Přidal se k nám <@{newSubscriber.Id}>!"
+                        $"Vítej v první třídě, <@{newSubscriber.Id}>!"
                     );
                 }
                 catch (Exception e)
