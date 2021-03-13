@@ -21,7 +21,6 @@ namespace HonzaBotner.Discord.EventHandler
 
             foreach (Type reactionHandlerType in _eventHandlers)
             {
-                Console.WriteLine(reactionHandlerType);
                 if (!reactionHandlerType.IsAssignableTo(typeof(IEventHandler<T>)))
                 {
                     continue;
