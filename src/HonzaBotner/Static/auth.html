@@ -1,0 +1,67 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>FIT Discord</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {{
+            font-family: 'Roboto', sans-serif;
+            font-size: 20px;
+            color: #222;
+        }}
+
+        .box {{
+            max-width: 720px;
+            width: 90%;
+            margin: 50px auto;
+            text-align: center;
+        }}
+
+        .avatar {{
+            max-width: 200px;
+        }}
+
+        .statement {{
+            margin-top: 100px;
+            margin-bottom: 200px;
+            font-size: 25px;
+            color: dodgerblue;
+            font-weight: bold;
+        }}
+
+        .statement--error {{
+            color: deeppink;
+        }}
+
+        a {{
+            color: dodgerblue;
+            text-transform: none;
+            text-decoration: none;
+        }}
+
+        a:hover {{
+            text-decoration: underline;
+        }}
+
+    </style>
+</head>
+<body>
+<div class="box">
+    <img class="avatar" src="https://raw.githubusercontent.com/fit-ctu-discord/honza-botner/master/docs/logo.png" alt="Honza Botner avatar"/>
+    <h1>Studentský FIT Discord</h1>
+    <p class="statement {0}">{1}</p>
+    <div class="info">
+        <p>Tohoto bota vyvíjí komunita. Budeme rádi, pokud se k vývoji přidáš a pomůžeš nám bota dále vylepšovat.</p>
+        <p>Zdrojový kód najdeš <a href="{2}" target="_blank">zde</a>.</p>
+        <p>Hlásit chyby můžeš <a href="{3}" target="_blank">tady</a>.</p>
+        </p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,6 +1,7 @@
 using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
+using HonzaBotner.Discord.EventHandler;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services;
 using HonzaBotner.Discord.Services.EventHandlers;
@@ -66,11 +67,13 @@ namespace HonzaBotner
                     {
                         reactions
                             .AddEventHandler<EmojiCounterHandler>()
+                            .AddEventHandler<HornyJailHandler>()
+                            .AddEventHandler<NewChannelHandler>()
                             .AddEventHandler<PinHandler>()
-                            .AddEventHandler<RoleBindingsHandler>()
+                            .AddEventHandler<RoleBindingsHandler>(EventHandlerPriority.High)
                             .AddEventHandler<ServerBoosterHandler>()
-                            .AddEventHandler<StaffVerificationEventHandler>()
-                            .AddEventHandler<VerificationEventHandler>()
+                            .AddEventHandler<StaffVerificationEventHandler>(EventHandlerPriority.Urgent)
+                            .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
                             .AddEventHandler<VoiceHandler>()
                             ;
                     }
