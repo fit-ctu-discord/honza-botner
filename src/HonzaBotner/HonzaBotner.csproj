@@ -40,5 +40,8 @@
 
   <ItemGroup>
     <Content Remove="Migrations\**" />
+    <Content Include="auth.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>
