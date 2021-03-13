@@ -49,7 +49,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
         [Command("info")]
         [Priority(1)]
-        public async Task MemberInfo(CommandContext ctx, string cvutUsername)
+        public async Task MemberInfo(CommandContext ctx, [Description("CVUT username.")] string cvutUsername)
         {
             string authId = _hashService.Hash(cvutUsername);
             Verification? databaseRecord = await _dbContext.Verifications.FirstOrDefaultAsync(v => v.AuthId == authId);
@@ -92,7 +92,6 @@ namespace HonzaBotner.Discord.Services.Commands
                 _commonCommandOptions = commonCommandOptions.Value;
             }
 
-            [GroupCommand]
             [Command("all")]
             [Description("Counts all members and all authenticated members.")]
             public async Task CountAll(CommandContext ctx)
@@ -112,6 +111,7 @@ namespace HonzaBotner.Discord.Services.Commands
                     $"Authenticated: {authenticatedCount}, All: {ctx.Guild.Members.Count.ToString()}");
             }
 
+            [GroupCommand]
             [Command("roleOr")]
             [Aliases("or")]
             [Description("Counts all members which have AT LEAST ONE of the provided roles.")]
