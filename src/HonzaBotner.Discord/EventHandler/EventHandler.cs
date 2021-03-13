@@ -19,8 +19,12 @@ namespace HonzaBotner.Discord.EventHandler
         {
             using IServiceScope scope = _provider.CreateScope();
 
-            foreach (Type reactionHandlerType in _eventHandlers)
+            // Sort handlers in descending order.
+            _eventHandlers.Sort((first, second) => second.Item2.CompareTo(first.Item2));
+
+            foreach ((Type reactionHandlerType, _) in _eventHandlers)
             {
+                Console.WriteLine(reactionHandlerType);
                 if (!reactionHandlerType.IsAssignableTo(typeof(IEventHandler<T>)))
                 {
                     continue;
