@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -44,8 +45,10 @@ namespace HonzaBotner.Discord
             Client.MessageReactionRemoved += Client_MessageReactionRemoved;
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
             Client.GuildMemberUpdated += Client_GuildMemberUpdated;
+            Client.ChannelCreated += Client_ChannelCreated;
 
             _configurator.Config(Commands);
+            Commands.RegisterConverter(new EnumConverter<ActivityType>());
 
             await Client.ConnectAsync();
             await Task.Delay(-1, cancellationToken);
@@ -150,6 +153,11 @@ namespace HonzaBotner.Discord
         }
 
         private Task Client_GuildMemberUpdated(DiscordClient client, GuildMemberUpdateEventArgs args)
+        {
+            return _eventHandler.Handle(args);
+        }
+
+        private Task Client_ChannelCreated(DiscordClient client, ChannelCreateEventArgs args)
         {
             return _eventHandler.Handle(args);
         }
