@@ -8,6 +8,7 @@
         public ulong AuthenticatedRoleId { get; set; }
 
         public ulong MuteRoleId { get; set; }
+        public ulong BotRoleId { get; set; }
         public string? HugEmoteName { get; set; }
 
         public ulong VerificationMessageId { get; set; }
