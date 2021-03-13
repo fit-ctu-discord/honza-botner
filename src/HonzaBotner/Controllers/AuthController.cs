@@ -82,7 +82,7 @@ namespace HonzaBotner.Controllers
         {
             Response.StatusCode = success ? 200 : 400;
 
-            string content = string.Format(System.IO.File.ReadAllText("auth.html"),
+            string content = string.Format(System.IO.File.ReadAllText("Static/auth.html"),
                 success ? string.Empty : "statement--error", message, _infoOptions.RepositoryUrl, _infoOptions.IssueTrackerUrl);
 
             return Content(content, "text/html");
