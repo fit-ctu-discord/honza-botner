@@ -67,13 +67,13 @@ namespace HonzaBotner
                     {
                         reactions
                             .AddEventHandler<EmojiCounterHandler>()
-                            .AddEventHandler<WelcomeRoleHandler>()
                             .AddEventHandler<NewChannelHandler>()
                             .AddEventHandler<PinHandler>()
                             .AddEventHandler<RoleBindingsHandler>(EventHandlerPriority.High)
                             .AddEventHandler<StaffVerificationEventHandler>(EventHandlerPriority.Urgent)
                             .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
                             .AddEventHandler<VoiceHandler>()
+                            .AddEventHandler<WelcomeRoleHandler>()
                             ;
                     }
                 )
