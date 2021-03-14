@@ -29,7 +29,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers.Helpers
             }
             catch (Exception e)
             {
-                logger?.LogWarning(e, "Couldn't get horny jail role");
+                logger?.LogWarning(e, "Couldn't get the role");
             }
 
             try
@@ -42,7 +42,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers.Helpers
             }
             catch (Exception e)
             {
-                logger?.LogError(e, "Failed to send welcome to the horny jail channel");
+                logger?.LogError(e, "Failed to send welcome message to the channel");
             }
 
             return EventHandlerResult.Continue;
