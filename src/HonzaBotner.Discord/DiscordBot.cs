@@ -44,7 +44,6 @@ namespace HonzaBotner.Discord
             Client.MessageReactionAdded += Client_MessageReactionAdded;
             Client.MessageReactionRemoved += Client_MessageReactionRemoved;
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
-            Client.GuildUpdated += Client_GuildUpdated;
             Client.GuildMemberUpdated += Client_GuildMemberUpdated;
             Client.ChannelCreated += Client_ChannelCreated;
 
@@ -149,11 +148,6 @@ namespace HonzaBotner.Discord
         }
 
         private Task Client_VoiceStateUpdated(DiscordClient client, VoiceStateUpdateEventArgs args)
-        {
-            return _eventHandler.Handle(args);
-        }
-
-        private Task Client_GuildUpdated(DiscordClient client, GuildUpdateEventArgs args)
         {
             return _eventHandler.Handle(args);
         }

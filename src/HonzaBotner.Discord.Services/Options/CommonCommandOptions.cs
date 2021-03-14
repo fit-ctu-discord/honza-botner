@@ -22,5 +22,7 @@
         public ulong HornyJailRoleId { get; set; }
         public ulong HornyJailChannelId { get; set; }
         public string HornyJailFilePath { get; set; } = "";
+
+        public ulong BoosterRoleId { get; set; }
     }
 }
