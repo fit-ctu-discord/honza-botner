@@ -209,13 +209,20 @@ namespace HonzaBotner.Discord.Services.Commands
 
             foreach (Warning warning in warnings)
             {
-                DiscordMember warningMember = await ctx.Guild.GetMemberAsync(warning.UserId);
-                DiscordMember issuerMember = await ctx.Guild.GetMemberAsync(warning.IssuerId);
+                try
+                {
+                    DiscordMember warningMember = await ctx.Guild.GetMemberAsync(warning.UserId);
+                    DiscordMember issuerMember = await ctx.Guild.GetMemberAsync(warning.IssuerId);
 
-                embedFields.Add(
-                    ($"#{warning.Id}\t{warningMember.RatherNicknameThanUsername()}\t{warning.IssuedAt}\t{issuerMember.RatherNicknameThanUsername()}",
-                        warning.Reason)
-                );
+                    embedFields.Add(
+                        ($"#{warning.Id}\t{warningMember.RatherNicknameThanUsername()}\t{warning.IssuedAt}\t{issuerMember.RatherNicknameThanUsername()}",
+                            warning.Reason)
+                    );
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Couldn't fetch user or issuer");
+                }
             }
 
             IEnumerable<Page> pages = interactivity.GeneratePages(embedFields, embedBuilder, 12);
