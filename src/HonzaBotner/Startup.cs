@@ -66,14 +66,15 @@ namespace HonzaBotner
                     }, reactions =>
                     {
                         reactions
+                            .AddEventHandler<BoosterHandler>()
                             .AddEventHandler<EmojiCounterHandler>()
+                            .AddEventHandler<HornyJailHandler>()
                             .AddEventHandler<NewChannelHandler>()
                             .AddEventHandler<PinHandler>()
                             .AddEventHandler<RoleBindingsHandler>(EventHandlerPriority.High)
                             .AddEventHandler<StaffVerificationEventHandler>(EventHandlerPriority.Urgent)
                             .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
                             .AddEventHandler<VoiceHandler>()
-                            .AddEventHandler<WelcomeRoleHandler>()
                             ;
                     }
                 )
