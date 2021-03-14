@@ -37,7 +37,8 @@ namespace HonzaBotner.Discord.Services.Commands
         public async Task AddWarning(
             CommandContext ctx,
             [Description("Member to warn.")] DiscordMember member,
-            [Description("Reason for issuing a warning.")] [RemainingText] string reason
+            [Description("Reason for issuing a warning.")] [RemainingText]
+            string reason
         )
         {
             await ctx.TriggerTypingAsync();
@@ -49,7 +50,8 @@ namespace HonzaBotner.Discord.Services.Commands
         public async Task AddSilentWarning(
             CommandContext ctx,
             [Description("Member to warn.")] DiscordMember member,
-            [Description("Reason for issuing a warning.")] [RemainingText] string reason
+            [Description("Reason for issuing a warning.")] [RemainingText]
+            string reason
         )
         {
             await ctx.TriggerTypingAsync();
@@ -208,9 +210,11 @@ namespace HonzaBotner.Discord.Services.Commands
             foreach (Warning warning in warnings)
             {
                 DiscordMember warningMember = await ctx.Guild.GetMemberAsync(warning.UserId);
+                DiscordMember issuerMember = await ctx.Guild.GetMemberAsync(warning.IssuerId);
 
                 embedFields.Add(
-                    ($"#{warning.Id}\t{warningMember?.RatherNicknameThanUsername()}\t{warning.IssuedAt}\t{warning.IssuerId}", warning.Reason)
+                    ($"#{warning.Id}\t{warningMember.RatherNicknameThanUsername()}\t{warning.IssuedAt}\t{issuerMember.RatherNicknameThanUsername()}",
+                        warning.Reason)
                 );
             }
 
