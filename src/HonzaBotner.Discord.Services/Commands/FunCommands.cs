@@ -44,7 +44,7 @@ namespace HonzaBotner.Discord.Services.Commands
             catch (Exception e)
             {
                 _logger.LogWarning(e, "Couldn't send a message");
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
             }
         }
     }
