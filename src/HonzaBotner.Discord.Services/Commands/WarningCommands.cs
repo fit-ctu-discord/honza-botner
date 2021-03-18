@@ -37,11 +37,12 @@ namespace HonzaBotner.Discord.Services.Commands
         public async Task AddWarning(
             CommandContext ctx,
             [Description("Member to warn.")] DiscordMember member,
-            [Description("Reason for issuing a warning.")] [RemainingText] string reason
+            [Description("Reason for issuing a warning.")] [RemainingText]
+            string reason
         )
         {
             await ctx.TriggerTypingAsync();
-            await WarnUserAsync(ctx, member, reason, false);
+            await WarnUserAsync(ctx, member, reason, false, ctx.Member);
         }
 
         [Command("silent")]
@@ -49,11 +50,12 @@ namespace HonzaBotner.Discord.Services.Commands
         public async Task AddSilentWarning(
             CommandContext ctx,
             [Description("Member to warn.")] DiscordMember member,
-            [Description("Reason for issuing a warning.")] [RemainingText] string reason
+            [Description("Reason for issuing a warning.")] [RemainingText]
+            string reason
         )
         {
             await ctx.TriggerTypingAsync();
-            await WarnUserAsync(ctx, member, reason, true);
+            await WarnUserAsync(ctx, member, reason, true, ctx.Member);
         }
 
         [Command("list")]
@@ -145,10 +147,11 @@ namespace HonzaBotner.Discord.Services.Commands
             CommandContext ctx,
             DiscordMember member,
             string reason,
-            bool silent
+            bool silent,
+            DiscordMember issuer
         )
         {
-            int? warningId = await _warningService.AddWarningAsync(member.Id, reason);
+            int? warningId = await _warningService.AddWarningAsync(member.Id, reason, issuer.Id);
 
             if (warningId.HasValue)
             {
@@ -161,7 +164,7 @@ namespace HonzaBotner.Discord.Services.Commands
                     if (silent)
                     {
                         await ctx.Channel.SendMessageAsync(
-                            $"**Uživatel <@!{member.Id}> byl varován!** (warning id: {warningId})");
+                            $"**Uživatel <@!{member.Id}> byl varován!**");
                     }
                     else
                     {
@@ -206,11 +209,20 @@ namespace HonzaBotner.Discord.Services.Commands
 
             foreach (Warning warning in warnings)
             {
-                DiscordMember warningMember = await ctx.Guild.GetMemberAsync(warning.UserId);
+                try
+                {
+                    DiscordMember warningMember = await ctx.Guild.GetMemberAsync(warning.UserId);
+                    DiscordMember issuerMember = await ctx.Guild.GetMemberAsync(warning.IssuerId);
 
-                embedFields.Add(
-                    ($"{warning.Id}\t{warningMember?.RatherNicknameThanUsername()}\t{warning.IssuedAt}", warning.Reason)
-                );
+                    embedFields.Add(
+                        ($"#{warning.Id}\t{warningMember.RatherNicknameThanUsername()}\t{warning.IssuedAt}\t{issuerMember.RatherNicknameThanUsername()}",
+                            warning.Reason)
+                    );
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Couldn't fetch user or issuer");
+                }
             }
 
             IEnumerable<Page> pages = interactivity.GeneratePages(embedFields, embedBuilder, 12);
