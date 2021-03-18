@@ -8,12 +8,12 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.EventHandlers
 {
-    public class HornyJailHandler : WelcomeMessageHandler, IEventHandler<GuildMemberUpdateEventArgs>
+    public class BoosterHandler : WelcomeMessageHandler, IEventHandler<GuildMemberUpdateEventArgs>
     {
-        private readonly ILogger<HornyJailHandler> _logger;
+        private readonly ILogger<BoosterHandler> _logger;
         private readonly CommonCommandOptions _commonOptions;
 
-        public HornyJailHandler(ILogger<HornyJailHandler> logger, IOptions<CommonCommandOptions> commonOptions)
+        public BoosterHandler(ILogger<BoosterHandler> logger, IOptions<CommonCommandOptions> commonOptions)
         {
             _logger = logger;
             _commonOptions = commonOptions.Value;
@@ -23,10 +23,10 @@ namespace HonzaBotner.Discord.Services.EventHandlers
         {
             return await HandleAddedRole(
                 eventArgs,
-                _commonOptions.HornyJailRoleId,
-                _commonOptions.HornyJailChannelId,
-                _commonOptions.HornyJailFilePath,
-                $"Ajaj, <@{eventArgs.Member.Id}>, další dirty coder!",
+                _commonOptions.BoosterRoleId,
+                _commonOptions.GentlemenChannelId,
+                _commonOptions.GentlemenFilePath,
+                $"Vítej v první třídě, <@{eventArgs.Member.Id}>!",
                 _logger
             );
         }

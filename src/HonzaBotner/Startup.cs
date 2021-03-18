@@ -66,6 +66,7 @@ namespace HonzaBotner
                     }, reactions =>
                     {
                         reactions
+                            .AddEventHandler<BoosterHandler>()
                             .AddEventHandler<EmojiCounterHandler>()
                             .AddEventHandler<HornyJailHandler>()
                             .AddEventHandler<NewChannelHandler>()
