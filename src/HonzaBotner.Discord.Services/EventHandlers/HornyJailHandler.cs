@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.EventHandlers
 {
-    public class HornyJailHandler : WelcomeMessage, IEventHandler<GuildMemberUpdateEventArgs>
+    public class HornyJailHandler : WelcomeMessageHandler, IEventHandler<GuildMemberUpdateEventArgs>
     {
         private readonly ILogger<HornyJailHandler> _logger;
         private readonly CommonCommandOptions _commonOptions;

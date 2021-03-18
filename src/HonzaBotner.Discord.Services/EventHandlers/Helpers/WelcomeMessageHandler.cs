@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.EventHandlers.Helpers
 {
-    public abstract class WelcomeMessage
+    public abstract class WelcomeMessageHandler
     {
         public async Task<EventHandlerResult> HandleAddedRole(
             GuildMemberUpdateEventArgs eventArgs,
