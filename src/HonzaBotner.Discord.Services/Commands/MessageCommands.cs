@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -8,7 +7,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using HonzaBotner.Database;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Services.Contract;
@@ -62,7 +60,7 @@ namespace HonzaBotner.Discord.Services.Commands
             catch (Exception e)
             {
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
-                _logger.LogWarning(e, "Failed to send message '{0}'. It might have been empty", valueToSend);
+                _logger.LogWarning(e, "Failed to send message '{ValueToSend}'. It might have been empty", valueToSend);
             }
         }
 
@@ -107,7 +105,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 }
                 catch (Exception e)
                 {
-                    _logger.LogWarning(e, "Couldn't react with emoji {0}", emoji);
+                    _logger.LogWarning(e, "Couldn't react with emoji {Emoji}", emoji);
                     await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":bug:"));
                     return;
                 }
@@ -153,14 +151,14 @@ namespace HonzaBotner.Discord.Services.Commands
                 try
                 {
                     await message.CreateReactionAsync(emoji);
-                    DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client,":+1:");
+                    DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client, ":+1:");
                     await ctx.Message.CreateReactionAsync(thumbsUp);
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, "Couldn't add reaction for emoji: {0} on {1}",
+                    _logger.LogError(e, "Couldn't add reaction for emoji: {EmojiName} on {Url}",
                         emoji.Name, url);
-                    DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client,":-1:");
+                    DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client, ":-1:");
                     await ctx.Message.CreateReactionAsync(thumbsUp);
                 }
             }
@@ -184,7 +182,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 bool someRemained = await _roleBindingsService.RemoveBindingsAsync(channelId, messageId, emoji.Name,
                     roles.Select(r => r.Id).ToHashSet());
 
-                DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client,":+1:");
+                DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client, ":+1:");
                 await ctx.Message.CreateReactionAsync(thumbsUp);
 
                 if (!someRemained)
@@ -195,7 +193,7 @@ namespace HonzaBotner.Discord.Services.Commands
                     }
                     catch (Exception e)
                     {
-                        _logger.LogError(e, "Couldn't add reaction for emoji: {0} on {1}",
+                        _logger.LogError(e, "Couldn't add reaction for emoji: {EmojiName} on {Url}",
                             emoji.Name, url);
                     }
                 }

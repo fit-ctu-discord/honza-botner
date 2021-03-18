@@ -7,8 +7,11 @@ using Hangfire.PostgreSql;
 using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
+using HonzaBotner.Discord.EventHandler;
+using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services;
-using HonzaBotner.Discord.Services.Reactions;
+using HonzaBotner.Discord.Services.EventHandlers;
+using HonzaBotner.Discord.Services.Managers;
 using HonzaBotner.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -38,40 +41,52 @@ namespace HonzaBotner
 
             string connectionString = PsqlConnectionStringParser.GetEFConnectionString(Configuration["DATABASE_URL"]);
 
-            services.AddDbContext<HonzaBotnerDbContext>(options =>
-                options.UseNpgsql(connectionString, b => b.MigrationsAssembly("HonzaBotner")));
+            services
+                .AddDbContext<HonzaBotnerDbContext>(options =>
+                    options.UseNpgsql(connectionString, b => b.MigrationsAssembly("HonzaBotner"))
+                )
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "HonzaBotner", Version = "v1"});
-            });
+                // Swagger
+                .AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "HonzaBotner", Version = "v1"}); })
 
-            services.AddBotnerServicesOptions(Configuration)
+                // Botner
+                .AddBotnerServicesOptions(Configuration)
                 .AddHttpClient()
-                .AddBotnerServices();
+                .AddBotnerServices()
 
-            services.AddDiscordOptions(Configuration)
+                // Discord
+                .AddDiscordOptions(Configuration)
                 .AddCommandOptions(Configuration)
                 .AddDiscordBot(config =>
-                {
-                    //config.RegisterCommands<AuthorizeCommands>();
-                    config.RegisterCommands<ChannelCommands>();
-                    config.RegisterCommands<EmoteCommands>();
-                    config.RegisterCommands<MemberCommands>();
-                    config.RegisterCommands<MessageCommands>();
-                    config.RegisterCommands<VoiceCommands>();
-                    config.RegisterCommands<PollCommands>();
-                    config.RegisterCommands<FunCommands>();
-                }, reactions =>
-                {
-                    reactions.AddReaction<VerificationReactionHandler>()
-                        .AddReaction<StaffVerificationReactionHandler>()
-                        .AddReaction<EmojiCounterHandler>()
-                        .AddReaction<RoleBindingsHandler>()
-                        .AddReaction<PinHandler>();
-                });
+                    {
+                        //config.RegisterCommands<AuthorizeCommands>();
+                        config.RegisterCommands<BotCommands>();
+                        config.RegisterCommands<ChannelCommands>();
+                        config.RegisterCommands<EmoteCommands>();
+                        config.RegisterCommands<FunCommands>();
+                        config.RegisterCommands<MemberCommands>();
+                        config.RegisterCommands<MessageCommands>();
+                        config.RegisterCommands<PollCommands>();
+                        config.RegisterCommands<VoiceCommands>();
+                        config.RegisterCommands<WarningCommands>();
+                    }, reactions =>
+                    {
+                        reactions
+                            .AddEventHandler<EmojiCounterHandler>()
+                            .AddEventHandler<HornyJailHandler>()
+                            .AddEventHandler<NewChannelHandler>()
+                            .AddEventHandler<PinHandler>()
+                            .AddEventHandler<RoleBindingsHandler>(EventHandlerPriority.High)
+                            .AddEventHandler<StaffVerificationEventHandler>(EventHandlerPriority.Urgent)
+                            .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
+                            .AddEventHandler<VoiceHandler>()
+                            ;
+                    }
+                )
 
-            services.AddSingleton<IVoiceManager, VoiceManager>();
+                // Managers
+                .AddTransient<IVoiceManager, VoiceManager>()
+                ;
 
             services.AddHangfire(config =>
             {

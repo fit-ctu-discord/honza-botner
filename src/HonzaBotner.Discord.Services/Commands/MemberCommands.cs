@@ -18,8 +18,8 @@ using Microsoft.Extensions.Options;
 namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("member")]
-    [ModuleLifespan(ModuleLifespan.Transient)]
     [Description("Commands to interact with members.")]
+    [ModuleLifespan(ModuleLifespan.Transient)]
     [RequireMod]
     public class MemberCommands : BaseCommandModule
     {
@@ -49,15 +49,15 @@ namespace HonzaBotner.Discord.Services.Commands
 
         [Command("info")]
         [Priority(1)]
-        public async Task MemberInfo(CommandContext ctx, string cvutUsername)
+        public async Task MemberInfo(CommandContext ctx, [Description("CVUT username.")] string cvutUsername)
         {
             string authId = _hashService.Hash(cvutUsername);
             Verification? databaseRecord = await _dbContext.Verifications.FirstOrDefaultAsync(v => v.AuthId == authId);
             await MemberInfoAsync(ctx, databaseRecord);
         }
 
-        [Command("erase")]
-        [Aliases("delete", "remove")]
+        [Command("delete")]
+        [Aliases("erase", "remove")]
         [Description("Erases database record of the member.")]
         [Priority(2)]
         public async Task MemberErase(CommandContext ctx,
@@ -92,7 +92,6 @@ namespace HonzaBotner.Discord.Services.Commands
                 _commonCommandOptions = commonCommandOptions.Value;
             }
 
-            [GroupCommand]
             [Command("all")]
             [Description("Counts all members and all authenticated members.")]
             public async Task CountAll(CommandContext ctx)
@@ -112,6 +111,7 @@ namespace HonzaBotner.Discord.Services.Commands
                     $"Authenticated: {authenticatedCount}, All: {ctx.Guild.Members.Count.ToString()}");
             }
 
+            [GroupCommand]
             [Command("roleOr")]
             [Aliases("or")]
             [Description("Counts all members which have AT LEAST ONE of the provided roles.")]

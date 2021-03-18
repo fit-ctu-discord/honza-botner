@@ -46,7 +46,7 @@ namespace HonzaBotner.Services
                                                                  && db.MessageId == binding.MessageId
                                                                  && db.RoleId == binding.RoleId))
                 {
-                    _logger.LogInformation("Binding for this combination already exists (roleId: {0})", roleId);
+                    _logger.LogInformation("Binding for this combination already exists (roleId: {RoleId})", roleId);
                     continue;
                 }
 

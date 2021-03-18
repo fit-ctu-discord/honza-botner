@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +7,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Services.Contract;
@@ -104,7 +102,7 @@ namespace HonzaBotner.Discord.Services.Commands
                     {
                         IconUrl = ctx.Member.AvatarUrl, Name = ctx.Member.RatherNicknameThanUsername()
                     },
-                    Title = "Statistika používání custom emotes",
+                    Title = "Statistika používání custom emotes"
                 };
                 IEnumerable<Page> pages = interactivity.GeneratePages(builder.ToString(), embedBuilder, 12);
                 await ctx.Channel.SendPaginatedMessageAsync(ctx.Member, pages);
@@ -125,7 +123,7 @@ namespace HonzaBotner.Discord.Services.Commands
                         nonAnimated = true;
                         break;
                     default:
-                        _logger.LogInformation("Unknown flag was used in emoji print: {0}", parameter);
+                        _logger.LogInformation("Unknown flag was used in emoji print: {Parameter}", parameter);
                         break;
                 }
             }
