@@ -82,8 +82,10 @@ namespace HonzaBotner.Migrations
                     b.Property<DateTime>("IssuedAt")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<decimal>("IssuerId")
+                        .HasColumnType("numeric(20,0)");
+
                     b.Property<string>("Reason")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("UserId")

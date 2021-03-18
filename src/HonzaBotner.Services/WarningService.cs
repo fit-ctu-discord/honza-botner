@@ -61,9 +61,9 @@ namespace HonzaBotner.Services
             return true;
         }
 
-        public async Task<int?> AddWarningAsync(ulong userId, string reason)
+        public async Task<int?> AddWarningAsync(ulong userId, string reason, ulong issuerId)
         {
-            Database.Warning warning = new() {UserId = userId, Reason = reason};
+            Database.Warning warning = new() {UserId = userId, Reason = reason, IssuerId = issuerId};
 
             await _dbContext.Warnings.AddAsync(warning);
 
@@ -86,6 +86,6 @@ namespace HonzaBotner.Services
         }
 
         private static Warning GetDto(Database.Warning warning) =>
-            new(warning.Id, warning.UserId, warning.Reason, warning.IssuedAt);
+            new(warning.Id, warning.UserId, warning.Reason, warning.IssuedAt, warning.IssuerId);
     }
 }
