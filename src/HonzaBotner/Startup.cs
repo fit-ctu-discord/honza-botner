@@ -1,3 +1,9 @@
+using System.Collections.Generic;
+using System.Linq;
+using Hangfire;
+using Hangfire.Dashboard;
+using Hangfire.MemoryStorage;
+using Hangfire.PostgreSql;
 using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
@@ -55,6 +61,7 @@ namespace HonzaBotner
                     config.RegisterCommands<MessageCommands>();
                     config.RegisterCommands<VoiceCommands>();
                     config.RegisterCommands<PollCommands>();
+                    config.RegisterCommands<FunCommands>();
                 }, reactions =>
                 {
                     reactions.AddReaction<VerificationReactionHandler>()
@@ -65,6 +72,11 @@ namespace HonzaBotner
                 });
 
             services.AddSingleton<IVoiceManager, VoiceManager>();
+
+            services.AddHangfire(config =>
+            {
+                config.UsePostgreSqlStorage(connectionString);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -79,16 +91,28 @@ namespace HonzaBotner
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "HonzaBotner v1");
                     c.RoutePrefix = string.Empty;
                 });
+                app.UseHttpsRedirection();
+                app.UseHangfireDashboard();
             }
             else
             {
                 UpdateDatabase(app);
+                SetupDashboard(app);
                 app.UseReverseProxyHttpsEnforcer();
             }
+            app.UseHangfireServer();
 
-            app.UseHttpsRedirection();
             app.UseRouting();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+        }
+
+        private void SetupDashboard(IApplicationBuilder app)
+        {
+            // TODO: Some auth
+
+            app.UseHangfireDashboard(options: new DashboardOptions
+            {
+            });
         }
 
         private static void UpdateDatabase(IApplicationBuilder app)

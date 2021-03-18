@@ -6,4 +6,8 @@
     <ProjectReference Include="..\HonzaBotner.Services.Contract\HonzaBotner.Services.Contract.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Hangfire.Core" Version="1.7.19" />
+  </ItemGroup>
+
 </Project>
