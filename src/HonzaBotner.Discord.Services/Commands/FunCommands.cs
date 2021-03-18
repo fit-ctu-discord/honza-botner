@@ -32,19 +32,26 @@ namespace HonzaBotner.Discord.Services.Commands
             await ctx.TriggerTypingAsync();
 
             SecureRandom random = new();
-            string selected = choices[random.Next(choices.Length)];
+            string selected = choices[random.Next(choices.Length)].RemoveDiscordMentions(ctx.Guild, _logger);
 
             try
             {
-                await ctx.Channel.SendMessageAsync(
-                    (choices.Length == 1 ? "Jak prosté: " : "Vybral jsem: ")
-                    + $"**{selected.RemoveDiscordMentions(ctx.Guild, _logger)}**"
-                );
+                if (selected.Trim().Length == 0)
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
+                }
+                else
+                {
+                    await ctx.Channel.SendMessageAsync(
+                        (choices.Length == 1 ? "Jak prosté: " : "Vybral jsem: ")
+                        + $"**{selected}**"
+                    );
+                }
             }
             catch (Exception e)
             {
                 _logger.LogWarning(e, "Couldn't send a message");
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
             }
         }
     }
