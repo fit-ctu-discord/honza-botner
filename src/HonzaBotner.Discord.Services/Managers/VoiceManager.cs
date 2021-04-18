@@ -37,7 +37,7 @@ namespace HonzaBotner.Discord.Services.Managers
                 DiscordChannel newChannel =
                     await channelToCloneFrom.CloneAsync($"Member {userName} created new voice channel.");
 
-                await EditChannelAsync(newChannel, name, limit, isPublic, userName);
+                await EditChannelAsync(false, newChannel, name, limit, isPublic, userName);
 
                 try
                 {
@@ -84,7 +84,7 @@ namespace HonzaBotner.Discord.Services.Managers
             try
             {
                 string? userName = ConvertStringToValidState(member.Nickname, member.Username);
-                await EditChannelAsync(member.VoiceState?.Channel, newName, limit, isPublic, userName);
+                await EditChannelAsync(true, member.VoiceState?.Channel, newName, limit, isPublic, userName);
                 return true;
             }
             catch (Exception e)
@@ -130,14 +130,22 @@ namespace HonzaBotner.Discord.Services.Managers
             return input.Trim().Length == 0 ? defaultValue : input.Substring(0, Math.Min(input.Length, 30));
         }
 
-        private async Task EditChannelAsync(DiscordChannel? channel, string? name, int? limit, bool? isPublic,
+        private async Task EditChannelAsync(bool isEdit, DiscordChannel? channel, string? name, int? limit,
+            bool? isPublic,
             string? userName)
         {
             if (channel == null) return;
 
             await channel.ModifyAsync(model =>
             {
-                model.Name = name ?? $"{userName ?? "FIŤÁK"}'s channel";
+                if (isEdit && name == null)
+                {
+                    // You can skip name if editing.
+                }
+                else
+                {
+                    model.Name = name ?? $"{userName ?? "FIŤÁK"}'s channel";
+                }
 
                 if (limit != null)
                 {
