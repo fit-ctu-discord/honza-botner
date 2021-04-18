@@ -30,52 +30,43 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("add")]
         [Aliases("new")]
         [Description("Create new voice channel. Users has 30 seconds to join.")]
-        [Priority(2)]
-        public async Task AddVoiceChannelWithLimit(
+        public async Task AddVoiceChannelWithLimitAndPublic(
             CommandContext ctx,
             [Description("Name of the channel.")] string name,
-            [Description("Limit number of members who can join.")]
-            int limit = 0
+            [Description("Limit number of members who can join. Use 0 to set to unlimited.")]
+            int limit = 0,
+            [Description("Set voice channel public.")] bool isPublic = false
         )
         {
-            await AddVoiceAsync(ctx, name, limit);
-        }
-
-        [Command("add")]
-        [Priority(1)]
-        public async Task AddVoiceChannel(
-            CommandContext ctx,
-            [RemainingText, Description("Name of the channel.")]
-            string name
-        )
-        {
-            await AddVoiceAsync(ctx, name);
+            await AddVoiceAsync(ctx, name, limit, isPublic);
         }
 
         [Command("edit")]
         [Aliases("rename")]
-        [Description("Edits the name (and limit) of the voice channel you are connected to.")]
-        [Priority(2)]
-        public async Task EditVoiceChannelWithLimit(
+        [Description("Edits the name (and limit and publicity) of the voice channel you are connected to.")]
+        [Priority(1)]
+        public async Task EditVoiceChannel(
             CommandContext ctx,
             [Description("New name of the channel.")]
             string newName,
             [Description("Limit number of members who can join.")]
-            int? limit = null
+            int? limit = null,
+            [Description("Set to be public.")]
+            bool? isPublic = null
         )
         {
-            await EditVoiceAsync(ctx, newName, limit);
+            await EditVoiceAsync(ctx, newName, limit, isPublic);
         }
 
         [Command("edit")]
-        [Priority(1)]
-        public async Task EditVoiceChannel(
+        [Priority(2)]
+        public async Task EditVoiceChannelWithoutName(
             CommandContext ctx,
-            [RemainingText, Description("New name of the channel.")]
-            string newName
+            int limit,
+            bool? isPublic = null
         )
         {
-            await EditVoiceAsync(ctx, newName);
+            await EditVoiceAsync(ctx, null, limit, isPublic);
         }
 
         private bool InValidChannel(DiscordChannel channel)
@@ -86,7 +77,8 @@ namespace HonzaBotner.Discord.Services.Commands
         private async Task AddVoiceAsync(
             CommandContext ctx,
             string name,
-            int limit = 0
+            int limit,
+            bool isPublic
         )
         {
             try
@@ -99,7 +91,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 }
 
                 await _voiceManager.AddNewVoiceChannelAsync(ctx.Guild.GetChannel(_voiceConfig.ClickChannelId),
-                    ctx.Member, name, limit);
+                    ctx.Member, name, limit, isPublic);
 
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
             }
@@ -111,8 +103,9 @@ namespace HonzaBotner.Discord.Services.Commands
 
         private async Task EditVoiceAsync(
             CommandContext ctx,
-            string newName,
-            int? limit = null
+            string? newName,
+            int? limit = 0,
+            bool? isPublic = false
         )
         {
             try
@@ -123,7 +116,7 @@ namespace HonzaBotner.Discord.Services.Commands
                     return;
                 }
 
-                bool success = await _voiceManager.EditVoiceChannelAsync(ctx.Member, newName, limit);
+                bool success = await _voiceManager.EditVoiceChannelAsync(ctx.Member, newName, limit, isPublic);
 
                 if (success)
                 {
