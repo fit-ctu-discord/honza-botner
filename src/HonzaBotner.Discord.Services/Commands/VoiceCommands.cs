@@ -30,6 +30,7 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("add")]
         [Aliases("new")]
         [Description("Create new voice channel. Users has 30 seconds to join.")]
+        [Priority(2)]
         public async Task AddVoiceChannelWithLimitAndPublic(
             CommandContext ctx,
             [Description("Name of the channel.")] string name,
@@ -39,6 +40,17 @@ namespace HonzaBotner.Discord.Services.Commands
         )
         {
             await AddVoiceAsync(ctx, name, limit, isPublic);
+        }
+
+        [Command("add")]
+        [Priority(1)]
+        public async Task AddVoiceChannel(
+            CommandContext ctx,
+            [RemainingText, Description("Name of the channel.")]
+            string name
+        )
+        {
+            await AddVoiceAsync(ctx, name);
         }
 
         [Command("edit")]
@@ -77,8 +89,8 @@ namespace HonzaBotner.Discord.Services.Commands
         private async Task AddVoiceAsync(
             CommandContext ctx,
             string name,
-            int limit,
-            bool isPublic
+            int limit = 0,
+            bool isPublic = false
         )
         {
             try
