@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Options;
@@ -26,7 +27,7 @@ namespace HonzaBotner.Discord.Services.Managers
 
         public async Task AddNewVoiceChannelAsync(
             DiscordChannel channelToCloneFrom, DiscordMember member,
-            string? name, int? limit)
+            string? name, int? limit, bool? isPublic)
         {
             name = ConvertStringToValidState(name);
 
@@ -36,7 +37,7 @@ namespace HonzaBotner.Discord.Services.Managers
                 DiscordChannel newChannel =
                     await channelToCloneFrom.CloneAsync($"Member {userName} created new voice channel.");
 
-                await EditChannelAsync(newChannel, name, limit, userName);
+                await EditChannelAsync(newChannel, name, limit, isPublic, userName);
 
                 try
                 {
@@ -63,7 +64,8 @@ namespace HonzaBotner.Discord.Services.Managers
             }
         }
 
-        public async Task<bool> EditVoiceChannelAsync(DiscordMember member, string? newName = null, int? limit = 0)
+        public async Task<bool> EditVoiceChannelAsync(DiscordMember member, string? newName = null, int? limit = 0,
+            bool? isPublic = false)
         {
             if (member.VoiceState?.Channel == null || member.VoiceState?.Channel.Id == _voiceConfig.ClickChannelId)
             {
@@ -82,7 +84,7 @@ namespace HonzaBotner.Discord.Services.Managers
             try
             {
                 string? userName = ConvertStringToValidState(member.Nickname, member.Username);
-                await EditChannelAsync(member.VoiceState?.Channel, newName, limit, userName);
+                await EditChannelAsync(member.VoiceState?.Channel, newName, limit, isPublic, userName);
                 return true;
             }
             catch (Exception e)
@@ -128,7 +130,8 @@ namespace HonzaBotner.Discord.Services.Managers
             return input.Trim().Length == 0 ? defaultValue : input.Substring(0, Math.Min(input.Length, 30));
         }
 
-        private async Task EditChannelAsync(DiscordChannel? channel, string? name, int? limit, string? userName)
+        private async Task EditChannelAsync(DiscordChannel? channel, string? name, int? limit, bool? isPublic,
+            string? userName)
         {
             if (channel == null) return;
 
@@ -141,6 +144,24 @@ namespace HonzaBotner.Discord.Services.Managers
                     model.Userlimit = Math.Max(Math.Min(limit.Value, 99), 0);
                 }
             });
+
+            if (isPublic != null)
+            {
+                if (isPublic == true)
+                {
+                    await channel.AddOverwriteAsync(
+                        channel.Guild.EveryoneRole,
+                        Permissions.AccessChannels
+                    );
+                }
+                else
+                {
+                    await channel.AddOverwriteAsync(
+                        channel.Guild.EveryoneRole,
+                        deny: Permissions.AccessChannels
+                    );
+                }
+            }
         }
     }
 }
