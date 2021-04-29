@@ -69,7 +69,7 @@ namespace HonzaBotner.Discord.Services.Commands
             await EraseMemberAsync(ctx, databaseRecord, member.Nickname ?? member.Username);
         }
 
-        [Command("erase")]
+        [Command("delete")]
         [Priority(1)]
         public async Task MemberErase(CommandContext ctx,
             [Description("CVUT username of member to erase.")]
