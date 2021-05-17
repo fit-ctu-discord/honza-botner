@@ -24,5 +24,7 @@
         public string HornyJailFilePath { get; set; } = "";
 
         public ulong BoosterRoleId { get; set; }
+
+        public ulong[]? ReactionIgnoreChannels { get; set; }
     }
 }

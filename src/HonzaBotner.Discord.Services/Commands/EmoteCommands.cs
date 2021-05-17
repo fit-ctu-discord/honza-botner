@@ -9,6 +9,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Logging;
@@ -20,7 +21,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Description(
         "Commands to display stats about emote usage. You can also use additional switches `animated` and `nonanimated`.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
-    [Cooldown(1, 60, CooldownBucketType.Guild)]
+    [RequireMod]
     public class EmoteCommands : BaseCommandModule
     {
         private readonly IEmojiCounterService _emojiCounterService;
