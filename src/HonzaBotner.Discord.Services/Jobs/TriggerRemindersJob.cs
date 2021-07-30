@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Chronic.Core.System;
 using DSharpPlus.Entities;
+using Hangfire;
 using HonzaBotner.Database;
 using HonzaBotner.Discord.Services.EventHandlers;
 using HonzaBotner.Discord.Services.Options;
@@ -12,7 +13,7 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Jobs
 {
-    public class TriggerRemindersJob
+    public class TriggerRemindersJob : IRecurringJobProvider
     {
         private readonly IRemindersService _service;
 
@@ -34,7 +35,11 @@ namespace HonzaBotner.Discord.Services.Jobs
             _discord = discord;
         }
 
-        public async Task Dispatch()
+        public string GetKey() => "reminders-trigger";
+
+        public string GetCronExpression() => Cron.Minutely();
+
+        public async Task Run()
         {
             var reminders = await _service.GetRemindersThatShouldBeExecutedAsync();
 

@@ -123,8 +123,26 @@ namespace HonzaBotner
 
             app.UseHangfireServer();
 
+            StartRecurringJobs(app);
+
             app.UseRouting();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+        }
+
+        private void StartRecurringJobs(IApplicationBuilder app)
+        {
+            using IServiceScope scope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope();
+
+            // TODO: Make this extendable with other jobs
+            var job = scope.ServiceProvider.GetService<TriggerRemindersJob>()!;
+
+            RecurringJob.AddOrUpdate(
+                job.GetKey(),
+                () => job.Run(),
+                job.GetCronExpression()
+            );
         }
 
         private void SetupDashboard(IApplicationBuilder app)
