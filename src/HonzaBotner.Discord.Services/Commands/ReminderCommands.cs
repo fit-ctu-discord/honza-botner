@@ -52,7 +52,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 return parsed;
             }
 
-           return new Parser().Parse(datetime)?.Start;
+            return new Parser().Parse(datetime)?.Start;
         }
     }
 }
