@@ -65,6 +65,7 @@ namespace HonzaBotner.Discord.Services.Commands
             var reminder = await _service.CreateReminderAsync(
                 context.User.Id,
                 message.Id,
+                message.ChannelId,
                 datetime.Value, // This is safe, as the nullability is validated above
                 title,
                 content

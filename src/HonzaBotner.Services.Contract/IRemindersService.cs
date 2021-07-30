@@ -12,11 +12,12 @@ namespace HonzaBotner.Services.Contract
         /// </summary>
         /// <param name="ownerId">ID of the owner (who called the command)</param>
         /// <param name="messageId">ID of the message that the reminder is bound to</param>
+        /// <param name="channelId">ID of the channel that the message is in</param>
         /// <param name="datetime">Datetime of the reminder</param>
         /// <param name="title">Title of the reminder</param>
         /// <param name="content">Additional content of the reminder</param>
         /// <returns>The created reminder</returns>
-        public Task<Reminder> CreateReminderAsync(ulong ownerId, ulong messageId, DateTime datetime, string title, string? content);
+        public Task<Reminder> CreateReminderAsync(ulong ownerId, ulong messageId, ulong channelId, DateTime datetime, string title, string? content);
 
         /// <summary>
         /// Cancels the specified reminder
