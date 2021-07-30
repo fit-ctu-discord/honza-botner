@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using HonzaBotner.Database;
 using HonzaBotner.Services.Contract;
+using Microsoft.EntityFrameworkCore;
 
 namespace HonzaBotner.Services
 {
@@ -29,6 +31,19 @@ namespace HonzaBotner.Services
             await _context.SaveChangesAsync();
 
             return reminder;
+        }
+
+        public async Task CancelReminderAsync(Reminder reminder)
+        {
+            _context.Reminders.Remove(reminder);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Reminder?> GetByMessageIdAsync(ulong messageId)
+        {
+            return await _context.Reminders
+                .Where(reminder => reminder.MessageId == messageId)
+                .FirstOrDefaultAsync();
         }
     }
 }

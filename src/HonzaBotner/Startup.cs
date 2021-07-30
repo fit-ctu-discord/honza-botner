@@ -73,6 +73,7 @@ namespace HonzaBotner
                             .AddEventHandler<HornyJailHandler>()
                             .AddEventHandler<NewChannelHandler>()
                             .AddEventHandler<PinHandler>()
+                            .AddEventHandler<ReminderReactionsHandler>()
                             .AddEventHandler<RoleBindingsHandler>(EventHandlerPriority.High)
                             .AddEventHandler<StaffVerificationEventHandler>(EventHandlerPriority.Urgent)
                             .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
