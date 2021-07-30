@@ -1,21 +1,29 @@
 using System;
 using System.Globalization;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Chronic.Core;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using HonzaBotner.Database;
 using HonzaBotner.Discord.Extensions;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using HonzaBotner.Services.Contract;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("reminder")]
     [Aliases("remind")]
     [Description("Commands to manager reminders.")]
+    [ModuleLifespan(ModuleLifespan.Transient)]
     public class ReminderCommands : BaseCommandModule
     {
+        private readonly IRemindersService _service;
+
+        public ReminderCommands(IRemindersService service)
+        {
+            _service = service;
+        }
+
         [Command("create")]
         [Aliases("me")] // Allows a more "fluent" usage ::remind me <>
         [Description("Create a new reminder.")]
@@ -37,7 +45,12 @@ namespace HonzaBotner.Discord.Services.Commands
                 return;
             }
 
-            await context.RespondAsync(datetime.ToString());
+            var message = await context.RespondAsync("Creating reminder...");
+
+            var reminder = await _service.CreateReminderAsync(message.Id);
+            var embed = CreateReminderEmbed(context, reminder);
+
+            await message.ModifyAsync(embed: embed);
         }
 
         private static DateTime? ParseDateTime(string datetime)
@@ -53,6 +66,22 @@ namespace HonzaBotner.Discord.Services.Commands
             }
 
             return new Parser().Parse(datetime)?.Start;
+        }
+
+        private static DiscordEmbed CreateReminderEmbed(CommandContext context, Reminder reminder)
+        {
+            return new DiscordEmbedBuilder()
+                .WithAuthor(context.Member.RatherNicknameThanUsername(), null, context.Member.AvatarUrl)
+                .WithColor(DiscordColor.Blurple)
+                .WithTitle("Reminder created.")
+                .WithDescription(
+@"If you would like to cancel this reminder, click the . reaction.
+For others: if you would like to be notified with this reminder as well, click the . reaction."
+                )
+                .AddField("Title", reminder.Title.RemoveDiscordMentions(context.Guild))
+                .AddField("Content", reminder.Description.RemoveDiscordMentions(context.Guild))
+                .AddField("Date / time of the reminder", reminder.RemindAt.ToString())
+                .Build();
         }
     }
 }

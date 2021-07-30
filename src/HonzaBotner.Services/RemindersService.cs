@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using HonzaBotner.Database;
 using HonzaBotner.Services.Contract;
 
@@ -10,6 +12,18 @@ namespace HonzaBotner.Services
         public RemindersService(HonzaBotnerDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<Reminder> CreateReminderAsync(ulong messageId)
+        {
+            return await Task.FromResult(new Reminder
+            {
+                Id = 420L,
+                Title = "Test reminder",
+                Description = "Content to be reminded",
+                MessageId = messageId,
+                RemindAt = DateTime.Now.AddMinutes(30)
+            });
         }
     }
 }
