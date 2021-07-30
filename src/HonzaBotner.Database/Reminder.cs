@@ -15,6 +15,8 @@ namespace HonzaBotner.Database
 
         public ulong MessageId { get; set; }
 
+        public ulong ChannelId { get; set; }
+
         public DateTime DateTime { get; set; }
 
         public string Title { get; set; }
