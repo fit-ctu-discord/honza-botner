@@ -14,8 +14,7 @@ namespace HonzaBotner.Services
             _context = context;
         }
 
-        public async Task<Reminder> CreateReminderAsync(ulong ownerId, ulong messageId, DateTime datetime, string title,
-            string content)
+        public async Task<Reminder> CreateReminderAsync(ulong ownerId, ulong messageId, DateTime datetime, string title, string? content)
         {
             var reminder = new Reminder
             {

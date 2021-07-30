@@ -7,7 +7,9 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using HonzaBotner.Database;
 using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
+using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
@@ -19,9 +21,12 @@ namespace HonzaBotner.Discord.Services.Commands
     {
         private readonly IRemindersService _service;
 
-        public ReminderCommands(IRemindersService service)
+        private readonly ReminderOptions _options;
+
+        public ReminderCommands(IRemindersService service, IOptions<ReminderOptions> options)
         {
             _service = service;
+            _options = options.Value;
         }
 
         [Command("create")]
@@ -31,7 +36,7 @@ namespace HonzaBotner.Discord.Services.Commands
             CommandContext context,
             [Description("Date or time of the reminder")] string rawDatetime,
             [Description("Title of the reminder.")] string title,
-            [Description("Optional additional content"), RemainingText] string content
+            [Description("Optional additional content"), RemainingText] string? content = null
         )
         {
             var datetime = ParseDateTime(rawDatetime);
@@ -55,10 +60,9 @@ namespace HonzaBotner.Discord.Services.Commands
                 content
             );
 
-            await message.ModifyAsync(
-                "",
-                CreateReminderEmbed(context, reminder)
-            );
+            await message.ModifyAsync( "Reminder created", CreateReminderEmbed(context, reminder));
+            await message.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.CancelEmojiName));
+            await message.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.JoinEmojiName));
         }
 
         private static DateTime? ParseDateTime(string datetime)
@@ -76,15 +80,15 @@ namespace HonzaBotner.Discord.Services.Commands
             return new Parser().Parse(datetime)?.Start;
         }
 
-        private static DiscordEmbed CreateReminderEmbed(CommandContext context, Reminder reminder)
+        private DiscordEmbed CreateReminderEmbed(CommandContext context, Reminder reminder)
         {
             return new DiscordEmbedBuilder()
                 .WithAuthor(context.Member.RatherNicknameThanUsername(), null, context.Member.AvatarUrl)
                 .WithColor(DiscordColor.Blurple)
                 .WithTitle("Reminder created.")
                 .WithDescription(
-                    @"If you would like to cancel this reminder, click the . reaction.
-For others: if you would like to be notified with this reminder as well, click the . reaction."
+@$"If you would like to cancel this reminder, click the {_options.CancelEmojiName} reaction.
+For others: if you would like to be notified with this reminder as well, click the {_options.JoinEmojiName} reaction."
                 )
                 .AddField("Owner", $"<@{reminder.OwnerId}>")
                 .AddField("Title", reminder.Title.RemoveDiscordMentions(context.Guild))
