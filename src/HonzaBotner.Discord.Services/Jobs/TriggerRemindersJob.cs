@@ -1,11 +1,9 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Chronic.Core.System;
 using DSharpPlus.Entities;
 using Hangfire;
 using HonzaBotner.Database;
-using HonzaBotner.Discord.Services.EventHandlers;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using Microsoft.Extensions.Logging;
@@ -55,10 +53,11 @@ namespace HonzaBotner.Discord.Services.Jobs
                 var emoji = DiscordEmoji.FromUnicode(_options.JoinEmojiName);
 
                 var receivers = await message.GetReactionsAsync(emoji, 100);
-                var mentions = string.Join(", ", receivers.Select(user => user.Mention) + $"<@{reminder.OwnerId}>");
+                var mentions = $"<@{reminder.OwnerId}> " +
+                               string.Join(", ", receivers.Where(user => !user.IsBot).Select(user => user.Mention));
 
                 await channel.SendMessageAsync(mentions, embed: CreateReminderEmbed(reminder));
-                await message.ModifyAsync("Reminder expired");
+                await message.ModifyAsync("Reminder expired", null);
                 await message.DeleteAllReactionsAsync();
                 await _service.CancelReminderAsync(reminder);
             }
