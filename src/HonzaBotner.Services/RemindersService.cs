@@ -35,9 +35,8 @@ namespace HonzaBotner.Services
             return reminder;
         }
 
-        public async Task CancelReminderAsync(Reminder reminder)
+        public async Task DeleteReminderAsync(Reminder reminder)
         {
-            _context.Reminders.Attach(reminder);
             _context.Reminders.Remove(reminder);
             await _context.SaveChangesAsync();
         }

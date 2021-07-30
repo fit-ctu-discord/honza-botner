@@ -59,7 +59,7 @@ namespace HonzaBotner.Discord.Services.Jobs
                 await channel.SendMessageAsync(mentions, embed: CreateReminderEmbed(reminder));
                 await message.ModifyAsync("Reminder expired", null);
                 await message.DeleteAllReactionsAsync();
-                await _service.CancelReminderAsync(reminder);
+                await _service.DeleteReminderAsync(reminder);
             }
             catch (Exception exception)
             {

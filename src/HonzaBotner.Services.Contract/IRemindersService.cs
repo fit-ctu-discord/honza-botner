@@ -23,7 +23,7 @@ namespace HonzaBotner.Services.Contract
         /// Cancels the specified reminder
         /// </summary>
         /// <param name="reminder">Reminder to be cancelled</param>
-        public Task CancelReminderAsync(Reminder reminder);
+        public Task DeleteReminderAsync(Reminder reminder);
 
         /// <summary>
         /// Find reminder bound to the specified message (embed).

@@ -40,7 +40,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             // The owner has cancelled the reminder
             if (emoji == _options.CancelEmojiName && arguments.User.Id == reminder.OwnerId)
             {
-                await _service.CancelReminderAsync(reminder);
+                await _service.DeleteReminderAsync(reminder);
                 await arguments.Message.ModifyAsync("", CreateCancelledReminderEmbed());
                 await arguments.Message.DeleteAllReactionsAsync("Reminder cancelled");
 
