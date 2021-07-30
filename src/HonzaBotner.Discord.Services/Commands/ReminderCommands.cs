@@ -39,6 +39,7 @@ namespace HonzaBotner.Discord.Services.Commands
             [Description("Optional additional content"), RemainingText] string? content = null
         )
         {
+            var now = DateTime.Now;
             var datetime = ParseDateTime(rawDatetime);
 
             if (datetime == null)
@@ -50,12 +51,21 @@ namespace HonzaBotner.Discord.Services.Commands
                 return;
             }
 
+            if (datetime <= now)
+            {
+                await context.RespondErrorAsync(
+                    "Cannot schedule reminders in the past.",
+                    "You can only create reminders that are in the future."
+                );
+                return;
+            }
+
             var message = await context.RespondAsync("Creating reminder...");
 
             var reminder = await _service.CreateReminderAsync(
                 context.User.Id,
                 message.Id,
-                (DateTime) datetime, // This is safe, as the nullability is validated above
+                datetime.Value, // This is safe, as the nullability is validated above
                 title,
                 content
             );

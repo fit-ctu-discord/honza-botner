@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HonzaBotner.Database;
@@ -44,6 +45,15 @@ namespace HonzaBotner.Services
             return await _context.Reminders
                 .Where(reminder => reminder.MessageId == messageId)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<Reminder>> GetRemindersThatShouldBeExecutedAsync()
+        {
+            var now = DateTime.Now;
+
+            return await _context.Reminders
+                .Where(reminder => (now - reminder.DateTime).Minutes < 2)
+                .ToListAsync();
         }
     }
 }
