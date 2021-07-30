@@ -15,16 +15,19 @@ namespace HonzaBotner.Database
 
         public ulong MessageId { get; set; }
 
+        public ulong ChannelId { get; set; }
+
         public DateTime DateTime { get; set; }
 
         public string Title { get; set; }
 
         public string? Content { get; set; } = null;
 
-        public Reminder(ulong ownerId, ulong messageId, DateTime dateTime, string title, string? content)
+        public Reminder(ulong ownerId, ulong messageId, ulong channelId, DateTime dateTime, string title, string? content)
         {
             OwnerId = ownerId;
             MessageId = messageId;
+            ChannelId = channelId;
             DateTime = dateTime;
             Title = title;
             Content = content;
