@@ -20,9 +20,9 @@ namespace HonzaBotner.Services
             {
                 Id = 420L,
                 Title = "Test reminder",
-                Description = "Content to be reminded",
+                Content = "Content to be reminded",
                 MessageId = messageId,
-                RemindAt = DateTime.Now.AddMinutes(30)
+                DateTime = DateTime.Now.AddMinutes(30)
             });
         }
     }

@@ -48,9 +48,11 @@ namespace HonzaBotner.Discord.Services.Commands
             var message = await context.RespondAsync("Creating reminder...");
 
             var reminder = await _service.CreateReminderAsync(message.Id);
-            var embed = CreateReminderEmbed(context, reminder);
 
-            await message.ModifyAsync(embed: embed);
+            await message.ModifyAsync(
+                "",
+                CreateReminderEmbed(context, reminder)
+            );
         }
 
         private static DateTime? ParseDateTime(string datetime)
@@ -59,8 +61,7 @@ namespace HonzaBotner.Discord.Services.Commands
             // Cases with time only are handled by the parser
             string[] formats = { "dd. MM. yyyy HH:mm", "dd.MM.yyyy HH:mm", "dd. MM. yyyy", "dd.MM.yyyy" };
 
-            if (DateTime.TryParseExact(datetime, formats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal,
-                out DateTime parsed))
+            if (DateTime.TryParseExact(datetime, formats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out DateTime parsed))
             {
                 return parsed;
             }
@@ -79,8 +80,8 @@ namespace HonzaBotner.Discord.Services.Commands
 For others: if you would like to be notified with this reminder as well, click the . reaction."
                 )
                 .AddField("Title", reminder.Title.RemoveDiscordMentions(context.Guild))
-                .AddField("Content", reminder.Description.RemoveDiscordMentions(context.Guild))
-                .AddField("Date / time of the reminder", reminder.RemindAt.ToString())
+                .AddField("Content", reminder.Content?.RemoveDiscordMentions(context.Guild) ?? "No content provided")
+                .AddField("Date / time of the reminder", reminder.DateTime.ToString(CultureInfo.InvariantCulture))
                 .Build();
         }
     }
