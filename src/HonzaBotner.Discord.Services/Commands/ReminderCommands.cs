@@ -29,8 +29,8 @@ namespace HonzaBotner.Discord.Services.Commands
         [Description("Create a new reminder.")]
         public async Task Create(
             CommandContext context,
-            [Description("Title of the reminder.")] string title,
             [Description("Date or time of the reminder")] string rawDatetime,
+            [Description("Title of the reminder.")] string title,
             [Description("Optional additional content"), RemainingText] string content
         )
         {
@@ -47,7 +47,13 @@ namespace HonzaBotner.Discord.Services.Commands
 
             var message = await context.RespondAsync("Creating reminder...");
 
-            var reminder = await _service.CreateReminderAsync(message.Id);
+            var reminder = await _service.CreateReminderAsync(
+                context.User.Id,
+                message.Id,
+                (DateTime) datetime, // This is safe, as the nullability is validated above
+                title,
+                content
+            );
 
             await message.ModifyAsync(
                 "",
@@ -61,7 +67,8 @@ namespace HonzaBotner.Discord.Services.Commands
             // Cases with time only are handled by the parser
             string[] formats = { "dd. MM. yyyy HH:mm", "dd.MM.yyyy HH:mm", "dd. MM. yyyy", "dd.MM.yyyy" };
 
-            if (DateTime.TryParseExact(datetime, formats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out DateTime parsed))
+            if (DateTime.TryParseExact(datetime, formats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal,
+                out DateTime parsed))
             {
                 return parsed;
             }
@@ -76,9 +83,10 @@ namespace HonzaBotner.Discord.Services.Commands
                 .WithColor(DiscordColor.Blurple)
                 .WithTitle("Reminder created.")
                 .WithDescription(
-@"If you would like to cancel this reminder, click the . reaction.
+                    @"If you would like to cancel this reminder, click the . reaction.
 For others: if you would like to be notified with this reminder as well, click the . reaction."
                 )
+                .AddField("Owner", $"<@{reminder.OwnerId}>")
                 .AddField("Title", reminder.Title.RemoveDiscordMentions(context.Guild))
                 .AddField("Content", reminder.Content?.RemoveDiscordMentions(context.Guild) ?? "No content provided")
                 .AddField("Date / time of the reminder", reminder.DateTime.ToString(CultureInfo.InvariantCulture))

@@ -14,16 +14,22 @@ namespace HonzaBotner.Services
             _context = context;
         }
 
-        public async Task<Reminder> CreateReminderAsync(ulong messageId)
+        public async Task<Reminder> CreateReminderAsync(ulong ownerId, ulong messageId, DateTime datetime, string title,
+            string content)
         {
-            return await Task.FromResult(new Reminder
+            var reminder = new Reminder
             {
-                Id = 420L,
-                Title = "Test reminder",
-                Content = "Content to be reminded",
+                OwnerId = ownerId,
                 MessageId = messageId,
-                DateTime = DateTime.Now.AddMinutes(30)
-            });
+                DateTime = datetime,
+                Title = title,
+                Content = content
+            };
+
+            _context.Reminders.Add(reminder);
+            await _context.SaveChangesAsync();
+
+            return reminder;
         }
     }
 }
