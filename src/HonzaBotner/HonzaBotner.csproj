@@ -35,8 +35,4 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Migrations\20200924183418_Init.Designer.cs" />
-  </ItemGroup>
 </Project>
