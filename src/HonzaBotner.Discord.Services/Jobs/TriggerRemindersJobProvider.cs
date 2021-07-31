@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Hangfire;
 using HonzaBotner.Database;
+using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -13,7 +15,7 @@ namespace HonzaBotner.Discord.Services.Jobs
 {
     public class TriggerRemindersJobProvider : IRecurringJobProvider
     {
-        private readonly IRemindersService _service;
+        private readonly IServiceScopeFactory _factory;
 
         private readonly ILogger<TriggerRemindersJobProvider> _logger;
 
@@ -21,16 +23,21 @@ namespace HonzaBotner.Discord.Services.Jobs
 
         private readonly DiscordWrapper _discord;
 
+        private readonly IGuildProvider _guild;
+
         public TriggerRemindersJobProvider(
-            IRemindersService service,
+            IServiceScopeFactory factory,
             ILogger<TriggerRemindersJobProvider> logger,
             IOptions<ReminderOptions> options,
-            DiscordWrapper discord)
+            DiscordWrapper discord,
+            IGuildProvider guild
+        )
         {
-            _service = service;
+            _factory = factory;
             _logger = logger;
             _options = options.Value;
             _discord = discord;
+            _guild = guild;
         }
 
         public string GetKey() => "reminders-trigger";
@@ -39,12 +46,15 @@ namespace HonzaBotner.Discord.Services.Jobs
 
         public async Task Run()
         {
-            var reminders = await _service.GetRemindersThatShouldBeExecutedAsync();
+            using var scope = _factory.CreateScope();
 
-            reminders.ForEach(SendReminderNotification);
+            var service = scope.ServiceProvider.GetRequiredService<IRemindersService>();
+            var reminders = await service.DeleteRemindersThatShouldBeExecutedAsync();
+
+            reminders.ForEach(reminder => SendReminderNotification(reminder, service));
         }
 
-        private async void SendReminderNotification(Reminder reminder)
+        private async void SendReminderNotification(Reminder reminder, IRemindersService service)
         {
             try
             {
@@ -56,10 +66,11 @@ namespace HonzaBotner.Discord.Services.Jobs
                 var mentions = $"<@{reminder.OwnerId}> " +
                                string.Join(", ", receivers.Where(user => !user.IsBot).Select(user => user.Mention));
 
-                await channel.SendMessageAsync(mentions, embed: CreateReminderEmbed(reminder));
+                var embed = await CreateReminderEmbed(reminder);
+
+                await channel.SendMessageAsync(mentions, embed: embed);
                 await message.ModifyAsync("", CreateExpiredEmbed());
                 await message.DeleteAllReactionsAsync();
-                await _service.DeleteReminderAsync(reminder);
             }
             catch (Exception exception)
             {
@@ -67,11 +78,13 @@ namespace HonzaBotner.Discord.Services.Jobs
             }
         }
 
-        private static DiscordEmbed CreateReminderEmbed(Reminder reminder)
+        private async Task<DiscordEmbed> CreateReminderEmbed(Reminder reminder)
         {
+            var guild = await _guild.GetCurrentGuildAsync();
+
             return new DiscordEmbedBuilder()
-                .WithTitle("🔔 " + reminder.Title)
-                .WithDescription(reminder.Content ?? "")
+                .WithTitle("🔔 " + reminder.Title.RemoveDiscordMentions(guild))
+                .WithDescription(reminder.Content?.RemoveDiscordMentions(guild) ?? "")
                 .WithColor(new DiscordColor("ffac33"))
                 .WithTimestamp(reminder.DateTime)
                 .Build();

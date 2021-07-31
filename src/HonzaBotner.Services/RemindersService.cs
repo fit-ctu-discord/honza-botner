@@ -48,11 +48,16 @@ namespace HonzaBotner.Services
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<Reminder>> GetRemindersThatShouldBeExecutedAsync()
+        public async Task<List<Reminder>> DeleteRemindersThatShouldBeExecutedAsync()
         {
-            return await _context.Reminders
+            var expired = await _context.Reminders
                 .Where(reminder => reminder.DateTime <= DateTime.Now)
                 .ToListAsync();
+
+            _context.Reminders.RemoveRange(expired);
+            await _context.SaveChangesAsync();
+
+            return expired;
         }
     }
 }
