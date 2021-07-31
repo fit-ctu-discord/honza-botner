@@ -32,7 +32,6 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                 return EventHandlerResult.Continue;
             }
 
-            // TODO: Move this to framework level code?
             if (arguments.User.IsBot)
             {
                 return EventHandlerResult.Stop;
