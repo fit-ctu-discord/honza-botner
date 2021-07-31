@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -23,13 +24,20 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
         public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs arguments)
         {
-            // TODO: Move this to framework level code
-            if (arguments.User.IsBot)
+            var emoji = arguments.Emoji.Name;
+            var validEmojis = new[] { _options.CancelEmojiName, _options.JoinEmojiName };
+
+            if (validEmojis.Contains<>(validEmojis))
             {
-               return EventHandlerResult.Stop;
+                return EventHandlerResult.Continue;
             }
 
-            var emoji = arguments.Emoji;
+            // TODO: Move this to framework level code?
+            if (arguments.User.IsBot)
+            {
+                return EventHandlerResult.Stop;
+            }
+
             var reminder = await _service.GetByMessageIdAsync(arguments.Message.Id);
 
             if (reminder == null)
