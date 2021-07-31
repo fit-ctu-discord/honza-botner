@@ -71,7 +71,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 content
             );
 
-            await message.ModifyAsync( "Reminder created", CreateReminderEmbed(context, reminder));
+            await message.ModifyAsync("Reminder created", CreateReminderEmbed(context, reminder));
             await message.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.CancelEmojiName));
             await message.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.JoinEmojiName));
         }
