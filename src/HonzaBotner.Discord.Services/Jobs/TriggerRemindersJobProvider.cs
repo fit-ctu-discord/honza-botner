@@ -11,19 +11,19 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Jobs
 {
-    public class TriggerRemindersJob : IRecurringJobProvider
+    public class TriggerRemindersJobProvider : IRecurringJobProvider
     {
         private readonly IRemindersService _service;
 
-        private readonly ILogger<TriggerRemindersJob> _logger;
+        private readonly ILogger<TriggerRemindersJobProvider> _logger;
 
         private readonly ReminderOptions _options;
 
         private readonly DiscordWrapper _discord;
 
-        public TriggerRemindersJob(
+        public TriggerRemindersJobProvider(
             IRemindersService service,
-            ILogger<TriggerRemindersJob> logger,
+            ILogger<TriggerRemindersJobProvider> logger,
             IOptions<ReminderOptions> options,
             DiscordWrapper discord)
         {
@@ -57,13 +57,13 @@ namespace HonzaBotner.Discord.Services.Jobs
                                string.Join(", ", receivers.Where(user => !user.IsBot).Select(user => user.Mention));
 
                 await channel.SendMessageAsync(mentions, embed: CreateReminderEmbed(reminder));
-                await message.ModifyAsync("Reminder expired", null);
+                await message.ModifyAsync("", CreateExpiredEmbed());
                 await message.DeleteAllReactionsAsync();
                 await _service.DeleteReminderAsync(reminder);
             }
             catch (Exception exception)
             {
-                _logger.LogCritical("Exception during reminder trigger", exception);
+                _logger.LogCritical($"Exception during reminder trigger: {exception.Message}");
             }
         }
 
@@ -72,8 +72,17 @@ namespace HonzaBotner.Discord.Services.Jobs
             return new DiscordEmbedBuilder()
                 .WithTitle("🔔 " + reminder.Title)
                 .WithDescription(reminder.Content ?? "")
-                .WithColor(new DiscordColor("#ffac33"))
+                .WithColor(new DiscordColor("ffac33"))
                 .WithTimestamp(reminder.DateTime)
+                .Build();
+        }
+
+        private static DiscordEmbed CreateExpiredEmbed()
+        {
+            return new DiscordEmbedBuilder()
+                .WithTitle("Reminder expired")
+                .WithColor(DiscordColor.Blurple)
+                .WithTimestamp(DateTime.Now)
                 .Build();
         }
     }

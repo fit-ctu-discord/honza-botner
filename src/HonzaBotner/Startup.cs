@@ -1,8 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
 using Hangfire;
-using Hangfire.Dashboard;
-using Hangfire.MemoryStorage;
 using Hangfire.PostgreSql;
 using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Database;
@@ -93,7 +89,7 @@ namespace HonzaBotner
                 .AddTransient<IVoiceManager, VoiceManager>()
 
                 // Jobs
-                .AddScoped<TriggerRemindersJob>();
+                .AddScoped<TriggerRemindersJobProvider>()
             ;
 
             services.AddHangfire(config => { config.UsePostgreSqlStorage(connectionString); });
@@ -121,10 +117,9 @@ namespace HonzaBotner
                 app.UseReverseProxyHttpsEnforcer();
             }
 
-            app.UseHangfireServer();
-
             StartRecurringJobs(app);
 
+            app.UseHangfireServer();
             app.UseRouting();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
@@ -136,7 +131,7 @@ namespace HonzaBotner
                 .CreateScope();
 
             // TODO: Make this extendable with other jobs
-            var job = scope.ServiceProvider.GetService<TriggerRemindersJob>()!;
+            var job = scope.ServiceProvider.GetService<TriggerRemindersJobProvider>()!;
 
             RecurringJob.AddOrUpdate(
                 job.GetKey(),

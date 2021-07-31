@@ -50,10 +50,8 @@ namespace HonzaBotner.Services
 
         public async Task<List<Reminder>> GetRemindersThatShouldBeExecutedAsync()
         {
-            var now = DateTime.Now;
-
             return await _context.Reminders
-                .Where(reminder => (now - reminder.DateTime).Minutes < 2)
+                .Where(reminder => reminder.DateTime <= DateTime.Now)
                 .ToListAsync();
         }
     }
