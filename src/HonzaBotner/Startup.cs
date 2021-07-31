@@ -119,6 +119,7 @@ namespace HonzaBotner
 
             StartRecurringJobs(app);
 
+            app.UseHttpsRedirection();
             app.UseHangfireServer();
             app.UseRouting();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
