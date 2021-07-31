@@ -8,14 +8,14 @@ namespace HonzaBotner.Services.Contract
         /// Key that will be used for registration within hangfire.
         /// </summary>
         /// <returns>Application-unique key</returns>
-        public string GetKey();
+        public string Key { get; }
 
         /// <summary>
         /// Cron expression to be used within the scheduler.
         /// </summary>
         /// <returns>Cron expression</returns>
         /// <seealso cref="Hangfire.Cron"/>
-        public string GetCronExpression();
+        public string CronExpression { get; }
 
         public Task Run();
     }

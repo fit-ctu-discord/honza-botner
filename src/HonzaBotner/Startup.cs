@@ -134,9 +134,9 @@ namespace HonzaBotner
             var job = scope.ServiceProvider.GetService<TriggerRemindersJobProvider>()!;
 
             RecurringJob.AddOrUpdate(
-                job.GetKey(),
+                job.Key,
                 () => job.Run(),
-                job.GetCronExpression()
+                job.CronExpression
             );
         }
 

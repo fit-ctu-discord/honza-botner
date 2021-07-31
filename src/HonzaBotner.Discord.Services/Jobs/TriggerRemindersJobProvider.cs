@@ -40,9 +40,9 @@ namespace HonzaBotner.Discord.Services.Jobs
             _guild = guild;
         }
 
-        public string GetKey() => "reminders-trigger";
+        public string Key => "reminders-trigger";
 
-        public string GetCronExpression() => Cron.Minutely();
+        public string CronExpression => Cron.Minutely();
 
         public async Task Run()
         {
