@@ -24,10 +24,10 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
         public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs arguments)
         {
-            var emoji = arguments.Emoji.Name;
+            var emoji = arguments.Emoji;
             var validEmojis = new[] { _options.CancelEmojiName, _options.JoinEmojiName };
 
-            if (validEmojis.Contains<>(validEmojis))
+            if (!validEmojis.Contains(emoji))
             {
                 return EventHandlerResult.Continue;
             }
