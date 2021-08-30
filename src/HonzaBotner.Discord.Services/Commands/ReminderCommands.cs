@@ -32,6 +32,7 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("create")]
         [Aliases("me")] // Allows a more "fluent" usage ::remind me <>
         [Description("Create a new reminder.")]
+        [GroupCommand]
         public async Task Create(
             CommandContext context,
             [Description("Date or time of the reminder")] string rawDatetime,
