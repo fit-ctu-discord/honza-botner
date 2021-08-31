@@ -17,6 +17,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Aliases("remind")]
     [Description("Commands to manager reminders.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
+    //[Cooldown(1, 60 * 15, CooldownBucketType.User)]
     public class ReminderCommands : BaseCommandModule
     {
         private readonly IRemindersService _service;
@@ -35,16 +36,18 @@ namespace HonzaBotner.Discord.Services.Commands
         [GroupCommand]
         public async Task Create(
             CommandContext context,
-            [Description("Date or time of the reminder")] string rawDatetime,
-            [Description("Title of the reminder.")] string title,
-            [Description("Optional additional content"), RemainingText] string? content = null
+            [Description("Date or time of the reminder")]
+            string rawDatetime,
+            [Description("Title of the reminder."), RemainingText]
+            string title
         )
         {
-            var now = DateTime.Now;
-            var datetime = ParseDateTime(rawDatetime);
+            DateTime now = DateTime.Now;
+            DateTime? datetime = ParseDateTime(rawDatetime);
 
             if (datetime == null)
             {
+                // TODO: send DM?
                 await context.RespondErrorAsync(
                     $"Cannot parse datetime string `{rawDatetime}`",
                     "Try using an explicit datetime or expressions like `in 30 minutes`, `tomorrow at 8:00`, ..."
@@ -54,6 +57,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
             if (datetime <= now)
             {
+                // TODO: send DM?
                 await context.RespondErrorAsync(
                     "Cannot schedule reminders in the past.",
                     "You can only create reminders that are in the future."
@@ -61,6 +65,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 return;
             }
 
+            await context.TriggerTypingAsync();
             var message = await context.RespondAsync("Creating reminder...");
 
             var reminder = await _service.CreateReminderAsync(
@@ -69,7 +74,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 message.ChannelId,
                 datetime.Value, // This is safe, as the nullability is validated above
                 title,
-                content
+                null
             );
 
             await message.ModifyAsync("Reminder created", CreateReminderEmbed(context, reminder));
@@ -97,15 +102,9 @@ namespace HonzaBotner.Discord.Services.Commands
             return new DiscordEmbedBuilder()
                 .WithAuthor(context.Member.RatherNicknameThanUsername(), null, context.Member.AvatarUrl)
                 .WithColor(DiscordColor.Blurple)
-                .WithTitle("Reminder created.")
-                .WithDescription(
-@$"If you would like to cancel this reminder, click the {_options.CancelEmojiName} reaction.
-For others: if you would like to be notified with this reminder as well, click the {_options.JoinEmojiName} reaction."
-                )
-                .AddField("Owner", $"<@{reminder.OwnerId}>")
+                .WithTitle("Reminder")
                 .AddField("Title", reminder.Title.RemoveDiscordMentions(context.Guild))
-                .AddField("Content", reminder.Content?.RemoveDiscordMentions(context.Guild) ?? "No content provided")
-                .AddField("Date / time of the reminder", reminder.DateTime.ToString(CultureInfo.InvariantCulture))
+                .AddField("Datetime of the reminder", reminder.DateTime.ToString(CultureInfo.InvariantCulture))
                 .Build();
         }
     }
