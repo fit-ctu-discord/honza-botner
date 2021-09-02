@@ -7,6 +7,8 @@ services:
       POSTGRES_USER: honza-bot
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: HonzaBotner
+      TZ: 'Europe/Prague'
+      PGTZ: 'Europe/Prague'
     ports:
       - "5432:5432"
     volumes:
