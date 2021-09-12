@@ -30,24 +30,33 @@ namespace HonzaBotner.Discord.Services.Commands
             _options = options.Value;
         }
 
+        [GroupCommand]
         [Command("create")]
         [Aliases("me")] // Allows a more "fluent" usage ::remind me <>
         [Description("Create a new reminder.")]
-        [GroupCommand]
         public async Task Create(
             CommandContext context,
             [Description("Date or time of the reminder")]
             string rawDatetime,
-            [Description("Title of the reminder."), RemainingText]
-            string title
+            [Description("Content of the reminder."), RemainingText]
+            string? content
         )
         {
             DateTime now = DateTime.Now;
             DateTime? datetime = ParseDateTime(rawDatetime);
 
+            if (content == null)
+            {
+                await context.RespondErrorAsync(
+                    $"Cannot parse content string",
+                    "You didn't provide any content for the reminder."
+                );
+                await context.Message.DeleteAsync();
+                return;
+            }
+
             if (datetime == null)
             {
-                // TODO: send DM?
                 await context.RespondErrorAsync(
                     $"Cannot parse datetime string `{rawDatetime}`",
                     "Try using an explicit datetime or expressions like `in 30 minutes`, `tomorrow at 8:00`, ..."
@@ -57,7 +66,6 @@ namespace HonzaBotner.Discord.Services.Commands
 
             if (datetime <= now)
             {
-                // TODO: send DM?
                 await context.RespondErrorAsync(
                     "Cannot schedule reminders in the past.",
                     "You can only create reminders that are in the future."
@@ -66,20 +74,20 @@ namespace HonzaBotner.Discord.Services.Commands
             }
 
             await context.TriggerTypingAsync();
-            var message = await context.RespondAsync("Creating reminder...");
+            DiscordMessage message = await context.RespondAsync("Creating reminder...");
 
-            var reminder = await _service.CreateReminderAsync(
+            Reminder reminder = await _service.CreateReminderAsync(
                 context.User.Id,
                 message.Id,
                 message.ChannelId,
                 datetime.Value, // This is safe, as the nullability is validated above
-                title,
-                null
+                content
             );
 
-            await message.ModifyAsync("Reminder created", CreateReminderEmbed(context, reminder));
+            await message.ModifyAsync("", CreateReminderEmbed(context, reminder));
             await message.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.CancelEmojiName));
             await message.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.JoinEmojiName));
+            await context.Message.DeleteAsync();
         }
 
         private static DateTime? ParseDateTime(string datetime)
@@ -100,11 +108,11 @@ namespace HonzaBotner.Discord.Services.Commands
         private DiscordEmbed CreateReminderEmbed(CommandContext context, Reminder reminder)
         {
             return new DiscordEmbedBuilder()
-                .WithAuthor(context.Member.RatherNicknameThanUsername(), null, context.Member.AvatarUrl)
-                .WithColor(DiscordColor.Blurple)
-                .WithTitle("Reminder")
-                .AddField("Title", reminder.Title.RemoveDiscordMentions(context.Guild))
-                .AddField("Datetime of the reminder", reminder.DateTime.ToString(CultureInfo.InvariantCulture))
+                .WithAuthor(context.Member.RatherNicknameThanUsername(), iconUrl: context.Member.AvatarUrl)
+                .WithColor(DiscordColor.Yellow)
+                .WithTitle("🔔 Reminder")
+                .WithDescription(reminder.Content.RemoveDiscordMentions(context.Guild))
+                .AddField("I will remind you at", reminder.DateTime.ToString(CultureInfo.InvariantCulture))
                 .Build();
         }
     }

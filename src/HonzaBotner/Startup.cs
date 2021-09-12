@@ -145,7 +145,7 @@ namespace HonzaBotner
         {
             // TODO: Some auth
 
-            app.UseHangfireDashboard(options: new DashboardOptions { });
+            app.UseHangfireDashboard(options: new DashboardOptions());
         }
 
         private static void UpdateDatabase(IApplicationBuilder app)

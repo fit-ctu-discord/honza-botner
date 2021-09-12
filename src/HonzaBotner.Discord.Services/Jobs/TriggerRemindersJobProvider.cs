@@ -19,7 +19,7 @@ namespace HonzaBotner.Discord.Services.Jobs
 
         private readonly ILogger<TriggerRemindersJobProvider> _logger;
 
-        private readonly ReminderOptions _options;
+        private readonly ReminderOptions _reminderOptions;
 
         private readonly DiscordWrapper _discord;
 
@@ -35,7 +35,7 @@ namespace HonzaBotner.Discord.Services.Jobs
         {
             _factory = factory;
             _logger = logger;
-            _options = options.Value;
+            _reminderOptions = options.Value;
             _discord = discord;
             _guild = guild;
         }
@@ -58,23 +58,41 @@ namespace HonzaBotner.Discord.Services.Jobs
         {
             try
             {
-                var channel = await _discord.Client.GetChannelAsync(reminder.ChannelId);
-                var message = await channel.GetMessageAsync(reminder.MessageId);
-                var emoji = DiscordEmoji.FromUnicode(_options.JoinEmojiName);
+                DiscordChannel channel = await _discord.Client.GetChannelAsync(reminder.ChannelId);
+                DiscordMessage message = await channel.GetMessageAsync(reminder.MessageId);
+                DiscordEmoji emoji = DiscordEmoji.FromUnicode(_reminderOptions.JoinEmojiName);
 
-                var receivers = await message.GetReactionsAsync(emoji, 100);
-                var mentions = $"<@{reminder.OwnerId}> " +
-                               string.Join(", ", receivers.Where(user => !user.IsBot).Select(user => user.Mention));
+                // Get receivers from reactions + reminder owner.
+                var receiversFromReactions = await message.GetReactionsAsync(emoji);
+                var receivers = receiversFromReactions.Where(user => !user.IsBot);
+                if (message.Channel.Guild.Members.ContainsKey(reminder.OwnerId))
+                {
+                    receivers = receivers.Append(message.Channel.Guild.Members[reminder.OwnerId]);
+                }
 
-                var embed = await CreateReminderEmbed(reminder);
+                DiscordEmbed embed = await CreateReminderEmbed(reminder);
 
-                await channel.SendMessageAsync(mentions, embed: embed);
-                await message.ModifyAsync("", CreateExpiredEmbed());
+                // DM all users.
+                foreach (DiscordUser user in receivers)
+                {
+                    if (!message.Channel.Guild.Members.ContainsKey(user.Id)) continue;
+
+                    DiscordDmChannel dmChannel = await message.Channel.Guild.Members[user.Id].CreateDmChannelAsync();
+                    await dmChannel.SendMessageAsync(embed: embed);
+                }
+
+                DiscordEmbed expiredEmbed = await CreateExpiredEmbed(reminder);
+
+                // Delete reminder from DB.
+                await service.DeleteReminderAsync(reminder);
+
+                // Expire old reaction message.
+                await message.ModifyAsync("", expiredEmbed);
                 await message.DeleteAllReactionsAsync();
             }
-            catch (Exception exception)
+            catch (Exception e)
             {
-                _logger.LogCritical($"Exception during reminder trigger: {exception.Message}");
+                _logger.LogCritical(e, "Exception during reminder trigger: {Message}", e.Message);
             }
         }
 
@@ -82,20 +100,48 @@ namespace HonzaBotner.Discord.Services.Jobs
         {
             var guild = await _guild.GetCurrentGuildAsync();
 
-            return new DiscordEmbedBuilder()
-                .WithTitle("🔔 " + reminder.Title.RemoveDiscordMentions(guild))
-                .WithDescription(reminder.Content?.RemoveDiscordMentions(guild) ?? "")
-                .WithColor(new DiscordColor("ffac33"))
-                .WithTimestamp(reminder.DateTime)
-                .Build();
+            return CreateAbstractEmbed(
+                "🔔 Reminder from FIT ČVUT Discord",
+                guild.Members.ContainsKey(reminder.OwnerId)
+                    ? guild.Members[reminder.OwnerId]
+                    : null,
+                reminder.Content.RemoveDiscordMentions(guild),
+                DiscordColor.Yellow,
+                reminder.DateTime
+            );
         }
 
-        private static DiscordEmbed CreateExpiredEmbed()
+        private async Task<DiscordEmbed> CreateExpiredEmbed(Reminder reminder)
+        {
+            var guild = await _guild.GetCurrentGuildAsync();
+
+            return CreateAbstractEmbed(
+                    "🔕 Expired reminder",
+                    guild.Members.ContainsKey(reminder.OwnerId)
+                        ? guild.Members[reminder.OwnerId]
+                        : null,
+                    reminder.Content.RemoveDiscordMentions(guild),
+                    DiscordColor.Grayple,
+                    DateTime.Now
+                );
+        }
+
+        private static DiscordEmbed CreateAbstractEmbed(
+            string title,
+            DiscordMember? author,
+            string description,
+            DiscordColor color,
+            DateTime dateTime
+        )
         {
             return new DiscordEmbedBuilder()
-                .WithTitle("Reminder expired")
-                .WithColor(DiscordColor.Blurple)
-                .WithTimestamp(DateTime.Now)
+                .WithTitle(title)
+                .WithAuthor(
+                    author?.RatherNicknameThanUsername() ?? "Unknown user",
+                    iconUrl: author?.AvatarUrl)
+                .WithDescription(description)
+                .WithColor(color)
+                .WithTimestamp(dateTime)
                 .Build();
         }
     }

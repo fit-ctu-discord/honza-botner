@@ -1,6 +1,4 @@
-#nullable enable
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HonzaBotner.Database
@@ -19,22 +17,18 @@ namespace HonzaBotner.Database
 
         public DateTime DateTime { get; set; }
 
-        public string Title { get; set; }
+        public string Content { get; set; }
 
-        public string? Content { get; set; } = null;
-
-        public Reminder(ulong ownerId, ulong messageId, DateTime dateTime, string title, string? content)
+        public Reminder(ulong ownerId, ulong messageId, DateTime dateTime, string content)
         {
             OwnerId = ownerId;
             MessageId = messageId;
             DateTime = dateTime;
-            Title = title;
             Content = content;
         }
 
         public Reminder()
         {
-            Title = "";
             Content = "";
         }
     }
