@@ -127,17 +127,12 @@ namespace HonzaBotner
 
         private void StartRecurringJobs(IApplicationBuilder app)
         {
-            using IServiceScope scope = app.ApplicationServices
-                .GetRequiredService<IServiceScopeFactory>()
-                .CreateScope();
-
-            // TODO: Make this extendable with other jobs
-            var job = scope.ServiceProvider.GetService<TriggerRemindersJobProvider>()!;
+            GlobalConfiguration.Configuration.UseActivator(new DIActivator(app.ApplicationServices));
 
             RecurringJob.AddOrUpdate(
-                job.Key,
-                () => job.Run(),
-                job.CronExpression
+                TriggerRemindersJobProvider.Key,
+                (TriggerRemindersJobProvider remindersJobProvider) => remindersJobProvider.Run(),
+                TriggerRemindersJobProvider.CronExpression
             );
         }
 
