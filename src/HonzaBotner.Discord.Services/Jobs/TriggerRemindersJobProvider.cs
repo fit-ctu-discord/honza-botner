@@ -3,13 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Hangfire;
-using HonzaBotner.Database;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using HonzaBotner.Services.Contract.Dto;
 
 namespace HonzaBotner.Discord.Services.Jobs
 {
@@ -84,7 +84,7 @@ namespace HonzaBotner.Discord.Services.Jobs
                 DiscordEmbed expiredEmbed = await CreateExpiredEmbed(reminder);
 
                 // Delete reminder from DB.
-                await service.DeleteReminderAsync(reminder);
+                await service.DeleteReminderAsync(reminder.Id);
 
                 // Expire old reaction message.
                 await message.ModifyAsync("", expiredEmbed);

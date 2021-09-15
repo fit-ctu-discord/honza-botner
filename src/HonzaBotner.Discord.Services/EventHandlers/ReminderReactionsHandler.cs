@@ -3,23 +3,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using HonzaBotner.Database;
 using HonzaBotner.Discord.EventHandler;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
+using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.EventHandlers
 {
     public class ReminderReactionsHandler : IEventHandler<MessageReactionAddEventArgs>
     {
-        private readonly ReminderOptions _options;
+        private readonly ReminderOptions _reminderOptions;
 
         private readonly IRemindersService _service;
 
         public ReminderReactionsHandler(IOptions<ReminderOptions> options, IRemindersService service)
         {
-            _options = options.Value;
+            _reminderOptions = options.Value;
             _service = service;
         }
 
@@ -31,7 +31,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             }
 
             DiscordEmoji emoji = arguments.Emoji;
-            string[] validEmojis = { _options.CancelEmojiName, _options.JoinEmojiName };
+            string[] validEmojis = { _reminderOptions.CancelEmojiName, _reminderOptions.JoinEmojiName };
             if (!validEmojis.Contains(emoji))
             {
                 return EventHandlerResult.Continue;
@@ -44,9 +44,9 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             }
 
             // The owner has cancelled the reminder
-            if (emoji == _options.CancelEmojiName && arguments.User.Id == reminder.OwnerId)
+            if (emoji == _reminderOptions.CancelEmojiName && arguments.User.Id == reminder.OwnerId)
             {
-                await _service.DeleteReminderAsync(reminder);
+                await _service.DeleteReminderAsync(reminder.Id);
                 await arguments.Message.ModifyAsync("", CreateCancelledReminderEmbed());
                 await arguments.Message.DeleteAllReactionsAsync("Reminder cancelled");
 
@@ -54,7 +54,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             }
 
             // Somebody else wants to be mentioned within the reminder notification
-            if (emoji == _options.JoinEmojiName && arguments.User.Id != reminder.OwnerId)
+            if (emoji == _reminderOptions.JoinEmojiName && arguments.User.Id != reminder.OwnerId)
             {
                 // There is nothing that has to be done, as the reactions are checked during the reminder notification
                 // This check is just to disable owner from joining his own reminder

@@ -5,21 +5,23 @@ using System.Threading.Tasks;
 using HonzaBotner.Database;
 using HonzaBotner.Services.Contract;
 using Microsoft.EntityFrameworkCore;
+using Reminder = HonzaBotner.Services.Contract.Dto.Reminder;
 
 namespace HonzaBotner.Services
 {
     public class RemindersService : IRemindersService
     {
-        private readonly HonzaBotnerDbContext _context;
+        private readonly HonzaBotnerDbContext _dbContext;
 
-        public RemindersService(HonzaBotnerDbContext context)
+        public RemindersService(HonzaBotnerDbContext dbContext)
         {
-            _context = context;
+            _dbContext = dbContext;
         }
 
-        public async Task<Reminder> CreateReminderAsync(ulong ownerId, ulong messageId, ulong channelId, DateTime datetime, string content)
+        public async Task<Reminder> CreateReminderAsync(ulong ownerId, ulong messageId, ulong channelId,
+            DateTime datetime, string content)
         {
-            var reminder = new Reminder
+            Database.Reminder reminder = new()
             {
                 OwnerId = ownerId,
                 MessageId = messageId,
@@ -27,36 +29,45 @@ namespace HonzaBotner.Services
                 DateTime = datetime,
                 Content = content
             };
-
-            _context.Reminders.Add(reminder);
-            await _context.SaveChangesAsync();
-
-            return reminder;
+            _dbContext.Reminders.Add(reminder);
+            await _dbContext.SaveChangesAsync();
+            return GetDto(reminder);
         }
 
-        public async Task DeleteReminderAsync(Reminder reminder)
+        public async Task DeleteReminderAsync(int id)
         {
-            _context.Reminders.Remove(reminder);
-            await _context.SaveChangesAsync();
+            Database.Reminder? dbReminder = await _dbContext.Reminders.FirstOrDefaultAsync(r => r.Id == id);
+            if (dbReminder == null)
+            {
+                Console.WriteLine("shit");
+                return;
+            }
+
+            _dbContext.Reminders.Remove(dbReminder);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<Reminder?> GetByMessageIdAsync(ulong messageId)
         {
-            return await _context.Reminders
+            return GetDto(await _dbContext.Reminders
                 .Where(reminder => reminder.MessageId == messageId)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync());
         }
 
         public async Task<List<Reminder>> DeleteRemindersThatShouldBeExecutedAsync()
         {
-            var expired = await _context.Reminders
+            var expired = await _dbContext.Reminders
                 .Where(reminder => reminder.DateTime <= DateTime.Now)
                 .ToListAsync();
 
-            _context.Reminders.RemoveRange(expired);
-            await _context.SaveChangesAsync();
+            _dbContext.Reminders.RemoveRange(expired);
+            await _dbContext.SaveChangesAsync();
 
-            return expired;
+            return expired.Select(GetDto).ToList();
         }
+
+        private static Reminder GetDto(Database.Reminder reminder) =>
+            new(reminder.Id, reminder.OwnerId, reminder.MessageId, reminder.ChannelId, reminder.DateTime,
+                reminder.Content);
     }
 }

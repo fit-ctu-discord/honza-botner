@@ -18,18 +18,5 @@ namespace HonzaBotner.Database
         public DateTime DateTime { get; set; }
 
         public string Content { get; set; }
-
-        public Reminder(ulong ownerId, ulong messageId, DateTime dateTime, string content)
-        {
-            OwnerId = ownerId;
-            MessageId = messageId;
-            DateTime = dateTime;
-            Content = content;
-        }
-
-        public Reminder()
-        {
-            Content = "";
-        }
     }
 }

@@ -26,7 +26,6 @@ namespace HonzaBotner.Database
         public DbSet<CountedEmoji> CountedEmojis { get; set; }
         public DbSet<RoleBinding> RoleBindings { get; set; }
         public DbSet<Warning> Warnings { get; set; }
-
         public DbSet<Reminder> Reminders { get; set; }
     }
 }

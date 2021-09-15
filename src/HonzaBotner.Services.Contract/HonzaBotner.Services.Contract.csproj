@@ -1,8 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\HonzaBotner.Database\HonzaBotner.Database.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Hangfire.Core" Version="1.7.19" />
   </ItemGroup>
 </Project>

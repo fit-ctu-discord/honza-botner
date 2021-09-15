@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using HonzaBotner.Database;
+using HonzaBotner.Services.Contract.Dto;
 
 namespace HonzaBotner.Services.Contract
 {
@@ -21,8 +21,8 @@ namespace HonzaBotner.Services.Contract
         /// <summary>
         /// Cancels the specified reminder
         /// </summary>
-        /// <param name="reminder">Reminder to be cancelled</param>
-        public Task DeleteReminderAsync(Reminder reminder);
+        /// <param name="id">Reminder to be cancelled</param>
+        public Task DeleteReminderAsync(int id);
 
         /// <summary>
         /// Find reminder bound to the specified message (embed).
