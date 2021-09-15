@@ -54,16 +54,23 @@ namespace HonzaBotner.Services
                 .FirstOrDefaultAsync());
         }
 
-        public async Task<List<Reminder>> DeleteRemindersThatShouldBeExecutedAsync()
+        public async Task<List<Reminder>> GetRemindersToExecuteAsync(DateTime? dateTime)
         {
             var expired = await _dbContext.Reminders
-                .Where(reminder => reminder.DateTime <= DateTime.Now)
+                .Where(reminder => reminder.DateTime <= (dateTime ?? DateTime.Now))
+                .ToListAsync();
+
+            return expired.Select(GetDto).ToList();
+        }
+
+        public async Task DeleteExecutedRemindersAsync(DateTime? dateTime)
+        {
+            var expired = await _dbContext.Reminders
+                .Where(reminder => reminder.DateTime <= (dateTime ?? DateTime.Now))
                 .ToListAsync();
 
             _dbContext.Reminders.RemoveRange(expired);
             await _dbContext.SaveChangesAsync();
-
-            return expired.Select(GetDto).ToList();
         }
 
         private static Reminder GetDto(Database.Reminder reminder) =>

@@ -6,6 +6,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
@@ -24,10 +25,17 @@ namespace HonzaBotner.Discord.Services.Commands
 
         private readonly ReminderOptions _options;
 
-        public ReminderCommands(IRemindersService service, IOptions<ReminderOptions> options)
+        private readonly IReminderManager _reminderManager;
+
+        public ReminderCommands(
+            IRemindersService service,
+            IOptions<ReminderOptions> options,
+            IReminderManager reminderManager
+        )
         {
             _service = service;
             _options = options.Value;
+            _reminderManager = reminderManager;
         }
 
         [GroupCommand]
@@ -84,7 +92,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 content
             );
 
-            await message.ModifyAsync("", CreateReminderEmbed(context, reminder));
+            await message.ModifyAsync("", await _reminderManager.CreateReminderEmbedAsync(reminder));
             await message.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.CancelEmojiName));
             await message.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.JoinEmojiName));
             await context.Message.DeleteAsync();
@@ -92,28 +100,13 @@ namespace HonzaBotner.Discord.Services.Commands
 
         private static DateTime? ParseDateTime(string datetime)
         {
-            // First try to parse the explicit datetime formats
-            // Cases with time only are handled by the parser
-            string[] formats = { "dd. MM. yyyy HH:mm", "dd.MM.yyyy HH:mm", "dd. MM. yyyy", "dd.MM.yyyy" };
-
-            if (DateTime.TryParseExact(datetime, formats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal,
+            if (DateTime.TryParse(datetime, new CultureInfo("cs-CZ"), DateTimeStyles.AllowWhiteSpaces,
                 out DateTime parsed))
             {
                 return parsed;
             }
 
             return new Parser().Parse(datetime)?.Start;
-        }
-
-        private DiscordEmbed CreateReminderEmbed(CommandContext context, Reminder reminder)
-        {
-            return new DiscordEmbedBuilder()
-                .WithAuthor(context.Member.RatherNicknameThanUsername(), iconUrl: context.Member.AvatarUrl)
-                .WithColor(DiscordColor.Yellow)
-                .WithTitle("🔔 Reminder")
-                .WithDescription(reminder.Content.RemoveDiscordMentions(context.Guild))
-                .AddField("I will remind you at", reminder.DateTime.ToString(CultureInfo.InvariantCulture))
-                .Build();
         }
     }
 }

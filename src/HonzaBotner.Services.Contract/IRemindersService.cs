@@ -32,8 +32,13 @@ namespace HonzaBotner.Services.Contract
         public Task<Reminder?> GetByMessageIdAsync(ulong messageId);
 
         /// <summary>
-        /// Return and delete all reminders that have should be executed (notified).
+        /// Return all reminders that should be executed.
         /// </summary>
-        public Task<List<Reminder>> DeleteRemindersThatShouldBeExecutedAsync();
+        public Task<List<Reminder>> GetRemindersToExecuteAsync(DateTime? dateTime = null);
+
+        /// <summary>
+        /// Delete all executed reminders.
+        /// </summary>
+        public Task DeleteExecutedRemindersAsync(DateTime? dateTime = null);
     }
 }

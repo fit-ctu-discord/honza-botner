@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using Hangfire;
-using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using Microsoft.Extensions.Logging;
@@ -22,21 +22,21 @@ namespace HonzaBotner.Discord.Services.Jobs
 
         private readonly DiscordWrapper _discord;
 
-        private readonly IGuildProvider _guild;
+        private readonly IReminderManager _reminderManager;
 
         public TriggerRemindersJobProvider(
             IRemindersService remindersService,
             ILogger<TriggerRemindersJobProvider> logger,
             IOptions<ReminderOptions> options,
             DiscordWrapper discord,
-            IGuildProvider guild
+            IReminderManager reminderManager
         )
         {
             _remindersService = remindersService;
             _logger = logger;
             _reminderOptions = options.Value;
             _discord = discord;
-            _guild = guild;
+            _reminderManager = reminderManager;
         }
 
         public const string Key = "reminders-trigger";
@@ -45,12 +45,15 @@ namespace HonzaBotner.Discord.Services.Jobs
 
         public async Task Run()
         {
-            var reminders = await _remindersService.DeleteRemindersThatShouldBeExecutedAsync();
+            var now = DateTime.Now; // Fix one point in time.
+            var reminders = await _remindersService.GetRemindersToExecuteAsync(now);
+            await _remindersService.DeleteExecutedRemindersAsync(now);
 
-            reminders.ForEach(reminder => SendReminderNotification(reminder, _remindersService));
+            foreach (var reminder in reminders)
+                await SendReminderNotification(reminder);
         }
 
-        private async void SendReminderNotification(Reminder reminder, IRemindersService service)
+        private async Task SendReminderNotification(Reminder reminder)
         {
             try
             {
@@ -66,7 +69,7 @@ namespace HonzaBotner.Discord.Services.Jobs
                     receivers = receivers.Append(message.Channel.Guild.Members[reminder.OwnerId]);
                 }
 
-                DiscordEmbed embed = await CreateReminderEmbed(reminder);
+                DiscordEmbed embed = await _reminderManager.CreateReminderEmbedAsync(reminder);
 
                 // DM all users.
                 foreach (DiscordUser user in receivers)
@@ -77,10 +80,7 @@ namespace HonzaBotner.Discord.Services.Jobs
                     await dmChannel.SendMessageAsync(embed: embed);
                 }
 
-                DiscordEmbed expiredEmbed = await CreateExpiredEmbed(reminder);
-
-                // Delete reminder from DB.
-                //await service.DeleteReminderAsync(reminder.Id);
+                DiscordEmbed expiredEmbed = await _reminderManager.CreateExpiredReminderEmbedAsync(reminder);
 
                 // Expire old reaction message.
                 await message.ModifyAsync("", expiredEmbed);
@@ -90,55 +90,6 @@ namespace HonzaBotner.Discord.Services.Jobs
             {
                 _logger.LogCritical(e, "Exception during reminder trigger: {Message}", e.Message);
             }
-        }
-
-        private async Task<DiscordEmbed> CreateReminderEmbed(Reminder reminder)
-        {
-            var guild = await _guild.GetCurrentGuildAsync();
-
-            return CreateAbstractEmbed(
-                "🔔 Reminder from FIT ČVUT Discord",
-                guild.Members.ContainsKey(reminder.OwnerId)
-                    ? guild.Members[reminder.OwnerId]
-                    : null,
-                reminder.Content.RemoveDiscordMentions(guild),
-                DiscordColor.Yellow,
-                reminder.DateTime
-            );
-        }
-
-        private async Task<DiscordEmbed> CreateExpiredEmbed(Reminder reminder)
-        {
-            var guild = await _guild.GetCurrentGuildAsync();
-
-            return CreateAbstractEmbed(
-                    "🔕 Expired reminder",
-                    guild.Members.ContainsKey(reminder.OwnerId)
-                        ? guild.Members[reminder.OwnerId]
-                        : null,
-                    reminder.Content.RemoveDiscordMentions(guild),
-                    DiscordColor.Grayple,
-                    DateTime.Now
-                );
-        }
-
-        private static DiscordEmbed CreateAbstractEmbed(
-            string title,
-            DiscordMember? author,
-            string description,
-            DiscordColor color,
-            DateTime dateTime
-        )
-        {
-            return new DiscordEmbedBuilder()
-                .WithTitle(title)
-                .WithAuthor(
-                    author?.RatherNicknameThanUsername() ?? "Unknown user",
-                    iconUrl: author?.AvatarUrl)
-                .WithDescription(description)
-                .WithColor(color)
-                .WithTimestamp(dateTime)
-                .Build();
         }
     }
 }

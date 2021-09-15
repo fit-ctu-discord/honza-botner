@@ -1,9 +1,9 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.EventHandler;
+using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
@@ -17,10 +17,17 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
         private readonly IRemindersService _service;
 
-        public ReminderReactionsHandler(IOptions<ReminderOptions> options, IRemindersService service)
+        private readonly IReminderManager _reminderManager;
+
+        public ReminderReactionsHandler(
+            IOptions<ReminderOptions> options,
+            IRemindersService service,
+            IReminderManager reminderManager
+        )
         {
             _reminderOptions = options.Value;
             _service = service;
+            _reminderManager = reminderManager;
         }
 
         public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs arguments)
@@ -43,12 +50,13 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                 return EventHandlerResult.Continue;
             }
 
-            // The owner has cancelled the reminder
+            // The owner has canceled the reminder
             if (emoji == _reminderOptions.CancelEmojiName && arguments.User.Id == reminder.OwnerId)
             {
                 await _service.DeleteReminderAsync(reminder.Id);
-                await arguments.Message.ModifyAsync("", CreateCancelledReminderEmbed());
-                await arguments.Message.DeleteAllReactionsAsync("Reminder cancelled");
+                await arguments.Message.ModifyAsync("",
+                    await _reminderManager.CreateCanceledReminderEmbedAsync(reminder));
+                await arguments.Message.DeleteAllReactionsAsync("Reminder canceled");
 
                 return EventHandlerResult.Stop;
             }
@@ -64,13 +72,6 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             // Otherwise just remove the emoji...
             await arguments.Message.DeleteReactionAsync(arguments.Emoji, arguments.User, "It is not a valid reaction.");
             return EventHandlerResult.Continue;
-        }
-
-        private static DiscordEmbed CreateCancelledReminderEmbed()
-        {
-            return new DiscordEmbedBuilder()
-                .WithTitle("Reminder cancelled.")
-                .WithTimestamp(DateTime.Now);
         }
     }
 }
