@@ -117,7 +117,7 @@ namespace HonzaBotner
                 app.UseReverseProxyHttpsEnforcer();
             }
 
-            StartRecurringJobs(app);
+            StartRecurringJobs();
 
             app.UseHttpsRedirection();
             app.UseHangfireServer();
@@ -125,10 +125,8 @@ namespace HonzaBotner
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
 
-        private void StartRecurringJobs(IApplicationBuilder app)
+        private void StartRecurringJobs()
         {
-            GlobalConfiguration.Configuration.UseActivator(new DIActivator(app.ApplicationServices));
-
             RecurringJob.AddOrUpdate(
                 TriggerRemindersJobProvider.Key,
                 (TriggerRemindersJobProvider remindersJobProvider) => remindersJobProvider.Run(),

@@ -6,7 +6,6 @@ using Hangfire;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using HonzaBotner.Services.Contract.Dto;
@@ -15,7 +14,7 @@ namespace HonzaBotner.Discord.Services.Jobs
 {
     public class TriggerRemindersJobProvider : IRecurringJobProvider
     {
-        private readonly IServiceScopeFactory _factory;
+        private readonly IRemindersService _remindersService;
 
         private readonly ILogger<TriggerRemindersJobProvider> _logger;
 
@@ -26,14 +25,14 @@ namespace HonzaBotner.Discord.Services.Jobs
         private readonly IGuildProvider _guild;
 
         public TriggerRemindersJobProvider(
-            IServiceScopeFactory factory,
+            IRemindersService remindersService,
             ILogger<TriggerRemindersJobProvider> logger,
             IOptions<ReminderOptions> options,
             DiscordWrapper discord,
             IGuildProvider guild
         )
         {
-            _factory = factory;
+            _remindersService = remindersService;
             _logger = logger;
             _reminderOptions = options.Value;
             _discord = discord;
@@ -44,16 +43,11 @@ namespace HonzaBotner.Discord.Services.Jobs
 
         public static string CronExpression => Cron.Minutely();
 
-        public static string Test { get; set; }
-
         public async Task Run()
         {
-            using var scope = _factory.CreateScope();
+            var reminders = await _remindersService.DeleteRemindersThatShouldBeExecutedAsync();
 
-            var service = scope.ServiceProvider.GetRequiredService<IRemindersService>();
-            var reminders = await service.DeleteRemindersThatShouldBeExecutedAsync();
-
-            reminders.ForEach(reminder => SendReminderNotification(reminder, service));
+            reminders.ForEach(reminder => SendReminderNotification(reminder, _remindersService));
         }
 
         private async void SendReminderNotification(Reminder reminder, IRemindersService service)
@@ -86,7 +80,7 @@ namespace HonzaBotner.Discord.Services.Jobs
                 DiscordEmbed expiredEmbed = await CreateExpiredEmbed(reminder);
 
                 // Delete reminder from DB.
-                await service.DeleteReminderAsync(reminder.Id);
+                //await service.DeleteReminderAsync(reminder.Id);
 
                 // Expire old reaction message.
                 await message.ModifyAsync("", expiredEmbed);
