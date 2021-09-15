@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
@@ -21,8 +22,8 @@ namespace HonzaBotner.Discord.Services.EventHandlers.Helpers
         {
             try
             {
-                DiscordRole hornyJailRole = eventArgs.Guild.GetRole(roleId);
-                if (eventArgs.RolesBefore.Contains(hornyJailRole) || !eventArgs.RolesAfter.Contains(hornyJailRole))
+                DiscordRole role = eventArgs.Guild.GetRole(roleId);
+                if (eventArgs.RolesBefore.Contains(role) || !eventArgs.RolesAfter.Contains(role))
                 {
                     return EventHandlerResult.Continue;
                 }
@@ -35,9 +36,10 @@ namespace HonzaBotner.Discord.Services.EventHandlers.Helpers
             try
             {
                 DiscordChannel channel = eventArgs.Guild.GetChannel(channelId);
-                await channel.SendFileAsync(
-                    filePath,
-                    message
+                await channel.SendMessageAsync(
+                    new DiscordMessageBuilder()
+                        .WithContent(message)
+                        .WithFile(new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 );
             }
             catch (Exception e)
