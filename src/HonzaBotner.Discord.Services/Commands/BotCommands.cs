@@ -42,7 +42,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
             try
             {
-                DiscordActivity activity = new() {ActivityType = type, Name = status};
+                DiscordActivity activity = new() { ActivityType = type, Name = status };
 
                 await ctx.Client.UpdateStatusAsync(activity);
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
@@ -80,7 +80,7 @@ namespace HonzaBotner.Discord.Services.Commands
                     Description = stringBuilder.ToString()
                 };
 
-                await ctx.Channel.SendMessageAsync(embed: embed);
+                await ctx.Channel.SendMessageAsync(embed);
             }
             catch (Exception e)
             {
