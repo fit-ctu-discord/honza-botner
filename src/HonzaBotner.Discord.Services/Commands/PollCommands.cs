@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -39,7 +40,7 @@ namespace HonzaBotner.Discord.Services.Commands
             }
             else
             {
-                await ctx.RespondAsync($"Too many options, maximum number of responses is ${AbcPoll.MaxOptions}.");
+                await ctx.RespondAsync($"Too many options, maximum number of responses is {AbcPoll.MaxOptions}.");
                 return;
             }
 
@@ -86,6 +87,10 @@ namespace HonzaBotner.Discord.Services.Commands
                         answers.ToList())
                     .PostAsync(ctx.Client, ctx.Channel);
                 await ctx.Message.DeleteAsync();
+            }
+            catch (ArgumentException e)
+            {
+                await ctx.RespondAsync(e.Message);
             }
             catch
             {
