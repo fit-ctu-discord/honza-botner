@@ -12,18 +12,16 @@ namespace HonzaBotner.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseController
     {
         private const string AuthIdCookieName = "honza-botner-auth-id";
         private const string RolesPoolCookieName = "honza-botner-roles-pool";
         private readonly IAuthorizationService _authorizationService;
-        private readonly InfoOptions _infoOptions;
         private string RedirectUri => Url.ActionLink(nameof(Callback));
 
-        public AuthController(IAuthorizationService authorizationService, IOptions<InfoOptions> options)
+        public AuthController(IAuthorizationService authorizationService, IOptions<InfoOptions> options) : base(options)
         {
             _authorizationService = authorizationService;
-            _infoOptions = options.Value;
         }
 
         [HttpGet("Authenticate/{userId}/{pool}")]
@@ -70,22 +68,12 @@ namespace HonzaBotner.Controllers
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
-                return ReturnPage(message, true);
+                return Page(message, 200);
             }
             catch (InvalidOperationException e)
             {
-                return ReturnPage(e.Message, false);
+                return Page(e.Message, 500);
             }
-        }
-
-        private ActionResult ReturnPage(string message, bool success)
-        {
-            Response.StatusCode = success ? 200 : 400;
-
-            string content = string.Format(System.IO.File.ReadAllText("Static/auth.html"),
-                success ? string.Empty : "statement--error", message, _infoOptions.RepositoryUrl, _infoOptions.IssueTrackerUrl);
-
-            return Content(content, "text/html");
         }
 
         private bool GetRolesPool(string? value, out RolesPool rolesPool)
