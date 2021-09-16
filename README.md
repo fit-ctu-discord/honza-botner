@@ -8,7 +8,7 @@ Bot for FIT CTU Discord server.
 
 The easiest way to contribute to this project is to [file issues][issues].
 
-You can see contributing guidelines and a list of available features in the [the docs](docs).
+If you want to contribute, see [the contributing guidelines](CONTRIBUTING.md) and a list of available features and other stuff in the [the docs](docs).
 
 ## License
 

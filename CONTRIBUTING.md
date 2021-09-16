@@ -94,7 +94,7 @@ dotnet ef migrations add "Name of migration"
 ```
 
 [dotnet]: https://dotnet.microsoft.com/download
-[compose]: ../docker-compose.yml
+[compose]: docker-compose.yml
 [discordDev]: https://discord.com/developers/applications
 [oauth]: https://auth.fit.cvut.cz/manager/user/apps.xhtml
 [secrets]: https://docs.microsoft.com/cs-cz/aspnet/core/security/app-secrets
