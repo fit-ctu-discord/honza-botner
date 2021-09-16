@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 
@@ -87,6 +88,26 @@ namespace HonzaBotner.Discord.Extensions
             }
 
             return result;
+        }
+
+        public static async Task ReportException(this DiscordChannel channel, string source, Exception exception)
+        {
+            static string Truncate(string value, int maxLength)
+            {
+                if (string.IsNullOrEmpty(value)) return value;
+                return value.Length <= maxLength ? value : value.Substring(0, maxLength) + "...";
+            }
+
+            await channel.SendMessageAsync(
+                new DiscordEmbedBuilder()
+                .WithTitle($"{source} - {exception.GetType().Name}")
+                .WithColor(DiscordColor.Red)
+                .AddField("Message:", exception.Message, true)
+                .AddField("Stack Trace:", Truncate(exception.StackTrace ?? "No stack trace", 500))
+                .WithTimestamp(DateTime.Now)
+                .WithDescription("Please react to this message to indicate that it is already logged in isssue or solved")
+                .Build()
+                );
         }
     }
 }

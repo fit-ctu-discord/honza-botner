@@ -102,6 +102,7 @@ namespace HonzaBotner
             {
                 UpdateDatabase(app);
                 app.UseReverseProxyHttpsEnforcer();
+                app.UseExceptionHandler("/error");
             }
 
             app.UseHttpsRedirection();
