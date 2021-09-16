@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.EventHandler;
@@ -15,31 +16,54 @@ namespace HonzaBotner.Discord.Services.EventHandlers
     {
         private readonly IUrlProvider _urlProvider;
         private readonly CommonCommandOptions _config;
+        private readonly DiscordRoleConfig _discordRoleConfig;
         private readonly IDiscordRoleManager _roleManager;
         private readonly ILogger<StaffVerificationEventHandler> _logger;
 
         public StaffVerificationEventHandler(IUrlProvider urlProvider,
             IOptions<CommonCommandOptions> options,
+            IOptions<DiscordRoleConfig> discordRoleConfig,
             IDiscordRoleManager roleManager,
             ILogger<StaffVerificationEventHandler> logger)
         {
             _urlProvider = urlProvider;
             _config = options.Value;
+            _discordRoleConfig = discordRoleConfig.Value;
             _roleManager = roleManager;
             _logger = logger;
         }
 
         public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs eventArgs)
         {
-            // https://discordapp.com/channels/366970031445377024/507515506073403402/686745124885364770
-
             if (!(eventArgs.Message.Id == _config.VerificationMessageId
                   && eventArgs.Message.ChannelId == _config.VerificationChannelId))
                 return EventHandlerResult.Continue;
             if (!eventArgs.Emoji.Name.Equals(_config.StaffVerificationEmojiName)) return EventHandlerResult.Continue;
 
             DiscordUser user = eventArgs.User;
-            DiscordDmChannel channel = await eventArgs.Guild.Members[user.Id].CreateDmChannelAsync();
+            DiscordMember member = eventArgs.Guild.Members[user.Id];
+            DiscordDmChannel channel = await member.CreateDmChannelAsync();
+
+            bool isAuthenticated = false;
+            foreach (ulong roleId in _discordRoleConfig.AuthenticatedRoleIds)
+            {
+                if (member.Roles.Select(role => role.Id).Contains(roleId))
+                {
+                    isAuthenticated = true;
+                    break;
+                }
+            }
+
+            // Check if the user is authenticated first.
+            if (!isAuthenticated)
+            {
+                string verificationLink = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
+                await channel.SendMessageAsync(
+                    $"Ahoj, ještě nejsi ověřený!\n" +
+                    $"1) Pro ověření ✅ a přidělení rolí dle UserMap klikni na odkaz: {verificationLink}\n" +
+                    "2) Následně znovu klikni na tlačítko 👑 pro přidání zaměstnaneckých rolí.");
+                return EventHandlerResult.Stop;
+            }
 
             string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Staff);
             await channel.SendMessageAsync($"Ahoj, pro získání rolí zaměstnance klikni na: {link}");
