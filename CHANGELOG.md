@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Message command, containing message sending, editing, removing and binding handler to some reaction by [@tenhobi](https://github.com/tenhobi) and [@ostorc](https://github.com/ostorc).
 - Fun command, containing random picker of provided options, by [@tenhobi](https://github.com/tenhobi).
 - User pinning event handler by [@tenhobi](https://github.com/tenhobi).
-- Poll command, containing ABC or yes/no polls by [albru123](https://github.com/albru123), [@ostorc](https://github.com/ostorc) and [@tenhobi](https://github.com/tenhobi).
+- Poll command, containing ABC or yes/no polls by [@albru123](https://github.com/albru123), [@ostorc](https://github.com/ostorc) and [@tenhobi](https://github.com/tenhobi).
 - Emotes counting command and event handler by [@ostorc](https://github.com/ostorc).
 - Authorization using CTU OAuth2 by [@ostorc](https://github.com/ostorc).
 - Core functionality and design of the bot by [@ostorc](https://github.com/ostorc).
