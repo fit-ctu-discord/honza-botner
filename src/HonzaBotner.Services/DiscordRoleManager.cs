@@ -79,7 +79,8 @@ namespace HonzaBotner.Services
                     if (role == null)
                     {
                         returnValue = false;
-                        _logger.LogError("Revoking roles for user id {UserId} failed for role key:{Key} = value:{Value}",
+                        _logger.LogError(
+                            "Revoking roles for user id {UserId} failed for role key:{Key} = value:{Value}",
                             userId, key, value);
                     }
                     else
@@ -93,7 +94,9 @@ namespace HonzaBotner.Services
             DiscordMember member = await guild.GetMemberAsync(userId);
             foreach (DRole role in roles)
             {
-                if (member.Roles.Contains(role))
+                if (member.Roles.Contains(role)
+                    // Don't remove any of the authenticated roles.
+                    && !_roleConfig.AuthenticatedRoleIds.Contains(role.Id))
                 {
                     await member.RevokeRoleAsync(role, "Auth");
                 }
