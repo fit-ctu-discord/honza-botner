@@ -70,7 +70,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
 
             if (_options.Count > _optionsEmoji.Count)
             {
-                throw new ArgumentException("Too many options.");
+                throw new ArgumentException($"Too many options. Maximum options is {MaxOptions}.");
             }
 
             _options.Zip(_optionsEmoji).ToList().ForEach(pair =>
