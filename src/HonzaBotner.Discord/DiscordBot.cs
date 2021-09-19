@@ -18,17 +18,19 @@ namespace HonzaBotner.Discord
         private readonly EventHandler.EventHandler _eventHandler;
         private readonly CommandConfigurator _configurator;
         private readonly IVoiceManager _voiceManager;
+        private readonly IButtonManager _buttonManager;
 
         private DiscordClient Client => _discordWrapper.Client;
         private CommandsNextExtension Commands => _discordWrapper.Commands;
 
         public DiscordBot(DiscordWrapper discordWrapper, EventHandler.EventHandler eventHandler,
-            CommandConfigurator configurator, IVoiceManager voiceManager)
+            CommandConfigurator configurator, IVoiceManager voiceManager, IButtonManager buttonManager)
         {
             _discordWrapper = discordWrapper;
             _eventHandler = eventHandler;
             _configurator = configurator;
             _voiceManager = voiceManager;
+            _buttonManager = buttonManager;
         }
 
         public async Task Run(CancellationToken cancellationToken)
@@ -41,6 +43,7 @@ namespace HonzaBotner.Discord
             Commands.CommandExecuted += Commands_CommandExecuted;
             Commands.CommandErrored += Commands_CommandErrored;
 
+            Client.ComponentInteractionCreated += Client_ComponentInteractionCreated;
             Client.MessageReactionAdded += Client_MessageReactionAdded;
             Client.MessageReactionRemoved += Client_MessageReactionRemoved;
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
@@ -72,6 +75,7 @@ namespace HonzaBotner.Discord
 
             // Run managers' init processes.
             await _voiceManager.DeleteAllUnusedVoiceChannelsAsync();
+            await _buttonManager.SetupButtons(e);
         }
 
         private Task Client_ClientError(DiscordClient sender, ClientErrorEventArgs e)
@@ -135,6 +139,12 @@ namespace HonzaBotner.Discord
                         e.Exception.Message);
                     break;
             }
+        }
+
+
+        private Task Client_ComponentInteractionCreated(DiscordClient client, ComponentInteractionCreateEventArgs args)
+        {
+            return _eventHandler.Handle(args);
         }
 
         private Task Client_MessageReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)

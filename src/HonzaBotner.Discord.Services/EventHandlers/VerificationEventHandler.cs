@@ -1,36 +1,30 @@
 ﻿using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.EventHandler;
-using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
-using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.EventHandlers
 {
-    public class VerificationEventHandler : IEventHandler<MessageReactionAddEventArgs>
+    public class VerificationEventHandler : IEventHandler<ComponentInteractionCreateEventArgs>
     {
         private readonly IAuthorizationService _authorizationService;
         private readonly IUrlProvider _urlProvider;
-        private readonly CommonCommandOptions _config;
 
-        public VerificationEventHandler(IAuthorizationService authorizationService, IUrlProvider urlProvider,
-            IOptions<CommonCommandOptions> options)
+        public VerificationEventHandler(IAuthorizationService authorizationService, IUrlProvider urlProvider)
         {
             _authorizationService = authorizationService;
             _urlProvider = urlProvider;
-            _config = options.Value;
         }
 
-        public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs eventArgs)
+        public async Task<EventHandlerResult> Handle(ComponentInteractionCreateEventArgs eventArgs)
         {
             // https://discordapp.com/channels/366970031445377024/507515506073403402/686745124885364770
 
-            if (!(eventArgs.Message.Id == _config.VerificationMessageId
-                  && eventArgs.Message.ChannelId == _config.VerificationChannelId))
-                return EventHandlerResult.Continue;
-            if (!eventArgs.Emoji.Name.Equals(_config.VerificationEmojiName)) return EventHandlerResult.Continue;
+            if (eventArgs.Id != "user-verification") return EventHandlerResult.Continue;
+            await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
             DiscordUser user = eventArgs.User;
             DiscordDmChannel channel = await eventArgs.Guild.Members[user.Id].CreateDmChannelAsync();
