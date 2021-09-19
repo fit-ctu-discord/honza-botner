@@ -11,30 +11,17 @@ namespace HonzaBotner.Discord.Services.Managers
     public class ButtonManager : IButtonManager
     {
         private readonly CommonCommandOptions _config;
-        private readonly DiscordConfig _dcConfig;
+        private readonly IGuildProvider _guildProvider;
 
-        public ButtonManager(IOptions<CommonCommandOptions> options, IOptions<DiscordConfig> config)
+        public ButtonManager(IOptions<CommonCommandOptions> options, IGuildProvider guildProvider)
         {
             _config = options.Value;
-            _dcConfig = config.Value;
-
+            _guildProvider = guildProvider;
         }
 
-        public async Task SetupButtons(IReadOnlyDictionary<ulong, DiscordGuild> guilds)
+        public async Task SetupButtons()
         {
-            if (guilds.Count == 0) return;
-
-            DiscordGuild guild;
-
-            try
-            {
-                guild = guilds[_dcConfig.GuildId ?? 0];
-            }
-            catch (KeyNotFoundException)
-            {
-                return;
-            }
-
+            DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
             DiscordChannel channel = guild.GetChannel(_config.VerificationChannelId);
             if (channel.Type != ChannelType.Text) return;
 

@@ -9,7 +9,6 @@ namespace HonzaBotner.Discord.Managers
         /// <summary>
         /// Sets up default buttons on verification messages
         /// </summary>
-        /// <param name="guilds">Dictionary of GuildID and DiscordGuild the bot is connected to</param>
-        Task SetupButtons(IReadOnlyDictionary<ulong, DiscordGuild> guilds);
+        Task SetupButtons();
     }
 }
