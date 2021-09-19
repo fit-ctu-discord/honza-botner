@@ -45,8 +45,8 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                 .WithContent(message.Content)
                 .AddComponents(new DiscordComponent[]
                 {
-                    new DiscordButtonComponent(ButtonStyle.Primary, "user-verification", "Ověř se!", false, new DiscordComponentEmoji("⚡")),
-                    new DiscordButtonComponent(ButtonStyle.Primary, "staff-verification", "Získat role zaměstnance", false, new DiscordComponentEmoji("👑"))
+                    new DiscordButtonComponent(ButtonStyle.Success, "user-verification", "Ověř se!", false, new DiscordComponentEmoji("⚡")),
+                    new DiscordButtonComponent(ButtonStyle.Primary, "staff-verification", "Aktualizovat role zaměstnance", false, new DiscordComponentEmoji("👑"))
                 });
 
             await message.ModifyAsync(builder);
