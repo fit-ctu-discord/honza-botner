@@ -32,11 +32,10 @@ namespace HonzaBotner.Discord.Services.EventHandlers
         public async Task<EventHandlerResult> Handle(ComponentInteractionCreateEventArgs eventArgs)
         {
             if (eventArgs.Id != "staff-verification") return EventHandlerResult.Continue;
-            await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
             DiscordUser user = eventArgs.User;
             DiscordMember member = eventArgs.Guild.Members[user.Id];
-            DiscordDmChannel channel = await member.CreateDmChannelAsync();
+            DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
 
             bool isAuthenticated = false;
             foreach (ulong roleId in _discordRoleConfig.AuthenticatedRoleIds)
@@ -52,17 +51,22 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             if (!isAuthenticated)
             {
                 string verificationLink = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
-                await channel.SendMessageAsync(
-                    $"Ahoj, ještě nejsi ověřený!\n" +
+                builder.Content =
+                    "Ahoj, ještě nejsi ověřený!\n" +
                     $"1) Pro ověření ✅ a přidělení rolí dle UserMap klikni na odkaz: {verificationLink}\n" +
-                    "2) Následně znovu klikni na tlačítko 👑 pro přidání zaměstnaneckých rolí.");
+                    "2) Následně znovu klikni na tlačítko 👑 pro přidání zaměstnaneckých rolí.";
+
+                await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    builder);
+
                 return EventHandlerResult.Stop;
             }
 
             await _roleManager.RevokeRolesPoolAsync(eventArgs.User.Id, RolesPool.Staff);
 
             string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Staff);
-            await channel.SendMessageAsync($"Ahoj, pro získání rolí zaměstnance klikni na: {link}");
+            builder.Content = $"Ahoj, pro získání rolí zaměstnance klikni na: {link}";
+            await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
 
             return EventHandlerResult.Stop;
         }

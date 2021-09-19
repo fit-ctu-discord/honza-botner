@@ -24,23 +24,21 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             // https://discordapp.com/channels/366970031445377024/507515506073403402/686745124885364770
 
             if (eventArgs.Id != "user-verification") return EventHandlerResult.Continue;
-            await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
 
-            DiscordUser user = eventArgs.User;
-            DiscordDmChannel channel = await eventArgs.Guild.Members[user.Id].CreateDmChannelAsync();
+            DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
 
-            string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
+            string link = _urlProvider.GetAuthLink(eventArgs.User.Id, RolesPool.Auth);
 
-            if (await _authorizationService.IsUserVerified(user.Id))
+            if (await _authorizationService.IsUserVerified(eventArgs.User.Id))
             {
-                await channel.SendMessageAsync(
-                    $"Ahoj, už jsi ověřený.\nPro aktualizaci rolí dle UserMap klikni na odkaz: {link}");
+                builder.Content = $"Ahoj, už jsi ověřený.\nPro aktualizaci rolí dle UserMap klikni na odkaz: {link}";
             }
             else
             {
-                await channel.SendMessageAsync(
-                    $"Ahoj, pro ověření a přidělení rolí dle UserMap klikni na odkaz: {link}");
+                builder.Content = $"Ahoj, pro ověření a přidělení rolí dle UserMap klikni na odkaz: {link}";
             }
+
+            await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
 
             return EventHandlerResult.Stop;
         }

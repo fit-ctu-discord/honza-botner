@@ -75,7 +75,7 @@ namespace HonzaBotner.Discord
 
             // Run managers' init processes.
             await _voiceManager.DeleteAllUnusedVoiceChannelsAsync();
-            await _buttonManager.SetupButtons(e);
+            await _buttonManager.SetupButtons(e.Guilds);
         }
 
         private Task Client_ClientError(DiscordClient sender, ClientErrorEventArgs e)
