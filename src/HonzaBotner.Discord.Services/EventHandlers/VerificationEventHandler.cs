@@ -31,11 +31,15 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             if (await _authorizationService.IsUserVerified(eventArgs.User.Id))
             {
-                builder.Content = $"Ahoj, už jsi ověřený.\nPro aktualizaci rolí dle UserMap klikni na odkaz: {link}";
+                builder.Content = "Ahoj, už jsi ověřený.\nChceš aktualizovat role dle UserMap?";
+                builder.AddComponents(new DiscordLinkButtonComponent(link, "Aktualizovat role", false,
+                    new DiscordComponentEmoji("🔄")));
             }
             else
             {
-                builder.Content = $"Ahoj, pro ověření a přidělení rolí dle UserMap klikni na odkaz: {link}";
+                builder.Content = "Ahoj, pro ověření a přidělení rolí dle UserMap pokračuj na odkaz";
+                builder.AddComponents(new DiscordLinkButtonComponent(link, "Ověřit se!", false,
+                    new DiscordComponentEmoji("✅")));
             }
 
             await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);

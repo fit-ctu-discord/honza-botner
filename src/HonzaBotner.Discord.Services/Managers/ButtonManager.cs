@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -31,8 +30,10 @@ namespace HonzaBotner.Discord.Services.Managers
                 .WithContent(message.Content)
                 .AddComponents(new DiscordComponent[]
                 {
-                    new DiscordButtonComponent(ButtonStyle.Primary, "user-verification", "Ověř se!", false, new DiscordComponentEmoji("✅")),
-                    new DiscordButtonComponent(ButtonStyle.Secondary, "staff-verification", "Přidat role zaměstnance", false, new DiscordComponentEmoji("👑"))
+                    new DiscordButtonComponent(ButtonStyle.Primary, "user-verification", "Ověř se!",
+                        false, new DiscordComponentEmoji("✅")),
+                    new DiscordButtonComponent(ButtonStyle.Secondary, "staff-verification",
+                        "Přidat role zaměstnance", false, new DiscordComponentEmoji("👑"))
                 });
 
             await message.ModifyAsync(builder);

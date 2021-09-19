@@ -53,9 +53,10 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                 string verificationLink = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
                 builder.Content =
                     "Ahoj, ještě nejsi ověřený!\n" +
-                    $"1) Pro ověření ✅ a přidělení rolí dle UserMap klikni na odkaz: {verificationLink}\n" +
-                    "2) Následně znovu klikni na tlačítko 👑 pro přidání zaměstnaneckých rolí.";
-
+                    "1) Pro ověření ✅ a přidělení rolí dle UserMap klikni na tlačítko dole\n" +
+                    "2) Následně znovu klikni na tlačítko pro přidání 👑 zaměstnaneckých rolí.";
+                builder.AddComponents(new DiscordLinkButtonComponent(verificationLink, "Ověřit se!", false,
+                    new DiscordComponentEmoji("✅")));
                 await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                     builder);
 
@@ -65,7 +66,9 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             await _roleManager.RevokeRolesPoolAsync(eventArgs.User.Id, RolesPool.Staff);
 
             string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Staff);
-            builder.Content = $"Ahoj, pro získání rolí zaměstnance klikni na: {link}";
+            builder.Content = "Ahoj, klikni pro ověření zaměstnaneckých rolí";
+            builder.AddComponents(new DiscordLinkButtonComponent(link, "Jsem zaměstnanec!", false,
+                new DiscordComponentEmoji("👑")));
             await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
 
             return EventHandlerResult.Stop;
