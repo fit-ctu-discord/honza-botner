@@ -18,19 +18,17 @@ namespace HonzaBotner.Discord
         private readonly EventHandler.EventHandler _eventHandler;
         private readonly CommandConfigurator _configurator;
         private readonly IVoiceManager _voiceManager;
-        private readonly IButtonManager _buttonManager;
 
         private DiscordClient Client => _discordWrapper.Client;
         private CommandsNextExtension Commands => _discordWrapper.Commands;
 
         public DiscordBot(DiscordWrapper discordWrapper, EventHandler.EventHandler eventHandler,
-            CommandConfigurator configurator, IVoiceManager voiceManager, IButtonManager buttonManager)
+            CommandConfigurator configurator, IVoiceManager voiceManager)
         {
             _discordWrapper = discordWrapper;
             _eventHandler = eventHandler;
             _configurator = configurator;
             _voiceManager = voiceManager;
-            _buttonManager = buttonManager;
         }
 
         public async Task Run(CancellationToken cancellationToken)
@@ -75,7 +73,6 @@ namespace HonzaBotner.Discord
 
             // Run managers' init processes.
             await _voiceManager.DeleteAllUnusedVoiceChannelsAsync();
-            await _buttonManager.SetupButtons();
         }
 
         private Task Client_ClientError(DiscordClient sender, ClientErrorEventArgs e)

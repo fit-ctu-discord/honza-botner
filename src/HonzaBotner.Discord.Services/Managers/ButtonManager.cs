@@ -9,34 +9,34 @@ namespace HonzaBotner.Discord.Services.Managers
 {
     public class ButtonManager : IButtonManager
     {
-        private readonly CommonCommandOptions _config;
-        private readonly IGuildProvider _guildProvider;
+        private readonly ButtonOptions _buttonOptions;
 
-        public ButtonManager(IOptions<CommonCommandOptions> options, IGuildProvider guildProvider)
+        public ButtonManager(IOptions<ButtonOptions> buttonConfig)
         {
-            _config = options.Value;
-            _guildProvider = guildProvider;
+            _buttonOptions = buttonConfig.Value;
         }
 
-        public async Task SetupButtons()
+        public async Task SetupVerificationButtons(DiscordMessage target)
         {
-            DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
-            DiscordChannel channel = guild.GetChannel(_config.VerificationChannelId);
-            if (channel.Type != ChannelType.Text) return;
-
-            DiscordMessage message = await channel.GetMessageAsync(_config.VerificationMessageId);
+            DiscordMessage message = target;
 
             var builder = new DiscordMessageBuilder()
                 .WithContent(message.Content)
                 .AddComponents(new DiscordComponent[]
                 {
-                    new DiscordButtonComponent(ButtonStyle.Primary, "user-verification", "Ověř se!",
+                    new DiscordButtonComponent(ButtonStyle.Primary, _buttonOptions.VerificationId, "Ověř se!",
                         false, new DiscordComponentEmoji("✅")),
-                    new DiscordButtonComponent(ButtonStyle.Secondary, "staff-verification",
+                    new DiscordButtonComponent(ButtonStyle.Secondary, _buttonOptions.StaffVerificationId,
                         "Přidat role zaměstnance", false, new DiscordComponentEmoji("👑"))
                 });
 
             await message.ModifyAsync(builder);
+        }
+
+        public async Task RemoveButtonsFromMessage(DiscordMessage target)
+        {
+            DiscordMessageBuilder builder = new DiscordMessageBuilder().WithContent(target.Content);
+            await target.ModifyAsync(builder);
         }
 
     }
