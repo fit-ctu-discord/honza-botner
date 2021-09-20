@@ -3,8 +3,10 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.EventHandler;
+using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
+using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.EventHandlers
 {
@@ -12,18 +14,20 @@ namespace HonzaBotner.Discord.Services.EventHandlers
     {
         private readonly IAuthorizationService _authorizationService;
         private readonly IUrlProvider _urlProvider;
+        private readonly ButtonOptions _buttonOptions;
 
-        public VerificationEventHandler(IAuthorizationService authorizationService, IUrlProvider urlProvider)
+        public VerificationEventHandler(IAuthorizationService authorizationService, IUrlProvider urlProvider, IOptions<ButtonOptions> options)
         {
             _authorizationService = authorizationService;
             _urlProvider = urlProvider;
+            _buttonOptions = options.Value;
         }
 
         public async Task<EventHandlerResult> Handle(ComponentInteractionCreateEventArgs eventArgs)
         {
             // https://discordapp.com/channels/366970031445377024/507515506073403402/686745124885364770
 
-            if (eventArgs.Id != "user-verification") return EventHandlerResult.Continue;
+            if (eventArgs.Id != _buttonOptions.VerificationId) return EventHandlerResult.Continue;
 
             DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
 

@@ -114,7 +114,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             }
             else
             {
-                builder.Content = "Ahoj, klikni na tlačítko pro ověřená rolí zaměstnance!";
+                builder.Content = "Ahoj, klikni na tlačítko pro ověření rolí zaměstnance!";
                 builder.AddComponents(new DiscordLinkButtonComponent(link, "Ověřit role zaměstnance!",
                     false, new DiscordComponentEmoji("👑")));
             }
