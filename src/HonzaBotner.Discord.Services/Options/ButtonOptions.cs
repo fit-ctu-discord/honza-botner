@@ -4,8 +4,8 @@ namespace HonzaBotner.Discord.Services.Options
     {
         public static string ConfigName => "ButtonOptions";
 
-        public string VerificationId { get; set; } = "verification-user";
-        public string StaffVerificationId { get; set; } = "verification-staff";
-        public string StaffRemoveRoleId { get; set; } = "verification-remove-staff";
+        public string? VerificationId { get; set; }
+        public string? StaffVerificationId { get; set; }
+        public string? StaffRemoveRoleId { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Exceptions;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using HonzaBotner.Discord.Extensions;
@@ -243,10 +244,23 @@ namespace HonzaBotner.Discord.Services.Commands
                     throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
                 }
 
-                await _buttonManager.RemoveButtonsFromMessage(message);
+                DiscordEmoji reactEmoji = DiscordEmoji.FromName(ctx.Client, ":+1:");
+                try
+                {
+                    await _buttonManager.RemoveButtonsFromMessage(message);
+                }
+                catch (Exception exception)
+                {
+                    if (exception is not UnauthorizedException)
+                    {
+                        throw;
+                    }
 
-                DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client, ":+1:");
-                await ctx.Message.CreateReactionAsync(thumbsUp);
+                    await ctx.RespondAsync("Chyba: Změny povoleny jen na zprávách odeslaných tímto botem");
+                    reactEmoji = DiscordEmoji.FromName(ctx.Client, ":-1:");
+                }
+
+                await ctx.Message.CreateReactionAsync(reactEmoji);
             }
 
             [Description("Marks message as verification message")]
@@ -259,10 +273,22 @@ namespace HonzaBotner.Discord.Services.Commands
                     throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
                 }
 
-                await _buttonManager.SetupVerificationButtons(message);
+                DiscordEmoji reactEmoji = DiscordEmoji.FromName(ctx.Client, ":+1:");
+                try
+                {
+                    await _buttonManager.SetupVerificationButtons(message);
+                }
+                catch (Exception exception)
+                {
+                    if (exception is not UnauthorizedException)
+                    {
+                        throw;
+                    }
 
-                DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client, ":+1:");
-                await ctx.Message.CreateReactionAsync(thumbsUp);
+                    await ctx.RespondAsync("Chyba: Změny povoleny jen na zprávách odeslaných tímto botem");
+                    reactEmoji = DiscordEmoji.FromName(ctx.Client, ":-1:");
+                }
+                await ctx.Message.CreateReactionAsync(reactEmoji);
             }
         }
     }
