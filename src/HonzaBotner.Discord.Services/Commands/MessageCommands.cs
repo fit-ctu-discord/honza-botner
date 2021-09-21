@@ -244,22 +244,17 @@ namespace HonzaBotner.Discord.Services.Commands
                     throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
                 }
 
-                DiscordEmoji reactEmoji = DiscordEmoji.FromName(ctx.Client, ":+1:");
                 try
                 {
                     await _buttonManager.RemoveButtonsFromMessage(message);
                 }
-                catch (Exception exception)
+                catch (UnauthorizedException)
                 {
-                    if (exception is not UnauthorizedException)
-                    {
-                        throw;
-                    }
-
-                    await ctx.RespondAsync("Chyba: Změny povoleny jen na zprávách odeslaných tímto botem");
-                    reactEmoji = DiscordEmoji.FromName(ctx.Client, ":-1:");
+                    await ctx.RespondAsync("Chyba: Změny možné jen na zprávách odeslaných tímto botem");
+                    return;
                 }
 
+                DiscordEmoji reactEmoji = DiscordEmoji.FromName(ctx.Client, ":+1:");
                 await ctx.Message.CreateReactionAsync(reactEmoji);
             }
 
@@ -273,21 +268,17 @@ namespace HonzaBotner.Discord.Services.Commands
                     throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
                 }
 
-                DiscordEmoji reactEmoji = DiscordEmoji.FromName(ctx.Client, ":+1:");
                 try
                 {
                     await _buttonManager.SetupVerificationButtons(message);
                 }
-                catch (Exception exception)
+                catch (UnauthorizedException)
                 {
-                    if (exception is not UnauthorizedException)
-                    {
-                        throw;
-                    }
-
-                    await ctx.RespondAsync("Chyba: Změny povoleny jen na zprávách odeslaných tímto botem");
-                    reactEmoji = DiscordEmoji.FromName(ctx.Client, ":-1:");
+                    await ctx.RespondAsync("Chyba: Změny možné jen na zprávách odeslaných tímto botem");
+                    return;
                 }
+
+                DiscordEmoji reactEmoji = DiscordEmoji.FromName(ctx.Client, ":+1:");
                 await ctx.Message.CreateReactionAsync(reactEmoji);
             }
         }
