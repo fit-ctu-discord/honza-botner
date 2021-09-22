@@ -70,7 +70,7 @@ namespace HonzaBotner.Controllers
 
                 return Page(message, 200);
             }
-            catch (InvalidOperationException e)
+            catch (Exception e)
             {
                 return Page(e.Message, 500);
             }

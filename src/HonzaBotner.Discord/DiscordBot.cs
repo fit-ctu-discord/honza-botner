@@ -21,7 +21,7 @@ namespace HonzaBotner.Discord
         private readonly EventHandler.EventHandler _eventHandler;
         private readonly CommandConfigurator _configurator;
         private readonly IVoiceManager _voiceManager;
-        private readonly IOptions<DiscordConfig> _discordOptions;
+        private readonly DiscordConfig _discordOptions;
 
         private DiscordClient Client => _discordWrapper.Client;
         private CommandsNextExtension Commands => _discordWrapper.Commands;
@@ -33,7 +33,7 @@ namespace HonzaBotner.Discord
             _eventHandler = eventHandler;
             _configurator = configurator;
             _voiceManager = voiceManager;
-            _discordOptions = discordOptions;
+            _discordOptions = discordOptions.Value;
         }
 
         public async Task Run(CancellationToken cancellationToken)
@@ -83,12 +83,12 @@ namespace HonzaBotner.Discord
         {
             sender.Logger.LogError(e.Exception, "Exception occured");
 
-            if (_discordOptions.Value.GuildId == null)
+            if (_discordOptions.GuildId == null)
                 return;
 
-            DiscordGuild guild = await sender.GetGuildAsync(_discordOptions.Value.GuildId.Value);
+            DiscordGuild guild = await sender.GetGuildAsync(_discordOptions.GuildId.Value);
 
-            await ReportException(guild, $"Client error", e.Exception);
+            await ReportException(guild, "Client error", e.Exception);
             e.Handled = true;
         }
 
@@ -107,8 +107,8 @@ namespace HonzaBotner.Discord
                     {
                         await e.Context.RespondAsync("Tento příkaz neznám.");
                         CommandContext? fakeContext = Commands.CreateFakeContext(e.Context.Member, e.Context.Channel,
-                            $"help", e.Context.Prefix,
-                            Commands.FindCommand($"help", out string args), args
+                            "help", e.Context.Prefix,
+                            Commands.FindCommand("help", out string args), args
                         );
                         await Commands.ExecuteCommandAsync(fakeContext);
                         break;
@@ -133,7 +133,7 @@ namespace HonzaBotner.Discord
                             Title = "Přístup zakázán",
                             Description =
                                 $"{emoji} Na vykonání příkazu nemáte dostatečná práva. Pokud si myslíte že ano, kontaktujte svého MODa.",
-                            Color = new DiscordColor(0xFF0000) // red
+                            Color = DiscordColor.Red // red
                         };
                         await e.Context.RespondAsync("", embed.Build());
                         break;
@@ -179,7 +179,7 @@ namespace HonzaBotner.Discord
 
         private async Task ReportException(DiscordGuild guild, string source, Exception exception)
         {
-            ulong logChannelId = _discordOptions.Value.LogChannelId;
+            ulong logChannelId = _discordOptions.LogChannelId;
 
             if (logChannelId == default)
             {

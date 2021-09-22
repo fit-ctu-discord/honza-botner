@@ -100,14 +100,16 @@ namespace HonzaBotner.Discord.Extensions
 
             await channel.SendMessageAsync(
                 new DiscordEmbedBuilder()
-                .WithTitle($"{source} - {exception.GetType().Name}")
-                .WithColor(DiscordColor.Red)
-                .AddField("Message:", exception.Message, true)
-                .AddField("Stack Trace:", Truncate(exception.StackTrace ?? "No stack trace", 500))
-                .WithTimestamp(DateTime.Now)
-                .WithDescription("Please react to this message to indicate that it is already logged in isssue or solved")
-                .Build()
-                );
+                    .WithTitle($"{source} - {exception.GetType().Name}")
+                    .WithColor(DiscordColor.Red)
+                    .AddField("Message:", exception.Message, true)
+                    .AddField("Stack Trace:", Truncate(exception.StackTrace ?? "No stack trace", 500))
+                    .WithTimestamp(DateTime.Now)
+                    .WithDescription(
+                        "Please react to this message to indicate that it is already logged in isssue or solved"
+                    )
+                    .Build()
+            );
         }
     }
 }

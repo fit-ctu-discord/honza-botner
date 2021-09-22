@@ -16,7 +16,11 @@ namespace HonzaBotner.Controllers
         private readonly IGuildProvider _guildProvider;
         private readonly IOptions<DiscordConfig> _discordOptions;
 
-        public ErrorController(IGuildProvider guildProvider, IOptions<DiscordConfig> options, IOptions<InfoOptions> infoOptions) : base(infoOptions)
+        public ErrorController(
+            IGuildProvider guildProvider,
+            IOptions<DiscordConfig> options,
+            IOptions<InfoOptions> infoOptions
+        ) : base(infoOptions)
         {
             _guildProvider = guildProvider;
             _discordOptions = options;
@@ -32,14 +36,14 @@ namespace HonzaBotner.Controllers
 
             if (logChannelId == default)
             {
-                return Page("Something went wrong. Please contact @mod at server", 500);
+                return Page("Something went wrong. Please contact @mod at server.", 500);
             }
 
             DiscordChannel channel = guild.GetChannel(logChannelId);
 
             await channel.ReportException("ASP Core .NET", context.Error);
 
-            return Page("Something went wrong. They were notified, but still please contact @Mod at server. ", 500);
+            return Page("Something went wrong. They were notified, but still please contact @Mod at server.", 500);
         }
     }
 }
