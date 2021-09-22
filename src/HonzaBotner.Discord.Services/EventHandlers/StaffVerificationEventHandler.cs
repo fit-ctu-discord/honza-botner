@@ -42,25 +42,28 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             DiscordUser user = eventArgs.User;
             DiscordMember member = eventArgs.Guild.Members[user.Id];
-            DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
+            var builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
 
-            // First check if the button to remove staff roles was pressed
+            // Check if the button to remove staff roles was pressed.
             if (eventArgs.Id == _buttonOptions.StaffRemoveRoleId)
             {
                 bool revoked = await _roleManager.RevokeRolesPoolAsync(eventArgs.User.Id, RolesPool.Staff);
-                builder.Content = "Role úspěšně odstraněny";
+                builder.Content = "Role byly úspěšně odstraněny.";
                 if (!revoked)
                 {
-                    _logger.LogWarning("Ungranting roles for user {Username} (id {Id}) failed", eventArgs.User.Username,
-                        eventArgs.User.Id);
-                    builder.Content = "Staff role se nepodařilo odebrat. Prosím, kontaktujte moderátory.";
+                    _logger.LogInformation(
+                        "Ungranting roles for user {Username} (id {Id}) failed",
+                        eventArgs.User.Username,
+                        eventArgs.User.Id
+                    );
+                    builder.Content = "Zaměstnanecké role se nepodařilo odebrat. Prosím, kontaktujte moderátory.";
                 }
 
                 await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, builder);
                 return EventHandlerResult.Stop;
             }
 
-            // Second check if the user is authenticated
+            // Check if the user is authenticated.
             bool isAuthenticated = false;
             foreach (ulong roleId in _discordRoleConfig.AuthenticatedRoleIds)
             {
@@ -70,22 +73,28 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                     break;
                 }
             }
+
             if (!isAuthenticated)
             {
                 string verificationLink = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
-                builder.Content =
-                    "Ahoj, ještě nejsi ověřený!\n" +
-                    "1) Pro ověření ✅ a přidělení rolí dle UserMap klikni na tlačítko dole\n" +
-                    "2) Následně znovu klikni na tlačítko pro přidání 👑 zaměstnaneckých rolí.";
-                builder.AddComponents(new DiscordLinkButtonComponent(verificationLink, "Ověřit se!", false,
-                    new DiscordComponentEmoji("✅")));
+                builder.Content = "Ahoj, ještě nejsi ověřený!\n" +
+                                  "1) Pro ověření a přidělení rolí dle UserMap klikni na tlačítko dole. ✅\n" +
+                                  "2) Následně znovu klikni na tlačítko pro přidání zaměstnaneckých rolí. 👑";
+                builder.AddComponents(
+                    new DiscordLinkButtonComponent(
+                        verificationLink,
+                        "Ověřit se",
+                        false,
+                        new DiscordComponentEmoji("✅")
+                    )
+                );
                 await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                     builder);
 
                 return EventHandlerResult.Stop;
             }
 
-            // Third check if the user already has some staff roles
+            // Check if the user already has some staff roles
             bool isStaffAuthenticated = false;
             foreach (ulong[] roleIds in _discordRoleConfig.StaffRoleMapping.Values)
             {
@@ -103,23 +112,39 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             if (isStaffAuthenticated && _buttonOptions.StaffRemoveRoleId is not null)
             {
-                builder.Content = "Ahoj, už jsi ověřený,\nChceš aktualizovat svoje role přes UserMap?";
-                builder.AddComponents(new DiscordComponent[]
-                {
-                    new DiscordLinkButtonComponent(link, "Aktualizovat role zaměstnance!",
-                        false, new DiscordComponentEmoji("👑")),
-                    new DiscordButtonComponent(ButtonStyle.Danger, _buttonOptions.StaffRemoveRoleId, "Odebrat role",
-                        false, new DiscordComponentEmoji("💣"))
-                });
+                builder.Content = "Ahoj, už jsi ověřený.\n" +
+                                  "Pro aktualizaci zaměstnaneckých rolí klikni na tlačítko.";
+                builder.AddComponents(
+                    new DiscordLinkButtonComponent(
+                        link,
+                        "Aktualizovat role zaměstnance",
+                        false,
+                        new DiscordComponentEmoji("👑")
+                    ),
+                    new DiscordButtonComponent(
+                        ButtonStyle.Danger,
+                        _buttonOptions.StaffRemoveRoleId,
+                        "Odebrat role",
+                        false,
+                        new DiscordComponentEmoji("🗑️")
+                    )
+                );
             }
             else
             {
-                builder.Content = "Ahoj, klikni na tlačítko pro ověření rolí zaměstnance!";
-                builder.AddComponents(new DiscordLinkButtonComponent(link, "Ověřit role zaměstnance!",
-                    false, new DiscordComponentEmoji("👑")));
+                builder.Content = "Ahoj, pro ověření rolí zaměstnance klikni na tlačítko.";
+                builder.AddComponents(new DiscordLinkButtonComponent(
+                    link,
+                    "Ověřit role zaměstnance",
+                    false,
+                    new DiscordComponentEmoji("👑"))
+                );
             }
-            await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                builder);
+
+            await eventArgs.Interaction.CreateResponseAsync(
+                InteractionResponseType.ChannelMessageWithSource,
+                builder
+            );
 
             return EventHandlerResult.Stop;
         }

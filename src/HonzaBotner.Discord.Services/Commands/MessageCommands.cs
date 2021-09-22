@@ -250,7 +250,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 }
                 catch (UnauthorizedException)
                 {
-                    await ctx.RespondAsync("Chyba: Změny možné jen na zprávách odeslaných tímto botem");
+                    await ctx.RespondAsync("Error: You can only edit messages by this bot.");
                     return;
                 }
 
@@ -274,7 +274,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 }
                 catch (UnauthorizedException)
                 {
-                    await ctx.RespondAsync("Chyba: Změny možné jen na zprávách odeslaných tímto botem");
+                    await ctx.RespondAsync("Error: You can only edit messages by this bot.");
                     return;
                 }
 

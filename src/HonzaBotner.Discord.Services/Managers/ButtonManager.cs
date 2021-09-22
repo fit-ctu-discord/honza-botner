@@ -19,10 +19,8 @@ namespace HonzaBotner.Discord.Services.Managers
             _logger = logger;
         }
 
-        public async Task SetupVerificationButtons(DiscordMessage target)
+        public async Task SetupVerificationButtons(DiscordMessage message)
         {
-            DiscordMessage message = target;
-
             if (_buttonOptions.VerificationId is null || _buttonOptions.StaffVerificationId is null)
             {
                 _logger.LogWarning("'VerificationId' or 'StaffVerificationId' not set in config");
@@ -31,13 +29,22 @@ namespace HonzaBotner.Discord.Services.Managers
 
             var builder = new DiscordMessageBuilder()
                 .WithContent(message.Content)
-                .AddComponents(new DiscordComponent[]
-                {
-                    new DiscordButtonComponent(ButtonStyle.Primary, _buttonOptions.VerificationId, "Ověř se!",
-                        false, new DiscordComponentEmoji("✅")),
-                    new DiscordButtonComponent(ButtonStyle.Secondary, _buttonOptions.StaffVerificationId,
-                        "Přidat role zaměstnance", false, new DiscordComponentEmoji("👑"))
-                });
+                .AddComponents(
+                    new DiscordButtonComponent(
+                        ButtonStyle.Primary,
+                        _buttonOptions.VerificationId,
+                        "Ověř se",
+                        false,
+                        new DiscordComponentEmoji("✅")
+                    ),
+                    new DiscordButtonComponent(
+                        ButtonStyle.Secondary,
+                        _buttonOptions.StaffVerificationId,
+                        "Přidat role zaměstnance",
+                        false,
+                        new DiscordComponentEmoji("👑")
+                    )
+                );
 
             await message.ModifyAsync(builder);
         }
@@ -47,6 +54,5 @@ namespace HonzaBotner.Discord.Services.Managers
             DiscordMessageBuilder builder = new DiscordMessageBuilder().WithContent(target.Content);
             await target.ModifyAsync(builder);
         }
-
     }
 }
