@@ -101,7 +101,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Staff);
 
-            if (isStaffAuthenticated)
+            if (isStaffAuthenticated && _buttonOptions.StaffRemoveRoleId is not null)
             {
                 builder.Content = "Ahoj, už jsi ověřený,\nChceš aktualizovat svoje role přes UserMap?";
                 builder.AddComponents(new DiscordComponent[]
