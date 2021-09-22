@@ -185,5 +185,39 @@ namespace HonzaBotner.Services
             return user.RootElement.GetProperty("user_name").GetString()
                    ?? throw new InvalidOperationException("Couldn't load information about user");
         }
+
+        public async Task<string> GetServiceTokenAsync(string scope)
+        {
+            const string tokenUri = "https://auth.fit.cvut.cz/oauth/oauth/token";
+
+            // TOOD(ostorc): add cache keyed by scope, with lifetime based on response
+
+            UriBuilder uriBuilder = new(tokenUri);
+
+            List<KeyValuePair<string?, string?>> contentValues = new()
+            {
+                new("grant_type", "client_credentials"),
+                new("client_id", _cvutConfig.ServiceId),
+                new("client_secret", _cvutConfig.ServiceSecret),
+                new("scope", scope)
+            };
+
+            FormUrlEncodedContent content = new(contentValues);
+
+            HttpRequestMessage requestMessage = new()
+            {
+                RequestUri = uriBuilder.Uri,
+                Method = HttpMethod.Post,
+                Content = content
+            };
+
+            HttpResponseMessage tokenResponse = await _client.SendAsync(requestMessage);
+            tokenResponse.EnsureSuccessStatusCode();
+
+            JsonDocument response = await JsonDocument.ParseAsync(await tokenResponse.Content.ReadAsStreamAsync());
+
+            return response.RootElement.GetProperty("access_token").GetString()
+                   ?? throw new InvalidOperationException("Couldn't get service token from CTU");
+        }
     }
 }
