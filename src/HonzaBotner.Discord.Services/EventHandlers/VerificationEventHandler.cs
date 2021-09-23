@@ -37,7 +37,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             DiscordUser user = eventArgs.User;
             DiscordMember member = eventArgs.Guild.Members[user.Id];
 
-            string link = _urlProvider.GetAuthLink(eventArgs.User.Id, RolesPool.Auth);
+            string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
 
             // Check if the user is authenticated.
             bool isAuthenticated = false;
