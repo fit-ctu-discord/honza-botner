@@ -1,3 +1,5 @@
+using Hangfire;
+using Hangfire.PostgreSql;
 using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
@@ -5,6 +7,7 @@ using HonzaBotner.Discord.EventHandler;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services;
 using HonzaBotner.Discord.Services.EventHandlers;
+using HonzaBotner.Discord.Services.Jobs;
 using HonzaBotner.Discord.Services.Managers;
 using HonzaBotner.Services;
 using Microsoft.AspNetCore.Builder;
@@ -41,7 +44,7 @@ namespace HonzaBotner
                 )
 
                 // Swagger
-                .AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "HonzaBotner", Version = "v1"}); })
+                .AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "HonzaBotner", Version = "v1" }); })
 
                 // Botner
                 .AddBotnerServicesOptions(Configuration)
@@ -61,6 +64,7 @@ namespace HonzaBotner
                         config.RegisterCommands<MemberCommands>();
                         config.RegisterCommands<MessageCommands>();
                         config.RegisterCommands<PollCommands>();
+                        config.RegisterCommands<ReminderCommands>();
                         config.RegisterCommands<TestCommands>();
                         config.RegisterCommands<VoiceCommands>();
                         config.RegisterCommands<WarningCommands>();
@@ -72,6 +76,7 @@ namespace HonzaBotner
                             .AddEventHandler<HornyJailHandler>()
                             .AddEventHandler<NewChannelHandler>()
                             .AddEventHandler<PinHandler>()
+                            .AddEventHandler<ReminderReactionsHandler>()
                             .AddEventHandler<RoleBindingsHandler>(EventHandlerPriority.High)
                             .AddEventHandler<StaffVerificationEventHandler>(EventHandlerPriority.Urgent)
                             .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
@@ -82,7 +87,14 @@ namespace HonzaBotner
 
                 // Managers
                 .AddTransient<IVoiceManager, VoiceManager>()
-                ;
+                .AddTransient<IReminderManager, ReminderManager>()
+                .AddTransient<IButtonManager, ButtonManager>()
+
+                // Jobs
+                .AddScoped<TriggerRemindersJobProvider>()
+            ;
+
+            services.AddHangfire(config => { config.UsePostgreSqlStorage(connectionString); });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -97,16 +109,39 @@ namespace HonzaBotner
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "HonzaBotner v1");
                     c.RoutePrefix = string.Empty;
                 });
+                app.UseHttpsRedirection();
+                app.UseHangfireDashboard();
             }
             else
             {
                 UpdateDatabase(app);
+                SetupDashboard(app);
                 app.UseReverseProxyHttpsEnforcer();
+                app.UseExceptionHandler("/error");
             }
 
+            StartRecurringJobs();
+
             app.UseHttpsRedirection();
+            app.UseHangfireServer();
             app.UseRouting();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+        }
+
+        private void StartRecurringJobs()
+        {
+            RecurringJob.AddOrUpdate(
+                TriggerRemindersJobProvider.Key,
+                (TriggerRemindersJobProvider remindersJobProvider) => remindersJobProvider.Run(),
+                TriggerRemindersJobProvider.CronExpression
+            );
+        }
+
+        private void SetupDashboard(IApplicationBuilder app)
+        {
+            // TODO: Some auth
+
+            app.UseHangfireDashboard(options: new DashboardOptions());
         }
 
         private static void UpdateDatabase(IApplicationBuilder app)
@@ -114,6 +149,7 @@ namespace HonzaBotner
             using IServiceScope serviceScope = app.ApplicationServices
                 .GetRequiredService<IServiceScopeFactory>()
                 .CreateScope();
+
             using HonzaBotnerDbContext? context = serviceScope.ServiceProvider.GetService<HonzaBotnerDbContext>();
             context?.Database.Migrate();
         }

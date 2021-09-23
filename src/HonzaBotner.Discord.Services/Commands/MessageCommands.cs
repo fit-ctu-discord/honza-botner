@@ -5,9 +5,11 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Exceptions;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Services.Contract;
 using Microsoft.Extensions.Logging;
@@ -218,6 +220,67 @@ namespace HonzaBotner.Discord.Services.Commands
                 // TODO: Pretty print of associated bindings with message
                 await ctx.Message.RespondAsync($"TODO: {roles.Count}");
             }*/
+        }
+
+        [Group("buttons")]
+        [Description("Module used to edit button interactions on messages")]
+        [ModuleLifespan(ModuleLifespan.Transient)]
+        public class ButtonCommands : BaseCommandModule
+        {
+            private readonly IButtonManager _buttonManager;
+
+            public ButtonCommands(IButtonManager manager)
+            {
+                _buttonManager = manager;
+            }
+
+            [Description("Deletes all button interactions on the message")]
+            [Command("remove")]
+            public async Task RemoveButtons(CommandContext ctx, [Description("URL of the message")] string url)
+            {
+                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+                if (message == null)
+                {
+                    throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
+                }
+
+                try
+                {
+                    await _buttonManager.RemoveButtonsFromMessage(message);
+                }
+                catch (UnauthorizedException)
+                {
+                    await ctx.RespondAsync("Error: You can only edit messages by this bot.");
+                    return;
+                }
+
+                DiscordEmoji reactEmoji = DiscordEmoji.FromName(ctx.Client, ":+1:");
+                await ctx.Message.CreateReactionAsync(reactEmoji);
+            }
+
+            [Description("Marks message as verification message")]
+            [Command("setup")]
+            public async Task SetupButtons(CommandContext ctx, [Description("URL of the message")] string url)
+            {
+                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+                if (message == null)
+                {
+                    throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
+                }
+
+                try
+                {
+                    await _buttonManager.SetupVerificationButtons(message);
+                }
+                catch (UnauthorizedException)
+                {
+                    await ctx.RespondAsync("Error: You can only edit messages by this bot.");
+                    return;
+                }
+
+                DiscordEmoji reactEmoji = DiscordEmoji.FromName(ctx.Client, ":+1:");
+                await ctx.Message.CreateReactionAsync(reactEmoji);
+            }
         }
     }
 }
