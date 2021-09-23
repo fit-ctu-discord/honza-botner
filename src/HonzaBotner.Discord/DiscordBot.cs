@@ -41,6 +41,7 @@ namespace HonzaBotner.Discord
             Commands.CommandExecuted += Commands_CommandExecuted;
             Commands.CommandErrored += Commands_CommandErrored;
 
+            Client.ComponentInteractionCreated += Client_ComponentInteractionCreated;
             Client.MessageReactionAdded += Client_MessageReactionAdded;
             Client.MessageReactionRemoved += Client_MessageReactionRemoved;
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
@@ -135,6 +136,12 @@ namespace HonzaBotner.Discord
                         e.Exception.Message);
                     break;
             }
+        }
+
+
+        private Task Client_ComponentInteractionCreated(DiscordClient client, ComponentInteractionCreateEventArgs args)
+        {
+            return _eventHandler.Handle(args);
         }
 
         private Task Client_MessageReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)

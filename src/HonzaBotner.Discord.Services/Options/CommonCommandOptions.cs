@@ -11,11 +11,6 @@
         public ulong BotRoleId { get; set; }
         public string? HugEmoteName { get; set; }
 
-        public ulong VerificationMessageId { get; set; }
-        public ulong VerificationChannelId { get; set; }
-        public string VerificationEmojiName { get; set; } = "";
-        public string StaffVerificationEmojiName { get; set; } = "";
-
         public ulong GentlemenChannelId { get; set; }
         public string GentlemenFilePath { get; set; } = "";
 

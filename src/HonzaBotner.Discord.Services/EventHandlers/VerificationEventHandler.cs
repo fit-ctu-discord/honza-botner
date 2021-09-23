@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.EventHandler;
@@ -9,44 +11,72 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.EventHandlers
 {
-    public class VerificationEventHandler : IEventHandler<MessageReactionAddEventArgs>
+    public class VerificationEventHandler : IEventHandler<ComponentInteractionCreateEventArgs>
     {
-        private readonly IAuthorizationService _authorizationService;
         private readonly IUrlProvider _urlProvider;
-        private readonly CommonCommandOptions _config;
+        private readonly ButtonOptions _buttonOptions;
+        private DiscordRoleConfig _discordRoleConfig;
 
-        public VerificationEventHandler(IAuthorizationService authorizationService, IUrlProvider urlProvider,
-            IOptions<CommonCommandOptions> options)
+        public VerificationEventHandler(
+            IUrlProvider urlProvider,
+            IOptions<ButtonOptions> options,
+            IOptions<DiscordRoleConfig> discordRoleConfig
+        )
         {
-            _authorizationService = authorizationService;
             _urlProvider = urlProvider;
-            _config = options.Value;
+            _buttonOptions = options.Value;
+            _discordRoleConfig = discordRoleConfig.Value;
         }
 
-        public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs eventArgs)
+        public async Task<EventHandlerResult> Handle(ComponentInteractionCreateEventArgs eventArgs)
         {
-            // https://discordapp.com/channels/366970031445377024/507515506073403402/686745124885364770
+            if (eventArgs.Id != _buttonOptions.VerificationId) return EventHandlerResult.Continue;
 
-            if (!(eventArgs.Message.Id == _config.VerificationMessageId
-                  && eventArgs.Message.ChannelId == _config.VerificationChannelId))
-                return EventHandlerResult.Continue;
-            if (!eventArgs.Emoji.Name.Equals(_config.VerificationEmojiName)) return EventHandlerResult.Continue;
+            DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
 
             DiscordUser user = eventArgs.User;
-            DiscordDmChannel channel = await eventArgs.Guild.Members[user.Id].CreateDmChannelAsync();
+            DiscordMember member = eventArgs.Guild.Members[user.Id];
 
             string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
 
-            if (await _authorizationService.IsUserVerified(user.Id))
+            // Check if the user is authenticated.
+            bool isAuthenticated = false;
+            foreach (ulong roleId in _discordRoleConfig.AuthenticatedRoleIds)
             {
-                await channel.SendMessageAsync(
-                    $"Ahoj, už jsi ověřený.\nPro aktualizaci rolí dle UserMap klikni na odkaz: {link}");
+                if (member.Roles.Select(role => role.Id).Contains(roleId))
+                {
+                    isAuthenticated = true;
+                    break;
+                }
+            }
+
+            if (isAuthenticated)
+            {
+                builder.Content = "Ahoj, už jsi ověřený.\n" +
+                                  "Pro aktualizaci rolí klikni na tlačítko.";
+                builder.AddComponents(
+                    new DiscordLinkButtonComponent(
+                        link,
+                        "Aktualizovat role",
+                        false,
+                        new DiscordComponentEmoji("🔄")
+                    )
+                );
             }
             else
             {
-                await channel.SendMessageAsync(
-                    $"Ahoj, pro ověření a přidělení rolí dle UserMap klikni na odkaz: {link}");
+                builder.Content = "Ahoj, pro ověření a přidělení rolí klikni na tlačítko.";
+                builder.AddComponents(
+                    new DiscordLinkButtonComponent(
+                        link,
+                        "Ověřit se",
+                        false,
+                        new DiscordComponentEmoji("✅")
+                    )
+                );
             }
+
+            await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
 
             return EventHandlerResult.Stop;
         }

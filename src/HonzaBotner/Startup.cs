@@ -88,6 +88,7 @@ namespace HonzaBotner
                 // Managers
                 .AddTransient<IVoiceManager, VoiceManager>()
                 .AddTransient<IReminderManager, ReminderManager>()
+                .AddTransient<IButtonManager, ButtonManager>()
 
                 // Jobs
                 .AddScoped<TriggerRemindersJobProvider>()
