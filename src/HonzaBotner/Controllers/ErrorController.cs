@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord;
 using HonzaBotner.Discord.Extensions;
