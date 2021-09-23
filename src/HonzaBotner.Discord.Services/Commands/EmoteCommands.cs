@@ -69,7 +69,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
             foreach (CountedEmoji result in orderedResults)
             {
-                if (!emojis.TryGetValue(result.Id, out DiscordEmoji? emoji) || emoji == null)
+                if (!emojis.TryGetValue(result.Id, out DiscordEmoji? emoji))
                 {
                     continue;
                 }
