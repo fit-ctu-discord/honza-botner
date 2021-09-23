@@ -5,6 +5,7 @@ using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 
@@ -16,11 +17,13 @@ namespace HonzaBotner.Controllers
     {
         private const string AuthIdCookieName = "honza-botner-auth-id";
         private const string RolesPoolCookieName = "honza-botner-roles-pool";
+        private readonly ILogger<AuthController> _logger;
         private readonly IAuthorizationService _authorizationService;
         private string RedirectUri => Url.ActionLink(nameof(Callback));
 
-        public AuthController(IAuthorizationService authorizationService, IOptions<InfoOptions> options) : base(options)
+        public AuthController(ILogger<AuthController> logger, IAuthorizationService authorizationService, IOptions<InfoOptions> options) : base(options)
         {
+            _logger = logger;
             _authorizationService = authorizationService;
         }
 
@@ -72,6 +75,7 @@ namespace HonzaBotner.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError(e, "Couldn't finish authentication for user id: {0}", userIdString);
                 return Page(e.Message, 500);
             }
         }

@@ -155,9 +155,9 @@ namespace HonzaBotner.Services
             {
                 tokenResponse.EnsureSuccessStatusCode();
             }
-            catch (HttpRequestException)
+            catch (Exception e)
             {
-                throw new Exception("Couldn't authorize user, status code is not successful.");
+                throw new InvalidOperationException("Couldn't authorize user, status code is not successful.", e);
             }
 
             JsonDocument response = await JsonDocument.ParseAsync(await tokenResponse.Content.ReadAsStreamAsync());
