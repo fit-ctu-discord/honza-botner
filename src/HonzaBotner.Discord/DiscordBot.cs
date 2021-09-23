@@ -7,8 +7,10 @@ using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Managers;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord
 {
@@ -18,17 +20,19 @@ namespace HonzaBotner.Discord
         private readonly EventHandler.EventHandler _eventHandler;
         private readonly CommandConfigurator _configurator;
         private readonly IVoiceManager _voiceManager;
+        private readonly DiscordConfig _discordOptions;
 
         private DiscordClient Client => _discordWrapper.Client;
         private CommandsNextExtension Commands => _discordWrapper.Commands;
 
         public DiscordBot(DiscordWrapper discordWrapper, EventHandler.EventHandler eventHandler,
-            CommandConfigurator configurator, IVoiceManager voiceManager)
+            CommandConfigurator configurator, IVoiceManager voiceManager, IOptions<DiscordConfig> discordOptions)
         {
             _discordWrapper = discordWrapper;
             _eventHandler = eventHandler;
             _configurator = configurator;
             _voiceManager = voiceManager;
+            _discordOptions = discordOptions.Value;
         }
 
         public async Task Run(CancellationToken cancellationToken)
@@ -75,10 +79,17 @@ namespace HonzaBotner.Discord
             await _voiceManager.DeleteAllUnusedVoiceChannelsAsync();
         }
 
-        private Task Client_ClientError(DiscordClient sender, ClientErrorEventArgs e)
+        private async Task Client_ClientError(DiscordClient sender, ClientErrorEventArgs e)
         {
             sender.Logger.LogError(e.Exception, "Exception occured");
-            return Task.CompletedTask;
+
+            if (_discordOptions.GuildId == null)
+                return;
+
+            DiscordGuild guild = await sender.GetGuildAsync(_discordOptions.GuildId.Value);
+
+            await ReportException(guild, "Client error", e.Exception);
+            e.Handled = true;
         }
 
         private Task Commands_CommandExecuted(CommandsNextExtension sender, CommandExecutionEventArgs e)
@@ -96,8 +107,8 @@ namespace HonzaBotner.Discord
                     {
                         await e.Context.RespondAsync("Tento příkaz neznám.");
                         CommandContext? fakeContext = Commands.CreateFakeContext(e.Context.Member, e.Context.Channel,
-                            $"help", e.Context.Prefix,
-                            Commands.FindCommand($"help", out string args), args
+                            "help", e.Context.Prefix,
+                            Commands.FindCommand("help", out string args), args
                         );
                         await Commands.ExecuteCommandAsync(fakeContext);
                         break;
@@ -122,13 +133,14 @@ namespace HonzaBotner.Discord
                             Title = "Přístup zakázán",
                             Description =
                                 $"{emoji} Na vykonání příkazu nemáte dostatečná práva. Pokud si myslíte že ano, kontaktujte svého MODa.",
-                            Color = new DiscordColor(0xFF0000) // red
+                            Color = DiscordColor.Red // red
                         };
                         await e.Context.RespondAsync("", embed.Build());
                         break;
                     }
                 default:
                     await e.Context.RespondAsync("Něco se pokazilo. Hups. :scream_cat:");
+                    await ReportException(e.Context.Guild, $"Command {e.Command.QualifiedName}", e.Exception);
                     e.Context.Client.Logger.LogError(e.Exception,
                         "{Username} tried executing '{CommandName}' but it errored: {ExceptionType}: {ExceptionMessage}",
                         e.Context.User.Username,
@@ -136,6 +148,8 @@ namespace HonzaBotner.Discord
                         e.Exception.Message);
                     break;
             }
+
+            e.Handled = true;
         }
 
 
@@ -167,6 +181,20 @@ namespace HonzaBotner.Discord
         private Task Client_ChannelCreated(DiscordClient client, ChannelCreateEventArgs args)
         {
             return _eventHandler.Handle(args);
+        }
+
+        private async Task ReportException(DiscordGuild guild, string source, Exception exception)
+        {
+            ulong logChannelId = _discordOptions.LogChannelId;
+
+            if (logChannelId == default)
+            {
+                return;
+            }
+
+            DiscordChannel channel = guild.GetChannel(logChannelId);
+
+            await channel.ReportException(source, exception);
         }
     }
 }
