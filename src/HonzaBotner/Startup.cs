@@ -117,6 +117,7 @@ namespace HonzaBotner
                 UpdateDatabase(app);
                 SetupDashboard(app);
                 app.UseReverseProxyHttpsEnforcer();
+                app.UseExceptionHandler("/error");
             }
 
             StartRecurringJobs();
