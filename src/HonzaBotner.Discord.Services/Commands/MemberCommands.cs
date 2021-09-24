@@ -21,6 +21,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Description("Commands to interact with members.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     [RequireMod]
+    [RequireGuild]
     public class MemberCommands : BaseCommandModule
     {
         [Group("info")]
@@ -169,15 +170,12 @@ namespace HonzaBotner.Discord.Services.Commands
         public class MemberRoleCount : BaseCommandModule
         {
             private readonly CommonCommandOptions _commonCommandOptions;
-            private readonly IGuildProvider _guildProvider;
 
             public MemberRoleCount(
-                IOptions<CommonCommandOptions> commonCommandOptions,
-                IGuildProvider guildProvider
+                IOptions<CommonCommandOptions> commonCommandOptions
             )
             {
                 _commonCommandOptions = commonCommandOptions.Value;
-                _guildProvider = guildProvider;
             }
 
             [Command("all")]
@@ -185,15 +183,7 @@ namespace HonzaBotner.Discord.Services.Commands
             public async Task CountAll(CommandContext ctx)
             {
                 int authenticatedCount = 0;
-                DiscordGuild guild;
-                if (ctx.Channel.IsPrivate)
-                {
-                    guild = await _guildProvider.GetCurrentGuildAsync();
-                }
-                else
-                {
-                    guild = ctx.Guild;
-                }
+                DiscordGuild guild = ctx.Guild;
                 DiscordRole authenticatedRole = guild.GetRole(_commonCommandOptions.AuthenticatedRoleId);
 
                 foreach ((_, DiscordMember member) in guild.Members)
@@ -218,15 +208,7 @@ namespace HonzaBotner.Discord.Services.Commands
             )
             {
                 int count = 0;
-                DiscordGuild guild;
-                if (ctx.Channel.IsPrivate)
-                {
-                    guild = await _guildProvider.GetCurrentGuildAsync();
-                }
-                else
-                {
-                    guild = ctx.Guild;
-                }
+                DiscordGuild guild = ctx.Guild;
 
                 foreach ((_, DiscordMember member) in guild.Members)
                 {
@@ -250,15 +232,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 [Description("Roles to check.")] params DiscordRole[] roles)
             {
                 int count = 0;
-                DiscordGuild guild;
-                if (ctx.Channel.IsPrivate)
-                {
-                    guild = await _guildProvider.GetCurrentGuildAsync();
-                }
-                else
-                {
-                    guild = ctx.Guild;
-                }
+                DiscordGuild guild = ctx.Guild;
 
                 foreach ((_, DiscordMember member) in guild.Members)
                 {

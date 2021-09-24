@@ -8,6 +8,7 @@ namespace HonzaBotner.Discord.Services.Extensions
 {
     public static class DiscordExtensions
     {
+        [Obsolete("Use DiscordMember.DisplayName instead")]
         public static string RatherNicknameThanUsername(this DiscordMember member)
         {
             return member.Nickname ?? member.Username;
