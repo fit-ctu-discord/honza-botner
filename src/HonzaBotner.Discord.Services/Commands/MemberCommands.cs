@@ -32,17 +32,14 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             private readonly HonzaBotnerDbContext _dbContext;
             private readonly IHashService _hashService;
-            private readonly ILogger<MemberCommandsInfo> _logger;
 
             public MemberCommandsInfo(
                 HonzaBotnerDbContext dbContext,
-                IHashService hashService,
-                ILogger<MemberCommandsInfo> logger
+                IHashService hashService
             )
             {
                 _dbContext = dbContext;
                 _hashService = hashService;
-                _logger = logger;
             }
 
             [GroupCommand]
