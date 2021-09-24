@@ -3,13 +3,14 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using HonzaBotner.Discord.Attributes;
 using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Attributes
 {
-    public class RequireModAttribute : CheckBaseAttribute
+    public class RequireModAttribute : CheckBaseAttribute, IRequireModAttribute
     {
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -8,6 +9,7 @@ using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using HonzaBotner.Discord.Attributes;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Managers;
 using Microsoft.Extensions.Logging;
@@ -125,46 +127,48 @@ namespace HonzaBotner.Discord
                         await Commands.ExecuteCommandAsync(fakeContext);
                         break;
                     }
-                case ChecksFailedException:
+                case ChecksFailedException exception:
                     {
-                        var failedChecks = ((ChecksFailedException)e.Exception).FailedChecks;
+                        IReadOnlyList<CheckBaseAttribute> failedChecks = exception.FailedChecks;
                         foreach (var failedCheck in failedChecks)
                         {
-                            DiscordEmbedBuilder embed;
                             DiscordEmoji emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
 
-                            if (failedCheck is RequireGuildAttribute)
+                            DiscordEmbed embed = failedCheck switch
                             {
-                                embed = new()
-                                {
-                                    Title = "Příkaz nelze použít mimo server",
-                                    Description = $"{emoji} Příkaz lze použít jen na discord serveru.",
-                                    Color = DiscordColor.Red
-                                };
-                            }
-                            else
-                            {
-                                embed = new()
-                                {
-                                    Title = "Přístup zakázán",
-                                    Description =
-                                        $"{emoji} Na vykonání příkazu nemáte dostatečná práva. Pokud si myslíte že ano, kontaktujte svého MODa.",
-                                    Color = DiscordColor.Red // red
-                                };
-                            }
-                            await e.Context.RespondAsync("", embed.Build());
+                                RequireGuildAttribute => new DiscordEmbedBuilder()
+                                    .WithTitle("Příkaz nelze použít mimo server")
+                                    .WithDescription($"{emoji} Příkaz lze použít jen na discord serveru.")
+                                    .WithColor(DiscordColor.Red)
+                                    .Build(),
+                                IRequireModAttribute => new DiscordEmbedBuilder()
+                                    .WithTitle("Přístup zakázán")
+                                    .WithDescription("Tento příkaz může používat pouze Moderátor.")
+                                    .WithColor(DiscordColor.Violet)
+                                    .Build(),
+                                _ => new DiscordEmbedBuilder()
+                                    .WithTitle("Přístup zakázán")
+                                    .WithDescription($"{emoji} Na vykonání příkazu nemáte dostatečná práva." +
+                                                     "Pokud si myslíte že ano, kontaktujte svého MODa.")
+                                    .WithColor(DiscordColor.Red)
+                                    .Build()
+                            };
+                            await e.Context.RespondAsync("", embed);
                             break;
                         }
+
                         break;
                     }
                 default:
                     await e.Context.RespondAsync("Něco se pokazilo. Hups. :scream_cat:");
                     await ReportException(e.Context.Guild, $"Command {e.Command.QualifiedName}", e.Exception);
-                    e.Context.Client.Logger.LogError(e.Exception,
+                    e.Context.Client.Logger.LogError(
+                        e.Exception,
                         "{Username} tried executing '{CommandName}' but it errored: {ExceptionType}: {ExceptionMessage}",
                         e.Context.User.Username,
                         e.Command?.QualifiedName ?? "<unknown command>", e.Exception.GetType(),
-                        e.Exception.Message);
+                        e.Exception.Message
+                    );
                     break;
             }
 
