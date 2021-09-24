@@ -107,6 +107,8 @@ namespace HonzaBotner.Discord
             switch (e.Exception)
             {
                 case CommandNotFoundException:
+                case InvalidOperationException:
+                case ArgumentException:
                     {
                         await e.Context.RespondAsync("Tento příkaz neznám.");
                         try
@@ -118,29 +120,9 @@ namespace HonzaBotner.Discord
                             );
                             await Commands.ExecuteCommandAsync(fakeContext);
                         }
-                        catch
+                        catch (NullReferenceException)
                         {
-                            // ignored
-                        }
-
-                        break;
-                    }
-                case InvalidOperationException:
-                case ArgumentException:
-                    {
-                        await e.Context.RespondAsync("Příkaz jsi zadal špatně.");
-                        try
-                        {
-                            CommandContext? fakeContext = Commands.CreateFakeContext(e.Context.Member,
-                                e.Context.Channel,
-                                $"help {e.Command?.QualifiedName}", e.Context.Prefix,
-                                Commands.FindCommand($"help {e.Command?.QualifiedName}", out string args), args
-                            );
-                            await Commands.ExecuteCommandAsync(fakeContext);
-                        }
-                        catch
-                        {
-                            // ignored
+                            await e.Context.Channel.SendMessageAsync("Pro více info zadej příkaz na discordovém serveru");
                         }
 
                         break;
