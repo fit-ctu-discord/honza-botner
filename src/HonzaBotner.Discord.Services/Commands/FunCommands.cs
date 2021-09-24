@@ -11,6 +11,7 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("fun")]
     [Description("Commands that bring fun!")]
+    [RequireGuild]
     public class FunCommands : BaseCommandModule
     {
         private readonly ILogger<FunCommands> _logger;

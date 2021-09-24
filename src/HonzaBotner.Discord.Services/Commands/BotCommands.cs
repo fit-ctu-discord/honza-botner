@@ -57,6 +57,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
         [Command("info")]
         [Description("Command to get you info about Discord bot and other things.")]
+        [GroupCommand]
         public async Task BotInfo(CommandContext ctx)
         {
             StringBuilder stringBuilder = new();
