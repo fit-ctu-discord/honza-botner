@@ -7,6 +7,10 @@ It can handle multiple types of features, including commands, event handlers, cr
 
 You can always see a help message for a specific command by sending a message `::help <command (subcommand ...)>`.
 
+## Contributing
+
+We gladly accept any kind of contribution.
+
 ## Features
 
 This is a list, not necessarily exhaustive, of the features of this bot:
