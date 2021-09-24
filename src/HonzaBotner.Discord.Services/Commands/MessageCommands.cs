@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -22,10 +23,12 @@ namespace HonzaBotner.Discord.Services.Commands
     public class MessageCommands : BaseCommandModule
     {
         private readonly ILogger<MessageCommands> _logger;
+        private readonly IGuildProvider _guildProvider;
 
-        public MessageCommands(ILogger<MessageCommands> logger)
+        public MessageCommands(ILogger<MessageCommands> logger, IGuildProvider guildProvider)
         {
             _logger = logger;
+            _guildProvider = guildProvider;
         }
 
         [Command("send")]
@@ -46,7 +49,7 @@ namespace HonzaBotner.Discord.Services.Commands
                         $"To approve sending message with ping, react with {emoji}. (15 seconds timeout to send without pings.)");
                 await reactMessage.CreateReactionAsync(emoji);
                 InteractivityResult<MessageReactionAddEventArgs> result =
-                    await reactMessage.WaitForReactionAsync(ctx.Member, emoji, TimeSpan.FromSeconds(15));
+                    await reactMessage.WaitForReactionAsync(ctx.User, emoji, TimeSpan.FromSeconds(15));
 
                 if (!result.TimedOut)
                 {
@@ -73,7 +76,16 @@ namespace HonzaBotner.Discord.Services.Commands
             [RemainingText, Description("New text of the message.")]
             string newText)
         {
-            DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(ctx.Message.Channel.Guild, url);
+            DiscordGuild guild;
+            if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+            {
+                guild = await _guildProvider.GetCurrentGuildAsync();
+            }
+            else
+            {
+                guild = ctx.Guild;
+            }
+            DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(guild, url);
 
             if (oldMessage == null)
             {
@@ -91,7 +103,16 @@ namespace HonzaBotner.Discord.Services.Commands
             [Description("URL of the message.")] string url,
             [Description("Emojis to react with.")] params DiscordEmoji[] emojis)
         {
-            DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(ctx.Message.Channel.Guild, url);
+            DiscordGuild guild;
+            if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+            {
+                guild = await _guildProvider.GetCurrentGuildAsync();
+            }
+            else
+            {
+                guild = ctx.Guild;
+            }
+            DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(guild, url);
 
             if (oldMessage == null)
             {
@@ -123,11 +144,14 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             private readonly IRoleBindingsService _roleBindingsService;
             private readonly ILogger<RoleBindingsCommands> _logger;
+            private readonly IGuildProvider _guildProvider;
 
-            public RoleBindingsCommands(IRoleBindingsService roleBindingsService, ILogger<RoleBindingsCommands> logger)
+            public RoleBindingsCommands(IRoleBindingsService roleBindingsService, ILogger<RoleBindingsCommands> logger,
+                IGuildProvider guildProvider)
             {
                 _roleBindingsService = roleBindingsService;
                 _logger = logger;
+                _guildProvider = guildProvider;
             }
 
             [GroupCommand]
@@ -172,7 +196,16 @@ namespace HonzaBotner.Discord.Services.Commands
                 [Description("Roles which will be toggled after reaction")]
                 params DiscordRole[] roles)
             {
-                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+                DiscordGuild guild;
+                if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+                {
+                    guild = await _guildProvider.GetCurrentGuildAsync();
+                }
+                else
+                {
+                    guild = ctx.Guild;
+                }
+                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(guild, url);
                 if (message == null)
                 {
                     throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
@@ -228,17 +261,28 @@ namespace HonzaBotner.Discord.Services.Commands
         public class ButtonCommands : BaseCommandModule
         {
             private readonly IButtonManager _buttonManager;
+            private readonly IGuildProvider _guildProvider;
 
-            public ButtonCommands(IButtonManager manager)
+            public ButtonCommands(IButtonManager manager, IGuildProvider guildProvider)
             {
                 _buttonManager = manager;
+                _guildProvider = guildProvider;
             }
 
             [Description("Deletes all button interactions on the message")]
             [Command("remove")]
             public async Task RemoveButtons(CommandContext ctx, [Description("URL of the message")] string url)
             {
-                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+                DiscordGuild guild;
+                if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+                {
+                    guild = await _guildProvider.GetCurrentGuildAsync();
+                }
+                else
+                {
+                    guild = ctx.Guild;
+                }
+                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(guild, url);
                 if (message == null)
                 {
                     throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
@@ -262,7 +306,16 @@ namespace HonzaBotner.Discord.Services.Commands
             [Command("setup")]
             public async Task SetupButtons(CommandContext ctx, [Description("URL of the message")] string url)
             {
-                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+                DiscordGuild guild;
+                if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+                {
+                    guild = await _guildProvider.GetCurrentGuildAsync();
+                }
+                else
+                {
+                    guild = ctx.Guild;
+                }
+                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(guild, url);
                 if (message == null)
                 {
                     throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");

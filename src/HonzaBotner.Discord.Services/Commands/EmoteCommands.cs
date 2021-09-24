@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -26,11 +27,14 @@ namespace HonzaBotner.Discord.Services.Commands
     {
         private readonly IEmojiCounterService _emojiCounterService;
         private readonly ILogger<EmoteCommands> _logger;
+        private readonly IGuildProvider _guildProvider;
 
-        public EmoteCommands(IEmojiCounterService emojiCounterService, ILogger<EmoteCommands> logger)
+        public EmoteCommands(IEmojiCounterService emojiCounterService, ILogger<EmoteCommands> logger,
+            IGuildProvider guildProvider)
         {
             _emojiCounterService = emojiCounterService;
             _logger = logger;
+            _guildProvider = guildProvider;
         }
 
         [GroupCommand]
@@ -65,7 +69,17 @@ namespace HonzaBotner.Discord.Services.Commands
             int emojisAppended = 0;
             //const int chunkSize = 30;
 
-            IReadOnlyDictionary<ulong, DiscordEmoji> emojis = ctx.Guild.Emojis;
+            DiscordGuild guild;
+            if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+            {
+                guild = await _guildProvider.GetCurrentGuildAsync();
+            }
+            else
+            {
+                guild = ctx.Guild;
+            }
+
+            IReadOnlyDictionary<ulong, DiscordEmoji> emojis = guild.Emojis;
 
             foreach (CountedEmoji result in orderedResults)
             {

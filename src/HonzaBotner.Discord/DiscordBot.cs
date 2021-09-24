@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
@@ -126,16 +127,34 @@ namespace HonzaBotner.Discord
                     }
                 case ChecksFailedException:
                     {
-                        DiscordEmoji emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
-
-                        DiscordEmbedBuilder embed = new()
+                        var failedChecks = ((ChecksFailedException)e.Exception).FailedChecks;
+                        foreach (var failedCheck in failedChecks)
                         {
-                            Title = "Přístup zakázán",
-                            Description =
-                                $"{emoji} Na vykonání příkazu nemáte dostatečná práva. Pokud si myslíte že ano, kontaktujte svého MODa.",
-                            Color = DiscordColor.Red // red
-                        };
-                        await e.Context.RespondAsync("", embed.Build());
+                            DiscordEmbedBuilder embed;
+                            DiscordEmoji emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
+
+                            if (failedCheck is RequireGuildAttribute)
+                            {
+                                embed = new()
+                                {
+                                    Title = "Příkaz nelze použít mimo server",
+                                    Description = $"{emoji} Příkaz lze použít jen na discord serveru.",
+                                    Color = DiscordColor.Red
+                                };
+                            }
+                            else
+                            {
+                                embed = new()
+                                {
+                                    Title = "Přístup zakázán",
+                                    Description =
+                                        $"{emoji} Na vykonání příkazu nemáte dostatečná práva. Pokud si myslíte že ano, kontaktujte svého MODa.",
+                                    Color = DiscordColor.Red // red
+                                };
+                            }
+                            await e.Context.RespondAsync("", embed.Build());
+                            break;
+                        }
                         break;
                     }
                 default:

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -23,9 +24,17 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("authorize"), Aliases("auth")]
         public async Task AuthorizeCommand(CommandContext ctx)
         {
-            DiscordMessage message = ctx.Message;
-            DiscordUser user = message.Author;
-            DiscordDmChannel channel = await message.Channel.Guild.Members[user.Id].CreateDmChannelAsync();
+            DiscordUser user = ctx.User;
+            DiscordDmChannel channel;
+
+            if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+            {
+                channel = (DiscordDmChannel) ctx.Channel;
+            }
+            else
+            {
+                channel = await ctx.Guild.Members[user.Id].CreateDmChannelAsync();
+            }
 
             string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
 

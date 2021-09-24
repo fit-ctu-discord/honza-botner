@@ -10,6 +10,7 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("poll")]
     [Description("Commands to create polls.")]
+    [RequireGuild]
     public class PollCommands : BaseCommandModule
     {
         private const string PollErrorMessage =
