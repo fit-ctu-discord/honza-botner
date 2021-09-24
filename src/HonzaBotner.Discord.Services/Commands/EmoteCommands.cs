@@ -9,7 +9,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
@@ -70,7 +70,7 @@ namespace HonzaBotner.Discord.Services.Commands
             //const int chunkSize = 30;
 
             DiscordGuild guild;
-            if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+            if (ctx.Channel.IsPrivate)
             {
                 guild = await _guildProvider.GetCurrentGuildAsync();
             }

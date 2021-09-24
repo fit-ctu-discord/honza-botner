@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 
-namespace HonzaBotner.Discord.Extensions
+namespace HonzaBotner.Discord.Services.Extensions
 {
     public static class CommandContextExtensions
     {

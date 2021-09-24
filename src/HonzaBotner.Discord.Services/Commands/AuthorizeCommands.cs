@@ -25,9 +25,9 @@ namespace HonzaBotner.Discord.Services.Commands
         public async Task AuthorizeCommand(CommandContext ctx)
         {
             DiscordUser user = ctx.User;
-            DiscordDmChannel channel;
 
-            if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+            DiscordDmChannel channel;
+            if (ctx.Channel.IsPrivate)
             {
                 channel = (DiscordDmChannel) ctx.Channel;
             }

@@ -187,7 +187,7 @@ namespace HonzaBotner.Discord.Services.Commands
             {
                 int authenticatedCount = 0;
                 DiscordGuild guild;
-                if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+                if (ctx.Channel.IsPrivate)
                 {
                     guild = await _guildProvider.GetCurrentGuildAsync();
                 }
@@ -220,7 +220,7 @@ namespace HonzaBotner.Discord.Services.Commands
             {
                 int count = 0;
                 DiscordGuild guild;
-                if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+                if (ctx.Channel.IsPrivate)
                 {
                     guild = await _guildProvider.GetCurrentGuildAsync();
                 }
@@ -252,7 +252,7 @@ namespace HonzaBotner.Discord.Services.Commands
             {
                 int count = 0;
                 DiscordGuild guild;
-                if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+                if (ctx.Channel.IsPrivate)
                 {
                     guild = await _guildProvider.GetCurrentGuildAsync();
                 }

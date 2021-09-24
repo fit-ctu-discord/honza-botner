@@ -9,7 +9,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Services.Contract;
@@ -77,7 +77,7 @@ namespace HonzaBotner.Discord.Services.Commands
             string newText)
         {
             DiscordGuild guild;
-            if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+            if (ctx.Channel.IsPrivate)
             {
                 guild = await _guildProvider.GetCurrentGuildAsync();
             }
@@ -104,7 +104,7 @@ namespace HonzaBotner.Discord.Services.Commands
             [Description("Emojis to react with.")] params DiscordEmoji[] emojis)
         {
             DiscordGuild guild;
-            if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+            if (ctx.Channel.IsPrivate)
             {
                 guild = await _guildProvider.GetCurrentGuildAsync();
             }
@@ -197,7 +197,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 params DiscordRole[] roles)
             {
                 DiscordGuild guild;
-                if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+                if (ctx.Channel.IsPrivate)
                 {
                     guild = await _guildProvider.GetCurrentGuildAsync();
                 }
@@ -274,7 +274,7 @@ namespace HonzaBotner.Discord.Services.Commands
             public async Task RemoveButtons(CommandContext ctx, [Description("URL of the message")] string url)
             {
                 DiscordGuild guild;
-                if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+                if (ctx.Channel.IsPrivate)
                 {
                     guild = await _guildProvider.GetCurrentGuildAsync();
                 }
@@ -307,7 +307,7 @@ namespace HonzaBotner.Discord.Services.Commands
             public async Task SetupButtons(CommandContext ctx, [Description("URL of the message")] string url)
             {
                 DiscordGuild guild;
-                if (ctx.Channel.Type is ChannelType.Group or ChannelType.Private)
+                if (ctx.Channel.IsPrivate)
                 {
                     guild = await _guildProvider.GetCurrentGuildAsync();
                 }
