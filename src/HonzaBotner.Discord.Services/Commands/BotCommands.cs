@@ -27,6 +27,7 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("activity")]
         [Description("Changes bot's activity status.")]
         [RequireMod]
+        [RequireGuild]
         public async Task Activity(CommandContext ctx,
             [Description("Type of the activity. Allowed values: competing, playing, watching or listeningTo.")]
             ActivityType type,

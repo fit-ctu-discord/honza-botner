@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -20,6 +19,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Group("message")]
     [Description("Commands to interact with messages.")]
     [RequireMod]
+    [RequireGuild]
     public class MessageCommands : BaseCommandModule
     {
         private readonly ILogger<MessageCommands> _logger;

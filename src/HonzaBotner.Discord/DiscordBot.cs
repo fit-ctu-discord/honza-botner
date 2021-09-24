@@ -109,22 +109,40 @@ namespace HonzaBotner.Discord
                 case CommandNotFoundException:
                     {
                         await e.Context.RespondAsync("Tento příkaz neznám.");
-                        CommandContext? fakeContext = Commands.CreateFakeContext(e.Context.Member, e.Context.Channel,
-                            "help", e.Context.Prefix,
-                            Commands.FindCommand("help", out string args), args
-                        );
-                        await Commands.ExecuteCommandAsync(fakeContext);
+                        try
+                        {
+                            CommandContext? fakeContext = Commands.CreateFakeContext(e.Context.Member,
+                                e.Context.Channel,
+                                "help", e.Context.Prefix,
+                                Commands.FindCommand("help", out string args), args
+                            );
+                            await Commands.ExecuteCommandAsync(fakeContext);
+                        }
+                        catch
+                        {
+                            // ignored
+                        }
+
                         break;
                     }
                 case InvalidOperationException:
                 case ArgumentException:
                     {
                         await e.Context.RespondAsync("Příkaz jsi zadal špatně.");
-                        CommandContext? fakeContext = Commands.CreateFakeContext(e.Context.Member, e.Context.Channel,
-                            $"help {e.Command?.QualifiedName}", e.Context.Prefix,
-                            Commands.FindCommand($"help {e.Command?.QualifiedName}", out string args), args
-                        );
-                        await Commands.ExecuteCommandAsync(fakeContext);
+                        try
+                        {
+                            CommandContext? fakeContext = Commands.CreateFakeContext(e.Context.Member,
+                                e.Context.Channel,
+                                $"help {e.Command?.QualifiedName}", e.Context.Prefix,
+                                Commands.FindCommand($"help {e.Command?.QualifiedName}", out string args), args
+                            );
+                            await Commands.ExecuteCommandAsync(fakeContext);
+                        }
+                        catch
+                        {
+                            // ignored
+                        }
+
                         break;
                     }
                 case ChecksFailedException exception:

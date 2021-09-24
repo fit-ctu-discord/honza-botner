@@ -19,6 +19,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Description("Commands to manager reminders.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     [Cooldown(2, 60 * 60, CooldownBucketType.User)]
+    [RequireGuild]
     public class ReminderCommands : BaseCommandModule
     {
         private readonly IRemindersService _service;
