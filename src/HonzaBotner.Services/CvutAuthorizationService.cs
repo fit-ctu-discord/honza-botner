@@ -125,10 +125,6 @@ namespace HonzaBotner.Services
                 .AnyAsync(v => v.UserId == userId);
         }
 
-        private string GetQueryString(NameValueCollection queryCollection)
-            => string.Join('&',
-                queryCollection.AllKeys.Select(k => $"{k}={HttpUtility.UrlEncode(queryCollection[k])}"));
-
         public async Task<string> GetAccessTokenAsync(string code, string redirectUri)
         {
             const string tokenUri = "https://auth.fit.cvut.cz/oauth/token";
@@ -140,7 +136,7 @@ namespace HonzaBotner.Services
                 {"grant_type", "authorization_code"}, {"code", code}, {"redirect_uri", redirectUri}
             };
 
-            UriBuilder uriBuilder = new(tokenUri) {Query = GetQueryString(queryCollection)};
+            UriBuilder uriBuilder = new(tokenUri) {Query = queryCollection.GetQueryString()};
 
             HttpRequestMessage requestMessage = new()
             {
@@ -200,10 +196,10 @@ namespace HonzaBotner.Services
                 Content = content
             };
 
-            HttpResponseMessage tokenResponse = await _client.SendAsync(requestMessage);
+            HttpResponseMessage tokenResponse = await _client.SendAsync(requestMessage).ConfigureAwait(false);
             tokenResponse.EnsureSuccessStatusCode();
 
-            JsonDocument response = await JsonDocument.ParseAsync(await tokenResponse.Content.ReadAsStreamAsync());
+            JsonDocument response = await JsonDocument.ParseAsync(await tokenResponse.Content.ReadAsStreamAsync().ConfigureAwait(false));
 
             return response.RootElement.GetProperty("access_token").GetString()
                    ?? throw new InvalidOperationException("Couldn't get service token from CTU");
