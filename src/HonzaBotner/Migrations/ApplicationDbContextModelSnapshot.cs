@@ -39,6 +39,47 @@ namespace HonzaBotner.Migrations
                     b.ToTable("CountedEmojis");
                 });
 
+            modelBuilder.Entity("HonzaBotner.Database.NewsConfig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ChannelsData")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastFetched")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NewsProviderType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("NewsConfigs");
+                });
+
             modelBuilder.Entity("HonzaBotner.Database.Reminder", b =>
                 {
                     b.Property<int>("Id")
