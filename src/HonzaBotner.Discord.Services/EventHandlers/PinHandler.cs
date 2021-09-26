@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.EventHandler;
@@ -19,8 +18,12 @@ namespace HonzaBotner.Discord.Services.EventHandlers
         private readonly ILogger<PinHandler> _logger;
         private readonly CommonCommandOptions _options;
 
-        public PinHandler(IOptions<PinOptions> pinOptions, DiscordWrapper discordWrapper, ILogger<PinHandler> logger,
-            IOptions<CommonCommandOptions> options)
+        public PinHandler(
+            IOptions<PinOptions> pinOptions,
+            DiscordWrapper discordWrapper,
+            ILogger<PinHandler> logger,
+            IOptions<CommonCommandOptions> options
+        )
         {
             _pinOptions = pinOptions.Value;
             _discordWrapper = discordWrapper;
@@ -30,20 +33,20 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
         public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs eventArgs)
         {
-            DiscordEmoji tempPinEmoji;
-            DiscordEmoji permPinEmoji;
-            DiscordEmoji lockEmoji;
-            DiscordEmoji pinEmoji;
-
             if (eventArgs.Channel.IsPrivate)
             {
                 return EventHandlerResult.Continue;
             }
 
+            DiscordEmoji temporaryPinEmoji;
+            DiscordEmoji permanentPinEmoji;
+            DiscordEmoji lockEmoji;
+            DiscordEmoji pinEmoji;
+
             try
             {
-                tempPinEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.TemporaryPinName);
-                permPinEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.PermanentPinName);
+                temporaryPinEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.TemporaryPinName);
+                permanentPinEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.PermanentPinName);
                 lockEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.LockEmojiName);
             }
             catch (ArgumentException e)
@@ -51,36 +54,49 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                 _logger.LogError("Failed to create discord emoji from name {EmojiName}", e.ParamName);
                 return EventHandlerResult.Continue;
             }
-            
-            if (eventArgs.Emoji.Equals(tempPinEmoji))
+
+            // Unpinning the message - mod or bot.
+            if (eventArgs.Emoji.Equals(lockEmoji))
             {
-                pinEmoji = tempPinEmoji;
-            }
-            else if (eventArgs.Emoji.Equals(permPinEmoji))
-            {
-                pinEmoji = permPinEmoji;
-            }
-            else if (eventArgs.Emoji.Equals(lockEmoji))
-            {
+                if (!eventArgs.Message.Pinned)
+                {
+                    return EventHandlerResult.Continue;
+                }
+
                 DiscordMember member = await eventArgs.Guild.GetMemberAsync(eventArgs.User.Id);
-                if (member.Roles.Contains(eventArgs.Guild.GetRole(_options?.ModRoleId ?? 0)))
+                if (member.Roles.Contains(eventArgs.Guild.GetRole(_options.ModRoleId)) ||
+                    member.Id == eventArgs.Guild.CurrentMember.Id)
                 {
                     await eventArgs.Message.UnpinAsync();
                 }
+
                 return EventHandlerResult.Continue;
+            }
+
+            // If pinned, nothing new will happen.
+            if (eventArgs.Message.Pinned) return EventHandlerResult.Continue;
+
+            if (eventArgs.Emoji.Equals(temporaryPinEmoji))
+            {
+                pinEmoji = temporaryPinEmoji;
+            }
+            else if (eventArgs.Emoji.Equals(permanentPinEmoji))
+            {
+                pinEmoji = permanentPinEmoji;
             }
             else
             {
                 return EventHandlerResult.Continue;
             }
-            
-            if (eventArgs.Message.Pinned) return EventHandlerResult.Continue;
-            
+
             IReadOnlyList<DiscordUser> lockedReactions = await eventArgs.Message.GetReactionsAsync(lockEmoji);
+
             foreach (DiscordUser user in lockedReactions)
             {
                 DiscordMember member = await eventArgs.Guild.GetMemberAsync(user.Id);
-                if (member.Roles.Contains(eventArgs.Guild.GetRole(_options?.ModRoleId ?? 0)))
+
+                // Mod locked the message, no need to process further.
+                if (member.Roles.Contains(eventArgs.Guild.GetRole(_options.ModRoleId)))
                 {
                     return EventHandlerResult.Continue;
                 }
@@ -88,13 +104,15 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             IReadOnlyList<DiscordUser> reactions = await eventArgs.Message.GetReactionsAsync(pinEmoji);
 
+            // Fast heuristic to check if threshold is passed.
             if (reactions.Count >= _pinOptions.Treshold)
             {
                 await eventArgs.Message.PinAsync();
                 return EventHandlerResult.Continue;
             }
-            
-            Dictionary<ulong, int> roleToScore = new Dictionary<ulong, int>();
+
+            // Build roleToScore dictionary mapping.
+            var roleToScore = new Dictionary<ulong, int>();
             foreach ((string? key, int value) in _pinOptions.RoleToWeightMapping)
             {
                 try
@@ -107,7 +125,8 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                     _logger.LogError(e, "Failed to parse role id {Key}", key);
                 }
             }
-            
+
+            // Compute pin score.
             int score = 0;
             foreach (DiscordUser user in reactions)
             {
@@ -131,7 +150,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             {
                 await eventArgs.Message.PinAsync();
             }
-            
+
             return EventHandlerResult.Continue;
         }
     }
