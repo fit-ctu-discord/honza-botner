@@ -9,6 +9,7 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     [Description("Příkazy sloužící k ověření totožnosti")]
     [ModuleLifespan(ModuleLifespan.Transient)]
+    [RequireGuild]
     public class AuthorizeCommands : BaseCommandModule
     {
         private readonly IUrlProvider _urlProvider;
@@ -23,9 +24,9 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("authorize"), Aliases("auth")]
         public async Task AuthorizeCommand(CommandContext ctx)
         {
-            DiscordMessage message = ctx.Message;
-            DiscordUser user = message.Author;
-            DiscordDmChannel channel = await message.Channel.Guild.Members[user.Id].CreateDmChannelAsync();
+            DiscordUser user = ctx.User;
+
+            DiscordDmChannel channel = await ctx.Member.CreateDmChannelAsync();
 
             string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
 

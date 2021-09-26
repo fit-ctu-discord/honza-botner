@@ -21,6 +21,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Description("Commands to interact with members.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     [RequireMod]
+    [RequireGuild]
     public class MemberCommands : BaseCommandModule
     {
         [Group("info")]
@@ -31,17 +32,14 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             private readonly HonzaBotnerDbContext _dbContext;
             private readonly IHashService _hashService;
-            private readonly ILogger<MemberCommandsInfo> _logger;
 
             public MemberCommandsInfo(
                 HonzaBotnerDbContext dbContext,
-                IHashService hashService,
-                ILogger<MemberCommandsInfo> logger
+                IHashService hashService
             )
             {
                 _dbContext = dbContext;
                 _hashService = hashService;
-                _logger = logger;
             }
 
             [GroupCommand]
@@ -185,9 +183,10 @@ namespace HonzaBotner.Discord.Services.Commands
             public async Task CountAll(CommandContext ctx)
             {
                 int authenticatedCount = 0;
-                DiscordRole authenticatedRole = ctx.Guild.GetRole(_commonCommandOptions.AuthenticatedRoleId);
+                DiscordGuild guild = ctx.Guild;
+                DiscordRole authenticatedRole = guild.GetRole(_commonCommandOptions.AuthenticatedRoleId);
 
-                foreach ((_, DiscordMember member) in ctx.Guild.Members)
+                foreach ((_, DiscordMember member) in guild.Members)
                 {
                     if (member.Roles.Contains(authenticatedRole))
                     {
@@ -209,8 +208,9 @@ namespace HonzaBotner.Discord.Services.Commands
             )
             {
                 int count = 0;
+                DiscordGuild guild = ctx.Guild;
 
-                foreach ((_, DiscordMember member) in ctx.Guild.Members)
+                foreach ((_, DiscordMember member) in guild.Members)
                 {
                     foreach (DiscordRole role in roles)
                     {
@@ -232,8 +232,9 @@ namespace HonzaBotner.Discord.Services.Commands
                 [Description("Roles to check.")] params DiscordRole[] roles)
             {
                 int count = 0;
+                DiscordGuild guild = ctx.Guild;
 
-                foreach ((_, DiscordMember member) in ctx.Guild.Members)
+                foreach ((_, DiscordMember member) in guild.Members)
                 {
                     bool hasAllRoles = true;
                     foreach (DiscordRole role in roles)

@@ -27,6 +27,7 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("activity")]
         [Description("Changes bot's activity status.")]
         [RequireMod]
+        [RequireGuild]
         public async Task Activity(CommandContext ctx,
             [Description("Type of the activity. Allowed values: competing, playing, watching or listeningTo.")]
             ActivityType type,
@@ -56,6 +57,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
         [Command("info")]
         [Description("Command to get you info about Discord bot and other things.")]
+        [GroupCommand]
         public async Task BotInfo(CommandContext ctx)
         {
             StringBuilder stringBuilder = new();

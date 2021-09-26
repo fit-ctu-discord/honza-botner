@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Services.Contract.Dto;
 
