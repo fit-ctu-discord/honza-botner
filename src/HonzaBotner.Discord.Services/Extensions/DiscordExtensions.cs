@@ -8,12 +8,6 @@ namespace HonzaBotner.Discord.Services.Extensions
 {
     public static class DiscordExtensions
     {
-        [Obsolete("Use DiscordMember.DisplayName instead")]
-        public static string RatherNicknameThanUsername(this DiscordMember member)
-        {
-            return member.Nickname ?? member.Username;
-        }
-
         public static IEnumerable<Page> GeneratePages(this InteractivityExtension _, string input,
             DiscordEmbedBuilder? embedBase = null, int pageRows = 14)
         {

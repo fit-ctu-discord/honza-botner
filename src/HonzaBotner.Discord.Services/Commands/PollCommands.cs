@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Services.Commands.Polls;
 
 namespace HonzaBotner.Discord.Services.Commands
@@ -32,11 +31,11 @@ namespace HonzaBotner.Discord.Services.Commands
 
             if (options.Length == 1)
             {
-                poll = new YesNoPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, options.First());
+                poll = new YesNoPoll(ctx.Member.DisplayName, ctx.Member.AvatarUrl, options.First());
             }
             else if (options.Length - 1 <= AbcPoll.MaxOptions)
             {
-                poll = new AbcPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, options.First(),
+                poll = new AbcPoll(ctx.Member.DisplayName, ctx.Member.AvatarUrl, options.First(),
                     options.Skip(1).ToList());
             }
             else
@@ -65,7 +64,7 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             try
             {
-                await new YesNoPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question)
+                await new YesNoPoll(ctx.Member.DisplayName, ctx.Member.AvatarUrl, question)
                     .PostAsync(ctx.Client, ctx.Channel);
                 await ctx.Message.DeleteAsync();
             }
@@ -84,7 +83,7 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             try
             {
-                await new AbcPoll(ctx.Member.RatherNicknameThanUsername(), ctx.Member.AvatarUrl, question,
+                await new AbcPoll(ctx.Member.DisplayName, ctx.Member.AvatarUrl, question,
                         answers.ToList())
                     .PostAsync(ctx.Client, ctx.Channel);
                 await ctx.Message.DeleteAsync();

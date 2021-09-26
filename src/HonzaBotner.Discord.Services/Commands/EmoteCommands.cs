@@ -102,7 +102,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 {
                     Author = new DiscordEmbedBuilder.EmbedAuthor
                     {
-                        IconUrl = ctx.Member.AvatarUrl, Name = ctx.Member.RatherNicknameThanUsername()
+                        IconUrl = ctx.Member.AvatarUrl, Name = ctx.Member.DisplayName
                     },
                     Title = "Statistika používání custom emotes"
                 };
