@@ -96,7 +96,8 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                 DiscordMember member = await eventArgs.Guild.GetMemberAsync(user.Id);
 
                 // Mod locked the message, no need to process further.
-                if (member.Roles.Contains(eventArgs.Guild.GetRole(_options.ModRoleId)))
+                if (member.Roles.Contains(eventArgs.Guild.GetRole(_options.ModRoleId)) ||
+                    member.Id == eventArgs.Guild.CurrentMember.Id)
                 {
                     return EventHandlerResult.Continue;
                 }
