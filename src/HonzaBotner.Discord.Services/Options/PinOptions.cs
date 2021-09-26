@@ -9,6 +9,8 @@ namespace HonzaBotner.Discord.Services.Options
 
         public int Treshold { get; set; }
         public Dictionary<string, int> RoleToWeightMapping { get; set; }
-        public string EmojiName { get; set; }
+        public string TemporaryPinName { get; set; }
+        public string PermanentPinName { get; set; }
+        public string LockEmojiName { get; set; }
     }
 }
