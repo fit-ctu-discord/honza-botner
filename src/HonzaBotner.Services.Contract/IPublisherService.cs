@@ -10,6 +10,6 @@ namespace HonzaBotner.Services.Contract
     public interface IPublisherService
     {
         // TODO: Example of API. Subject to change
-        Task Publish(NewsDto news);
+        Task Publish(News news);
     }
 }

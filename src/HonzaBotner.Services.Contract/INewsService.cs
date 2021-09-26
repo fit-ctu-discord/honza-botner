@@ -6,6 +6,6 @@ namespace HonzaBotner.Services.Contract
 {
     public interface INewsService
     {
-        IAsyncEnumerable<NewsDto> FetchDataAsync(string source, DateTime since);
+        IAsyncEnumerable<News> FetchDataAsync(string source, DateTime since);
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using HonzaBotner.Database;
 using HonzaBotner.Services.Contract;
+using Dto = HonzaBotner.Services.Contract.Dto;
 using Microsoft.EntityFrameworkCore;
 
 namespace HonzaBotner.Services
@@ -20,13 +20,13 @@ namespace HonzaBotner.Services
             _context = context;
         }
 
-        public async Task AddOrUpdate(NewsConfigDto configDto, bool active)
+        public async Task AddOrUpdate(Dto.NewsConfig configDto, bool active)
         {
-            NewsConfig config = await Configs.FirstOrDefaultAsync(c => c.Id == configDto.Id);
+            Database.NewsConfig config = await Configs.FirstOrDefaultAsync(c => c.Id == configDto.Id);
 
             if (config is null)
             {
-                config = new NewsConfig
+                config = new Database.NewsConfig
                 {
                     Id = configDto.Id,
                     Name = configDto.Name,
@@ -53,17 +53,17 @@ namespace HonzaBotner.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IList<NewsConfigDto>> ListActiveConfigsAsync()
+        public async Task<IList<Dto.NewsConfig>> ListActiveConfigsAsync()
         {
             return await Configs
                 .Where(c => c.Active)
-                .Select(c => new NewsConfigDto(c.Id, c.Name, c.Source, c.LastFetched, c.NewsProviderType, c.PublisherType, c.Channels))
+                .Select(c => new Dto.NewsConfig(c.Id, c.Name, c.Source, c.LastFetched, c.NewsProviderType, c.PublisherType, c.Channels))
                 .ToListAsync();
         }
 
         public async Task UpdateFetchDateAsync(int id, DateTime date)
         {
-            NewsConfig config = await Configs.FirstOrDefaultAsync(c => c.Id == id);
+            Database.NewsConfig config = await Configs.FirstOrDefaultAsync(c => c.Id == id);
 
             if (config is null)
             {

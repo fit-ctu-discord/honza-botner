@@ -81,7 +81,7 @@ namespace HonzaBotner.Services
             _authorizationService = authorizationService;
         }
 
-        public async IAsyncEnumerable<NewsDto> FetchDataAsync(string source, DateTime since)
+        public async IAsyncEnumerable<News> FetchDataAsync(string source, DateTime since)
         {
             string accessToken = await _authorizationService.GetServiceTokenAsync(CoursesScope).ConfigureAwait(false);
 
@@ -120,7 +120,7 @@ namespace HonzaBotner.Services
             {
                 // TODO: Think about the content. Is it good enough how it is now, or should we imporve it by adding audience or so.
 
-                yield return new NewsDto(item.Url, item.CreatedBy.Name, item.Title, item.Content, item.PublishedAt);
+                yield return new News(item.Url, item.CreatedBy.Name, item.Title, item.Content, item.PublishedAt);
             }
         }
     }

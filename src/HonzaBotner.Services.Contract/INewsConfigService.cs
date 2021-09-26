@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using HonzaBotner.Services.Contract.Dto;
 
 namespace HonzaBotner.Services.Contract
 {
     public interface INewsConfigService
     {
-        Task AddOrUpdate(NewsConfigDto configDto, bool active);
+        Task AddOrUpdate(NewsConfig configDto, bool active);
 
-        Task<IList<NewsConfigDto>> ListActiveConfigsAsync();
+        Task<IList<NewsConfig>> ListActiveConfigsAsync();
 
         Task UpdateFetchDateAsync(int id, DateTime date);
     }
