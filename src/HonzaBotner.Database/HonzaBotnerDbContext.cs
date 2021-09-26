@@ -20,6 +20,7 @@ namespace HonzaBotner.Database
             new RoleBindingMapper().Map(builder.Entity<RoleBinding>());
             new WarningMapper().Map(builder.Entity<Warning>());
             new ReminderMapper().Map(builder.Entity<Reminder>());
+            new NewsConfigMapper().Map(builder.Entity<NewsConfig>());
         }
 
         public DbSet<Verification> Verifications { get; set; }
@@ -27,5 +28,6 @@ namespace HonzaBotner.Database
         public DbSet<RoleBinding> RoleBindings { get; set; }
         public DbSet<Warning> Warnings { get; set; }
         public DbSet<Reminder> Reminders { get; set; }
+        public DbSet<NewsConfig> NewsConfigs { get; set; }
     }
 }
