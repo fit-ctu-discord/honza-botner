@@ -68,6 +68,8 @@ namespace HonzaBotner.Controllers
                         "Authentication failed because you are registered with another auth code or another user already uses your auth code.",
                     IAuthorizationService.AuthorizeResult.UserMapError =>
                         "Authentication failed due to UserMap service failure.",
+                    IAuthorizationService.AuthorizeResult.AuthorizeFirst =>
+                        "You need to verify yourself first.",
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
