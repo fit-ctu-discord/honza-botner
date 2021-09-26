@@ -33,11 +33,11 @@ namespace HonzaBotner.Discord.Services.Jobs
         {
             _logger.LogInformation("Starting news fetching");
 
-            IList<NewsConfigDto> sources = await _configService.ListActiveConfigsAsync();
+            IList<NewsConfig> sources = await _configService.ListActiveConfigsAsync();
 
             using IServiceScope scope = _serviceProvider.CreateAsyncScope();
 
-            foreach (NewsConfigDto newsSource in sources)
+            foreach (NewsConfig newsSource in sources)
             {
                 INewsService newsService = scope.ServiceProvider.GetRequiredService(GetType(newsSource.NewsProviderType)) as INewsService
                     ?? throw new InvalidCastException("Type must be INewsService");
@@ -45,7 +45,7 @@ namespace HonzaBotner.Discord.Services.Jobs
                     ?? throw new InvalidCastException("Type must be IPublisherService");
 
                 DateTime now = DateTime.Now;
-                IAsyncEnumerable<NewsDto> news = newsService.FetchDataAsync(newsSource.Source, now);
+                IAsyncEnumerable<News> news = newsService.FetchDataAsync(newsSource.Source, now);
 
                 await foreach (News item in news.WithCancellation(cancellationToken))
                 {
