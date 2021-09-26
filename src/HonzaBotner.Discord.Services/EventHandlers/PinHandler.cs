@@ -30,8 +30,6 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
         public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs eventArgs)
         {
-            if (eventArgs.Message.Pinned) return EventHandlerResult.Continue;
-            
             DiscordEmoji tempPinEmoji;
             DiscordEmoji permPinEmoji;
             DiscordEmoji lockEmoji;
@@ -75,6 +73,8 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             {
                 return EventHandlerResult.Continue;
             }
+            
+            if (eventArgs.Message.Pinned) return EventHandlerResult.Continue;
             
             IReadOnlyList<DiscordUser> lockedReactions = await eventArgs.Message.GetReactionsAsync(lockEmoji);
             foreach (DiscordUser user in lockedReactions)

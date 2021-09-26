@@ -63,7 +63,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
                 foreach (DiscordChannel channel in ctx.Guild.Channels.Values)
                 {
-                    if (channel.Type is not ChannelType.Text and ChannelType.News)
+                    if (channel.Type is not ChannelType.Text && channel.Type is not ChannelType.News)
                     {
                         continue;
                     }
@@ -92,6 +92,12 @@ namespace HonzaBotner.Discord.Services.Commands
 
                 if (result.TimedOut)
                 {
+                    return;
+                }
+                
+                if (channel.Type is not ChannelType.Text && channel.Type is not ChannelType.News)
+                {
+                    await ctx.RespondAsync("You can use this command only on text channels");
                     return;
                 }
 
