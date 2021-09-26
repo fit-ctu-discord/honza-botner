@@ -88,6 +88,7 @@ namespace HonzaBotner
                 // Managers
                 .AddTransient<IVoiceManager, VoiceManager>()
                 .AddTransient<IReminderManager, ReminderManager>()
+                .AddTransient<IButtonManager, ButtonManager>()
 
                 // Jobs
                 .AddScoped<TriggerRemindersJobProvider>()
@@ -116,6 +117,7 @@ namespace HonzaBotner
                 UpdateDatabase(app);
                 SetupDashboard(app);
                 app.UseReverseProxyHttpsEnforcer();
+                app.UseExceptionHandler("/error");
             }
 
             StartRecurringJobs();

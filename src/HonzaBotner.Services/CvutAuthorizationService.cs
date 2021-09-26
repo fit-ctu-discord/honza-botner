@@ -146,12 +146,20 @@ namespace HonzaBotner.Services
             };
 
             HttpResponseMessage tokenResponse = await _client.SendAsync(requestMessage);
-            tokenResponse.EnsureSuccessStatusCode();
+
+            try
+            {
+                tokenResponse.EnsureSuccessStatusCode();
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("Couldn't authorize user, status code is not successful.", e);
+            }
 
             JsonDocument response = await JsonDocument.ParseAsync(await tokenResponse.Content.ReadAsStreamAsync());
 
             return response.RootElement.GetProperty("access_token").GetString()
-                   ?? throw new InvalidOperationException("Couldn't authorize user");
+                   ?? throw new InvalidOperationException("Couldn't authorize user.");
         }
 
         public async Task<string> GetUserNameAsync(string accessToken)

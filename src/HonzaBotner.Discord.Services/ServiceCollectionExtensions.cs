@@ -13,6 +13,7 @@ namespace HonzaBotner.Discord.Services
             services.Configure<PinOptions>(configuration.GetSection(PinOptions.ConfigName));
             services.Configure<InfoOptions>(configuration.GetSection(InfoOptions.ConfigName));
             services.Configure<ReminderOptions>(configuration.GetSection(ReminderOptions.ConfigName));
+            services.Configure<ButtonOptions>(configuration.GetSection(ButtonOptions.ConfigName));
 
             return services;
         }
