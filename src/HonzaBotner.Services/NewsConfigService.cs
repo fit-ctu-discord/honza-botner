@@ -20,18 +20,30 @@ namespace HonzaBotner.Services
             _context = context;
         }
 
-        public async Task AddOrUpdate(Dto.NewsConfig configDto, bool active)
+        private async Task<NewsConfig> GetConfig(int id)
         {
-            Database.NewsConfig config = await Configs.FirstOrDefaultAsync(c => c.Id == configDto.Id);
+            NewsConfig config = await Configs.FirstOrDefaultAsync(c => c.Id == id);
 
             if (config is null)
             {
-                config = new Database.NewsConfig
+                throw new ArgumentOutOfRangeException(nameof(id), "Config id was not found.");
+            }
+
+            return config;
+        }
+
+        public async Task AddOrUpdate(Dto.NewsConfig configDto)
+        {
+            NewsConfig config = await Configs.FirstOrDefaultAsync(c => c.Id == configDto.Id);
+
+            if (config is null)
+            {
+                config = new NewsConfig
                 {
                     Id = configDto.Id,
                     Name = configDto.Name,
                     Source = configDto.Source,
-                    Active = active,
+                    Active = configDto.Active,
                     Channels = configDto.Channels,
                     LastFetched = configDto.LastFetched,
                     NewsProviderType = configDto.NewsProviderType,
@@ -44,7 +56,7 @@ namespace HonzaBotner.Services
             {
                 config.Name = configDto.Name;
                 config.Source = configDto.Source;
-                config.Active = active;
+                config.Active = configDto.Active;
                 config.Channels = configDto.Channels;
                 config.NewsProviderType = configDto.NewsProviderType;
                 config.PublisherType = configDto.PublisherType;
@@ -53,26 +65,32 @@ namespace HonzaBotner.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IList<Dto.NewsConfig>> ListActiveConfigsAsync()
+        public async Task<IList<Dto.NewsConfig>> ListConfigsAsync(bool onlyActive = true)
         {
             return await Configs
-                .Where(c => c.Active)
-                .Select(c => new Dto.NewsConfig(c.Id, c.Name, c.Source, c.LastFetched, c.NewsProviderType, c.PublisherType, c.Channels))
+                .Where(c => c.Active || !onlyActive)
+                .Select(c => new Dto.NewsConfig(c.Id, c.Name, c.Source, c.LastFetched, c.NewsProviderType, c.PublisherType, c.Active, c.Channels))
                 .ToListAsync();
         }
 
         public async Task UpdateFetchDateAsync(int id, DateTime date)
         {
-            Database.NewsConfig config = await Configs.FirstOrDefaultAsync(c => c.Id == id);
-
-            if (config is null)
-            {
-                throw new ArgumentOutOfRangeException(nameof(id), "Invalid id, must be known");
-            }
+            NewsConfig config = await GetConfig(id);
 
             config.LastFetched = date;
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> ToggleConfig(int id)
+        {
+            NewsConfig config = await GetConfig(id);
+
+            config.Active = !config.Active;
+
+            await _context.SaveChangesAsync();
+
+            return config.Active;
         }
     }
 }
