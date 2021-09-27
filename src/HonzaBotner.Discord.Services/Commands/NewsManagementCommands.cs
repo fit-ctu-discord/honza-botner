@@ -84,8 +84,8 @@ namespace HonzaBotner.Discord.Services.Commands
         public async Task AddConfig(CommandContext context, string name, string source, string newsProviderType,
             string publisherProviderType, params DiscordChannel[] channels)
         {
-            CheckIfTypeExists(newsProviderType, nameof(newsProviderType));
-            CheckIfTypeExists(publisherProviderType, nameof(publisherProviderType));
+            CheckIfTypeExists<INewsService>(newsProviderType, nameof(newsProviderType));
+            CheckIfTypeExists<IPublisherService>(publisherProviderType, nameof(publisherProviderType));
 
             NewsConfig config = new(default, name, source, DateTime.MinValue, newsProviderType, publisherProviderType,
                 true, channels.Select(ch => ch.Id).ToArray());
@@ -105,10 +105,15 @@ namespace HonzaBotner.Discord.Services.Commands
         }
 
 
-        private static void CheckIfTypeExists(string typeName, string paramName)
+        private static void CheckIfTypeExists<T>(string typeName, string paramName)
         {
-            _ = Type.GetType(typeName) ??
+            Type t = Type.GetType(typeName) ??
                 throw new ArgumentOutOfRangeException(paramName, $"Type `{typeName}` was not found in app domain");
+
+            Type interfaceType = typeof(T);
+
+            if(!t.IsAssignableTo(interfaceType))
+                throw new ArgumentOutOfRangeException(paramName, $"Type `{typeName}` is not inheriting {interfaceType.Name}");
         }
     }
 }
