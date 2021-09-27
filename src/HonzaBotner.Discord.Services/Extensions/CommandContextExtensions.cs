@@ -17,7 +17,7 @@ namespace HonzaBotner.Discord.Services.Extensions
                 .WithTimestamp(DateTime.Now)
                 .Build();
 
-            await context.RespondAsync(embed: embed);
+            await context.RespondAsync(embed);
         }
     }
 }
