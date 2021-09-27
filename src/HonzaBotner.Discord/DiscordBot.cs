@@ -116,7 +116,7 @@ namespace HonzaBotner.Discord
                 case InvalidOperationException:
                 case ArgumentException:
                     {
-                        await e.Context.RespondAsync("Příkaz jsi zadal špatně.");
+                        await e.Context.RespondAsync($"Příkaz jsi zadal špatně.\n{e.Exception.Message}");
                         CommandContext? fakeContext = Commands.CreateFakeContext(e.Context.Member, e.Context.Channel,
                             $"help {e.Command?.QualifiedName}", e.Context.Prefix,
                             Commands.FindCommand($"help {e.Command?.QualifiedName}", out string args), args
