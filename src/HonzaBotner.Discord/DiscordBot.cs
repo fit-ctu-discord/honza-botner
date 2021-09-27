@@ -9,6 +9,7 @@ using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.SlashCommands;
 using HonzaBotner.Discord.Attributes;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Managers;
@@ -22,18 +23,22 @@ namespace HonzaBotner.Discord
         private readonly DiscordWrapper _discordWrapper;
         private readonly EventHandler.EventHandler _eventHandler;
         private readonly CommandConfigurator _configurator;
+        private readonly SlashCommandsConfigurator _slashConfigurator;
         private readonly IVoiceManager _voiceManager;
         private readonly DiscordConfig _discordOptions;
 
         private DiscordClient Client => _discordWrapper.Client;
         private CommandsNextExtension Commands => _discordWrapper.Commands;
+        private SlashCommandsExtension SlashCommands => _discordWrapper.SlashCommands;
 
         public DiscordBot(DiscordWrapper discordWrapper, EventHandler.EventHandler eventHandler,
-            CommandConfigurator configurator, IVoiceManager voiceManager, IOptions<DiscordConfig> discordOptions)
+            CommandConfigurator configurator, SlashCommandsConfigurator slashConfigurator, IVoiceManager voiceManager, 
+            IOptions<DiscordConfig> discordOptions)
         {
             _discordWrapper = discordWrapper;
             _eventHandler = eventHandler;
             _configurator = configurator;
+            _slashConfigurator = slashConfigurator;
             _voiceManager = voiceManager;
             _discordOptions = discordOptions.Value;
         }
@@ -57,6 +62,7 @@ namespace HonzaBotner.Discord
 
             _configurator.Config(Commands);
             Commands.RegisterConverter(new EnumConverter<ActivityType>());
+            _slashConfigurator.Config(SlashCommands);
 
             await Client.ConnectAsync();
             await Task.Delay(-1, cancellationToken);
