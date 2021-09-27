@@ -9,6 +9,7 @@ using HonzaBotner.Discord.Services;
 using HonzaBotner.Discord.Services.EventHandlers;
 using HonzaBotner.Discord.Services.Jobs;
 using HonzaBotner.Discord.Services.Managers;
+using HonzaBotner.Discord.Services.SlashCommands;
 using HonzaBotner.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -35,6 +36,9 @@ namespace HonzaBotner
         {
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddControllers();
+            
+            // TODO: Temporary solution - should be rewritten once someone who knows coding stuff sees this!!
+            ulong? guildId = Configuration.GetSection("Discord").GetValue<ulong>("GuildId");
 
             string connectionString = PsqlConnectionStringParser.GetEFConnectionString(Configuration["DATABASE_URL"]);
 
@@ -82,6 +86,9 @@ namespace HonzaBotner
                             .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
                             .AddEventHandler<VoiceHandler>()
                             ;
+                    }, slash =>
+                    {
+                        slash.RegisterCommands<FunSCommands>(guildId);
                     }
                 )
 
