@@ -8,7 +8,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Services.Contract;
@@ -19,6 +19,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Group("message")]
     [Description("Commands to interact with messages.")]
     [RequireMod]
+    [RequireGuild]
     public class MessageCommands : BaseCommandModule
     {
         private readonly ILogger<MessageCommands> _logger;
@@ -46,7 +47,7 @@ namespace HonzaBotner.Discord.Services.Commands
                         $"To approve sending message with ping, react with {emoji}. (15 seconds timeout to send without pings.)");
                 await reactMessage.CreateReactionAsync(emoji);
                 InteractivityResult<MessageReactionAddEventArgs> result =
-                    await reactMessage.WaitForReactionAsync(ctx.Member, emoji, TimeSpan.FromSeconds(15));
+                    await reactMessage.WaitForReactionAsync(ctx.User, emoji, TimeSpan.FromSeconds(15));
 
                 if (!result.TimedOut)
                 {
@@ -73,7 +74,8 @@ namespace HonzaBotner.Discord.Services.Commands
             [RemainingText, Description("New text of the message.")]
             string newText)
         {
-            DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(ctx.Message.Channel.Guild, url);
+            DiscordGuild guild = ctx.Guild;
+            DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(guild, url);
 
             if (oldMessage == null)
             {
@@ -91,7 +93,8 @@ namespace HonzaBotner.Discord.Services.Commands
             [Description("URL of the message.")] string url,
             [Description("Emojis to react with.")] params DiscordEmoji[] emojis)
         {
-            DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(ctx.Message.Channel.Guild, url);
+            DiscordGuild guild = ctx.Guild;
+            DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(guild, url);
 
             if (oldMessage == null)
             {
@@ -172,7 +175,8 @@ namespace HonzaBotner.Discord.Services.Commands
                 [Description("Roles which will be toggled after reaction")]
                 params DiscordRole[] roles)
             {
-                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+                DiscordGuild guild = ctx.Guild;
+                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(guild, url);
                 if (message == null)
                 {
                     throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
@@ -238,7 +242,8 @@ namespace HonzaBotner.Discord.Services.Commands
             [Command("remove")]
             public async Task RemoveButtons(CommandContext ctx, [Description("URL of the message")] string url)
             {
-                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+                DiscordGuild guild = ctx.Guild;
+                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(guild, url);
                 if (message == null)
                 {
                     throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
@@ -262,7 +267,8 @@ namespace HonzaBotner.Discord.Services.Commands
             [Command("setup")]
             public async Task SetupButtons(CommandContext ctx, [Description("URL of the message")] string url)
             {
-                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+                DiscordGuild guild = ctx.Guild;
+                DiscordMessage? message = await DiscordHelper.FindMessageFromLink(guild, url);
                 if (message == null)
                 {
                     throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");

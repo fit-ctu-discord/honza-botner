@@ -63,6 +63,7 @@ namespace HonzaBotner
                         config.RegisterCommands<FunCommands>();
                         config.RegisterCommands<MemberCommands>();
                         config.RegisterCommands<MessageCommands>();
+                        config.RegisterCommands<PinCommands>();
                         config.RegisterCommands<PollCommands>();
                         config.RegisterCommands<ReminderCommands>();
                         config.RegisterCommands<TestCommands>();

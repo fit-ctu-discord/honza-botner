@@ -75,7 +75,7 @@ namespace HonzaBotner.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Couldn't finish authentication for user id: {0}", userIdString);
+                _logger.LogError(e, "Couldn't finish authentication for user id: {UserId}", userIdString);
                 return Page(e.Message, 500);
             }
         }

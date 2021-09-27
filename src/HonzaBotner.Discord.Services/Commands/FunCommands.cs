@@ -4,13 +4,14 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Emzi0767;
-using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Services.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("fun")]
     [Description("Commands that bring fun!")]
+    [RequireGuild]
     public class FunCommands : BaseCommandModule
     {
         private readonly ILogger<FunCommands> _logger;

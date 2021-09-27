@@ -12,6 +12,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Group("channel")]
     [Description("Commands to interact with channels.")]
     [RequireMod]
+    [RequireGuild]
     public class ChannelCommands : BaseCommandModule
     {
         private readonly ILogger<ChannelCommands> _logger;
