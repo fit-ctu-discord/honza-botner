@@ -26,8 +26,11 @@ namespace HonzaBotner.Discord.Services.Commands
         }
 
         [Command("list")]
+        [GroupCommand]
         public async Task ListConfig(CommandContext context)
         {
+            // TODO: Potential issue with too large message
+
             IList<NewsConfig> configs = await _configService.ListConfigsAsync(false).ConfigureAwait(false);
 
             DiscordEmbedBuilder builder = new() { Title = "News List" };
@@ -35,13 +38,36 @@ namespace HonzaBotner.Discord.Services.Commands
             foreach (NewsConfig config in configs)
             {
                 string active = GetActiveEmoji(config);
-                builder.AddField($"{active} {config.Name} [{config.Id}] ", $"Source: {config.Source}; Publishing to: {string.Join(',', config.Channels)}; Last fetched: {config.LastFetched}");
+                builder.AddField($"{active} {config.Name} [{config.Id}]",
+                    $"Last fetched: {config.LastFetched}");
             }
 
             await context.Channel.SendMessageAsync(builder.Build());
         }
 
-        private static string GetActiveEmoji(NewsConfig config) => config.Active ? "✔️" : "❌";
+
+        [Command("Detail")]
+        [Description("Gets detail of one config")]
+        public async Task DetailConfig(CommandContext context, int id)
+        {
+            NewsConfig config = await _configService.GetById(id);
+
+            string active = GetActiveEmoji(config);
+            DiscordEmbedBuilder builder = new() { Title = $"{active} {config.Name} [{config.Id}]" };
+            string[] channels = config.Channels.Select(chId => $"<#{chId}>").ToArray();
+
+            builder.AddField("Source", config.Source);
+            builder.AddField("Channels", string.Join(',', channels));
+            builder.AddField("Last fetched", config.LastFetched.ToString());
+            builder.AddField("Sourcing news via", config.NewsProviderType);
+            builder.AddField("Publishing news via", config.PublisherType);
+
+            builder.WithTimestamp(DateTime.Now);
+
+            await context.RespondAsync(builder.Build());
+        }
+
+        private static string GetActiveEmoji(NewsConfig config) => config.Active ? ":white_check_mark:" : "❌";
 
         [Command("toggle")]
         [Description("Toggles if one configuration for news source is active or not")]
@@ -55,19 +81,34 @@ namespace HonzaBotner.Discord.Services.Commands
         }
 
         [Command("add")]
-        public async Task AddConfig(CommandContext context, string name, string source, string newsProviderType, string publisherProviderType, params DiscordChannel[] channels)
+        public async Task AddConfig(CommandContext context, string name, string source, string newsProviderType,
+            string publisherProviderType, params DiscordChannel[] channels)
         {
             CheckIfTypeExists(newsProviderType, nameof(newsProviderType));
             CheckIfTypeExists(publisherProviderType, nameof(publisherProviderType));
 
-            NewsConfig config = new(default, name, source, DateTime.MinValue, newsProviderType, publisherProviderType, true, channels.Select(ch => ch.Id).ToArray());
+            NewsConfig config = new(default, name, source, DateTime.MinValue, newsProviderType, publisherProviderType,
+                true, channels.Select(ch => ch.Id).ToArray());
 
             await _configService.AddOrUpdate(config);
         }
 
+        [Command("edit-channels")]
+        [Description("Set channels for one config")]
+        public async Task EditConfig(CommandContext context, int id, params DiscordChannel[] channels)
+        {
+            NewsConfig config = await _configService.GetById(id);
+
+            config = config with { Channels = channels.Select(ch => ch.Id).ToArray() };
+
+            await _configService.AddOrUpdate(config);
+        }
+
+
         private static void CheckIfTypeExists(string typeName, string paramName)
         {
-            _ = Type.GetType(typeName) ?? throw new ArgumentOutOfRangeException(paramName, $"Type `{typeName}` was not found in app domain");
+            _ = Type.GetType(typeName) ??
+                throw new ArgumentOutOfRangeException(paramName, $"Type `{typeName}` was not found in app domain");
         }
     }
 }
