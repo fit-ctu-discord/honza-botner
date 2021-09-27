@@ -68,6 +68,7 @@ namespace HonzaBotner
                         config.RegisterCommands<TestCommands>();
                         config.RegisterCommands<VoiceCommands>();
                         config.RegisterCommands<WarningCommands>();
+                        config.RegisterCommands<NewsManagementCommands>();
                     }, reactions =>
                     {
                         reactions
