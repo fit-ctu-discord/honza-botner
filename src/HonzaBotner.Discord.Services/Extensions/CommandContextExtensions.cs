@@ -10,14 +10,14 @@ namespace HonzaBotner.Discord.Services.Extensions
         public static async Task RespondErrorAsync(this CommandContext context, string title, string? content = null)
         {
             var embed = new DiscordEmbedBuilder()
-                .WithAuthor(context.Member.RatherNicknameThanUsername(), null, context.Member.AvatarUrl)
+                .WithAuthor(context.Member.DisplayName, null, context.Member.AvatarUrl)
                 .WithTitle(title.RemoveDiscordMentions(context.Guild))
                 .WithDescription(content?.RemoveDiscordMentions(context.Guild) ?? "No additional content provided")
                 .WithColor(DiscordColor.Red)
                 .WithTimestamp(DateTime.Now)
                 .Build();
 
-            await context.RespondAsync(embed: embed);
+            await context.RespondAsync(embed);
         }
     }
 }
