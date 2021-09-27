@@ -11,7 +11,7 @@
     <PackageReference Include="Chronic.Core" Version="0.4.0" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.7.25" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.0" />
-    <PackageReference Include="Hangfire.PostgreSql" Version="1.8.2" />
+    <PackageReference Include="Hangfire.PostgreSql" Version="1.8.6" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.0.10" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
