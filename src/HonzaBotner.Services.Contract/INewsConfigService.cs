@@ -14,5 +14,7 @@ namespace HonzaBotner.Services.Contract
         Task UpdateFetchDateAsync(int id, DateTime date);
 
         Task<bool> ToggleConfig(int id);
+
+        Task<NewsConfig> GetById(int id);
     }
 }
