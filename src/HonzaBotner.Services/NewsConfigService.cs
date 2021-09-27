@@ -69,8 +69,14 @@ namespace HonzaBotner.Services
         {
             return await Configs
                 .Where(c => c.Active || !onlyActive)
-                .Select(c => new Dto.NewsConfig(c.Id, c.Name, c.Source, c.LastFetched, c.NewsProviderType, c.PublisherType, c.Active, c.Channels))
+                .Select(c => DomainToDto(c))
                 .ToListAsync();
+        }
+
+        private static Dto.NewsConfig DomainToDto(NewsConfig config)
+        {
+            return new(config.Id, config.Name, config.Source, config.LastFetched, config.NewsProviderType,
+                config.PublisherType, config.Active, config.Channels);
         }
 
         public async Task UpdateFetchDateAsync(int id, DateTime date)
@@ -91,6 +97,13 @@ namespace HonzaBotner.Services
             await _context.SaveChangesAsync();
 
             return config.Active;
+        }
+
+        public async Task<Dto.NewsConfig> GetById(int id)
+        {
+            NewsConfig config = await GetConfig(id);
+
+            return DomainToDto(config);
         }
     }
 }
