@@ -5,6 +5,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Exceptions;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using HonzaBotner.Database;
@@ -21,6 +22,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Description("Commands to interact with members.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     [RequireMod]
+    [RequireGuild]
     public class MemberCommands : BaseCommandModule
     {
         [Group("info")]
@@ -31,17 +33,14 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             private readonly HonzaBotnerDbContext _dbContext;
             private readonly IHashService _hashService;
-            private readonly ILogger<MemberCommandsInfo> _logger;
 
             public MemberCommandsInfo(
                 HonzaBotnerDbContext dbContext,
-                IHashService hashService,
-                ILogger<MemberCommandsInfo> logger
+                IHashService hashService
             )
             {
                 _dbContext = dbContext;
                 _hashService = hashService;
-                _logger = logger;
             }
 
             [GroupCommand]
@@ -88,16 +87,19 @@ namespace HonzaBotner.Discord.Services.Commands
             private readonly HonzaBotnerDbContext _dbContext;
             private readonly IHashService _hashService;
             private readonly ILogger<MemberCommandsDelete> _logger;
+            private readonly IGuildProvider _guildProvider;
 
             public MemberCommandsDelete(
                 HonzaBotnerDbContext dbContext,
                 IHashService hashService,
-                ILogger<MemberCommandsDelete> logger
+                ILogger<MemberCommandsDelete> logger,
+                IGuildProvider guildProvider
             )
             {
                 _dbContext = dbContext;
                 _hashService = hashService;
                 _logger = logger;
+                _guildProvider = guildProvider;
             }
 
             [GroupCommand]
@@ -111,7 +113,7 @@ namespace HonzaBotner.Discord.Services.Commands
             {
                 Verification? databaseRecord =
                     await _dbContext.Verifications.FirstOrDefaultAsync(v => v.UserId == member.Id);
-                await EraseMemberAsync(ctx, databaseRecord, member.Nickname ?? member.Username);
+                await EraseMemberAsync(ctx, databaseRecord, member.DisplayName);
             }
 
             [Command("ctu")]
@@ -131,7 +133,6 @@ namespace HonzaBotner.Discord.Services.Commands
 
             private async Task EraseMemberAsync(CommandContext ctx, Verification? databaseRecord, string userName)
             {
-                await ctx.TriggerTypingAsync();
                 if (databaseRecord == null)
                 {
                     await ctx.Channel.SendMessageAsync("No member record to erase.");
@@ -143,20 +144,28 @@ namespace HonzaBotner.Discord.Services.Commands
                     await ctx.Channel.SendMessageAsync($"To approve erase of `{userName}`, react with {emoji}");
                 await reactMessage.CreateReactionAsync(emoji);
                 InteractivityResult<MessageReactionAddEventArgs> result =
-                    await reactMessage.WaitForReactionAsync(ctx.Member, emoji);
-
-                await ctx.TriggerTypingAsync();
+                    await reactMessage.WaitForReactionAsync(ctx.Member, emoji, TimeSpan.FromSeconds(30));
+                
                 if (result.TimedOut)
                 {
                     await ctx.Channel.SendMessageAsync("Member hasn't been erased due to approval timeout.");
                     return;
                 }
+                await ctx.TriggerTypingAsync();
 
                 try
                 {
                     _dbContext.Verifications.Remove(databaseRecord);
                     await _dbContext.SaveChangesAsync();
+                    DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
+                    DiscordMember member = await guild.GetMemberAsync(databaseRecord.UserId);
+                    await member.RemoveAsync("This user was kicked due to being purged from the database.");
                     await ctx.Channel.SendMessageAsync("Member has been erased.");
+                }
+                catch (UnauthorizedException)
+                {
+                    await ctx.RespondAsync("User was purged but not kicked due to insufficient permissions\n" +
+                                           "Please remove verified role manually to prevent unexpected behaviour.");
                 }
                 catch (Exception e)
                 {
@@ -185,9 +194,10 @@ namespace HonzaBotner.Discord.Services.Commands
             public async Task CountAll(CommandContext ctx)
             {
                 int authenticatedCount = 0;
-                DiscordRole authenticatedRole = ctx.Guild.GetRole(_commonCommandOptions.AuthenticatedRoleId);
+                DiscordGuild guild = ctx.Guild;
+                DiscordRole authenticatedRole = guild.GetRole(_commonCommandOptions.AuthenticatedRoleId);
 
-                foreach ((_, DiscordMember member) in ctx.Guild.Members)
+                foreach ((_, DiscordMember member) in guild.Members)
                 {
                     if (member.Roles.Contains(authenticatedRole))
                     {
@@ -209,8 +219,9 @@ namespace HonzaBotner.Discord.Services.Commands
             )
             {
                 int count = 0;
+                DiscordGuild guild = ctx.Guild;
 
-                foreach ((_, DiscordMember member) in ctx.Guild.Members)
+                foreach ((_, DiscordMember member) in guild.Members)
                 {
                     foreach (DiscordRole role in roles)
                     {
@@ -232,8 +243,9 @@ namespace HonzaBotner.Discord.Services.Commands
                 [Description("Roles to check.")] params DiscordRole[] roles)
             {
                 int count = 0;
+                DiscordGuild guild = ctx.Guild;
 
-                foreach ((_, DiscordMember member) in ctx.Guild.Members)
+                foreach ((_, DiscordMember member) in guild.Members)
                 {
                     bool hasAllRoles = true;
                     foreach (DiscordRole role in roles)

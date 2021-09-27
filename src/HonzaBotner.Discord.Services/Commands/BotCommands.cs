@@ -27,6 +27,7 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("activity")]
         [Description("Changes bot's activity status.")]
         [RequireMod]
+        [RequireGuild]
         public async Task Activity(CommandContext ctx,
             [Description("Type of the activity. Allowed values: competing, playing, watching or listeningTo.")]
             ActivityType type,
@@ -56,31 +57,52 @@ namespace HonzaBotner.Discord.Services.Commands
 
         [Command("info")]
         [Description("Command to get you info about Discord bot and other things.")]
+        [GroupCommand]
         public async Task BotInfo(CommandContext ctx)
         {
-            StringBuilder stringBuilder = new();
-            stringBuilder
-                .Append("Tohoto bota vyvíjí komunita. " +
-                        "Budeme rádi, pokud se k vývoji přidáš a pomůžeš nám bota dále vylepšovat.")
-                .Append("\n\n")
-                .Append($"Zdrojový kód najdeš [zde]({_infoOptions.RepositoryUrl}).")
-                .Append("\n")
-                .Append($"Hlásit chyby můžeš [tady]({_infoOptions.IssueTrackerUrl}).")
-                ;
+            string content = "Tohoto bota vyvíjí komunita.\n" +
+                             "Budeme rádi, pokud se k vývoji přidáš a pomůžeš nám bota dále vylepšovat.";
 
             try
             {
+                DiscordMember botMember = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
+
                 DiscordEmbedBuilder embed = new()
                 {
                     Author = new DiscordEmbedBuilder.EmbedAuthor
                     {
-                        Name = ctx.Client.CurrentUser.Username, IconUrl = ctx.Client.CurrentUser.AvatarUrl
+                        Name = botMember.DisplayName, IconUrl = botMember.AvatarUrl
                     },
                     Title = "Informace o botovi",
-                    Description = stringBuilder.ToString()
+                    Description = content,
+                    Color = DiscordColor.CornflowerBlue
                 };
+                embed.AddField("Verze: ", _infoOptions.Version);
 
-                await ctx.Channel.SendMessageAsync(embed);
+                DiscordMessageBuilder message = new DiscordMessageBuilder()
+                    .AddEmbed(embed)
+                    .AddComponents(
+                        new DiscordLinkButtonComponent(
+                            _infoOptions.RepositoryUrl,
+                            "Zdrojový kód",
+                            false,
+                            new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":scroll:"))
+                        ),
+                        new DiscordLinkButtonComponent(
+                            _infoOptions.IssueTrackerUrl,
+                            "Hlášení chyb",
+                            false,
+                            new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":bug:"))
+                        ),
+                        new DiscordLinkButtonComponent(
+                            _infoOptions.ChangelogUrl,
+                            "Novinky",
+                            false,
+                            new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":part_alternation_mark:"))
+                        )
+                    );
+
+                await ctx.Channel.SendMessageAsync(message);
             }
             catch (Exception e)
             {

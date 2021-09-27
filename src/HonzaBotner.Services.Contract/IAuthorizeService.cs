@@ -11,6 +11,7 @@ namespace HonzaBotner.Services.Contract
             Failed,
             DifferentMember,
             UserMapError,
+            AuthorizeFirst
         }
 
         Task<AuthorizeResult> AuthorizeAsync(string accessToken, string username, ulong userId, RolesPool rolesPool);

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Services.Contract.Dto;
 
@@ -71,7 +71,7 @@ namespace HonzaBotner.Discord.Services.Managers
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithTitle(title)
                 .WithAuthor(
-                    author?.RatherNicknameThanUsername() ?? "Unknown user",
+                    author?.DisplayName ?? "Unknown user",
                     iconUrl: author?.AvatarUrl)
                 .WithDescription(description)
                 .WithColor(color);

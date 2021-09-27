@@ -6,7 +6,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
@@ -19,6 +19,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Description("Commands to warn and list warnings.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     [RequireMod]
+    [RequireGuild]
     public class WarningCommands : BaseCommandModule
     {
         private readonly IWarningService _warningService;
@@ -111,7 +112,7 @@ namespace HonzaBotner.Discord.Services.Commands
             {
                 DiscordMember warningMember = await ctx.Guild.GetMemberAsync(warning.UserId);
                 await ctx.Channel.SendMessageAsync(
-                    $"**Varování {warning.Id}** pro uživatele **{warningMember.RatherNicknameThanUsername()}**:\n" +
+                    $"**Varování {warning.Id}** pro uživatele **{warningMember.DisplayName}**:\n" +
                     $"{warning.Reason.RemoveDiscordMentions(ctx.Guild, _logger)}");
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
             }
@@ -189,7 +190,7 @@ namespace HonzaBotner.Discord.Services.Commands
             else
             {
                 _logger.LogWarning("Couldn't add a warning for {Member} with {Reason}",
-                    member.RatherNicknameThanUsername(), reason);
+                    member.DisplayName, reason);
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
             }
         }
@@ -202,7 +203,7 @@ namespace HonzaBotner.Discord.Services.Commands
             {
                 Title = forMember == null
                     ? "Seznam varování"
-                    : $"Seznam varování uživatele {forMember.RatherNicknameThanUsername()}",
+                    : $"Seznam varování uživatele {forMember.DisplayName}",
             };
 
             List<(string, string)> embedFields = new();
@@ -215,7 +216,7 @@ namespace HonzaBotner.Discord.Services.Commands
                     DiscordMember issuerMember = await ctx.Guild.GetMemberAsync(warning.IssuerId);
 
                     embedFields.Add(
-                        ($"#{warning.Id}\t{warningMember.RatherNicknameThanUsername()}\t{warning.IssuedAt}\t{issuerMember.RatherNicknameThanUsername()}",
+                        ($"#{warning.Id}\t{warningMember.DisplayName}\t{warning.IssuedAt}\t{issuerMember.DisplayName}",
                             warning.Reason)
                     );
                 }

@@ -5,7 +5,7 @@ using Chronic.Core;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord.Extensions;
+using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
@@ -19,6 +19,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Description("Commands to manager reminders.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     [Cooldown(2, 60 * 60, CooldownBucketType.User)]
+    [RequireGuild]
     public class ReminderCommands : BaseCommandModule
     {
         private readonly IRemindersService _service;
