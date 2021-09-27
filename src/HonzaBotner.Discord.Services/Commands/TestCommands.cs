@@ -8,6 +8,7 @@ namespace HonzaBotner.Discord.Services.Commands
     [Group("test")]
     [Description("Testing commands")]
     [RequireMod]
+    [RequireGuild]
     public class TestCommands : BaseCommandModule
     {
         [Command("boostCount")]

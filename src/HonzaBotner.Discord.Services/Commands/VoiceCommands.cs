@@ -13,6 +13,7 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("voice")]
     [Description("Commands to control (and only works in) custom voice channels.")]
+    [RequireGuild]
     public class VoiceCommands : BaseCommandModule
     {
         private readonly IVoiceManager _voiceManager;
