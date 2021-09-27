@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Chronic.Core" Version="0.4.0" />
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.19" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.25" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.0" />
     <PackageReference Include="Hangfire.PostgreSql" Version="1.8.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.1" />
