@@ -86,8 +86,8 @@ namespace HonzaBotner.Discord.Services.Commands
         public async Task AddConfig(CommandContext context, string name, string source, string newsProviderType,
             string publisherProviderType, params DiscordChannel[] channels)
         {
-            CheckIfTypeExists<INewsService>(newsProviderType, nameof(newsProviderType));
-            CheckIfTypeExists<IPublisherService>(publisherProviderType, nameof(publisherProviderType));
+            CheckIfTypeExists<INewsService>(NewsConfig.TypeFromProvider(newsProviderType), nameof(newsProviderType));
+            CheckIfTypeExists<IPublisherService>(NewsConfig.TypeFromPublisher(publisherProviderType), nameof(publisherProviderType));
 
             NewsConfig config = new(default, name, source, DateTime.MinValue, newsProviderType, publisherProviderType,
                 true, channels.Select(ch => ch.Id).ToArray());
@@ -101,7 +101,7 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             NewsConfig config = await _configService.GetById(id);
 
-            config = config with { Channels = channels.Select(ch => ch.Id).ToArray() };
+            config.Channels = channels.Select(ch => ch.Id).ToArray();
 
             await _configService.AddOrUpdate(config);
         }
@@ -112,7 +112,7 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             NewsConfig config = await _configService.GetById(id);
 
-            config = config with { LastFetched = lastRun };
+            config.LastFetched = lastRun;
 
             await _configService.AddOrUpdate(config);
         }
