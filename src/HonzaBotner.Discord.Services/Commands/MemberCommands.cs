@@ -164,7 +164,8 @@ namespace HonzaBotner.Discord.Services.Commands
                 }
                 catch (UnauthorizedException)
                 {
-                    await ctx.RespondAsync("User was purged but not kicked due to insufficient permissions");
+                    await ctx.RespondAsync("User was purged but not kicked due to insufficient permissions\n" +
+                                           "Please remove verified role manually to prevent unexpected behaviour.");
                 }
                 catch (Exception e)
                 {
