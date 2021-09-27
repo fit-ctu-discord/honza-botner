@@ -58,6 +58,7 @@ namespace HonzaBotner.Services
                 config.Source = configDto.Source;
                 config.Active = configDto.Active;
                 config.Channels = configDto.Channels;
+                config.LastFetched = configDto.LastFetched;
                 config.NewsProviderType = configDto.NewsProviderType;
                 config.PublisherType = configDto.PublisherType;
             }

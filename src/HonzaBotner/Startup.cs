@@ -93,6 +93,7 @@ namespace HonzaBotner
 
                 // Jobs
                 .AddScoped<TriggerRemindersJobProvider>()
+                .AddScoped<NewsJobProvider>()
             ;
 
             services.AddHangfire(config => { config.UsePostgreSqlStorage(connectionString); });
