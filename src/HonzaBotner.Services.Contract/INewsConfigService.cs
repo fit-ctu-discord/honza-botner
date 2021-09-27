@@ -7,10 +7,12 @@ namespace HonzaBotner.Services.Contract
 {
     public interface INewsConfigService
     {
-        Task AddOrUpdate(NewsConfig configDto, bool active);
+        Task AddOrUpdate(NewsConfig configDto);
 
-        Task<IList<NewsConfig>> ListActiveConfigsAsync();
+        Task<IList<NewsConfig>> ListConfigsAsync(bool onlyActive = true);
 
         Task UpdateFetchDateAsync(int id, DateTime date);
+
+        Task<bool> ToggleConfig(int id);
     }
 }

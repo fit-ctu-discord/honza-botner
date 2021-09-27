@@ -33,7 +33,7 @@ namespace HonzaBotner.Discord.Services.Jobs
         {
             _logger.LogInformation("Starting news fetching");
 
-            IList<NewsConfig> sources = await _configService.ListActiveConfigsAsync();
+            IList<NewsConfig> sources = await _configService.ListConfigsAsync();
 
             using IServiceScope scope = _serviceProvider.CreateAsyncScope();
 
