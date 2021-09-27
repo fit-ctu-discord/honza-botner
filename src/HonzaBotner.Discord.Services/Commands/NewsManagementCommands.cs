@@ -30,8 +30,7 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             IList<NewsConfig> configs = await _configService.ListConfigsAsync(false).ConfigureAwait(false);
 
-            DiscordEmbedBuilder builder = new();
-            builder.Title = "News List";
+            DiscordEmbedBuilder builder = new() { Title = "News List" };
             builder.WithTimestamp(DateTime.Now);
             foreach (NewsConfig config in configs)
             {
@@ -44,15 +43,15 @@ namespace HonzaBotner.Discord.Services.Commands
 
         private static string GetActiveEmoji(NewsConfig config) => config.Active ? "✔️" : "❌";
 
-        [Command("toogle")]
+        [Command("toggle")]
         [Description("Toggles if one configuration for news source is active or not")]
-        public async Task ToggleConfig(CommandContext contex, int id)
+        public async Task ToggleConfig(CommandContext context, int id)
         {
             bool currentState = await _configService.ToggleConfig(id);
 
             string prefix = currentState ? "" : "in";
 
-            await contex.RespondAsync($"News config with id [{id}] set to be {prefix}active");
+            await context.RespondAsync($"News config with id [{id}] set to be {prefix}active");
         }
 
         [Command("add")]
