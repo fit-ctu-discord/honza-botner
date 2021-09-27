@@ -91,7 +91,7 @@ namespace HonzaBotner.Services
                 // courses: BI-XY,BI-YZ,...
                 { "courses", source },
                 { "limit", "50" },
-                { "since", since.ToString("yyyy-MM-dd") }
+                { "since", since.AddDays(-1).ToString("yyyy-MM-dd") }
             };
 
             UriBuilder uriBuilder = new("https://courses.fit.cvut.cz/api/v1/cpages/news")
@@ -116,12 +116,15 @@ namespace HonzaBotner.Services
                 yield break;
             }
 
+            IScheme scheme = new Markdown();
+            scheme.Replacers().Add(new DivReplacer());
+            scheme.Replacers().Add(new DoubleLineReplacer());
+            Converter converter = new(scheme);
+
             foreach (CoursesNews item in coursesNews)
             {
-                IScheme scheme = new Markdown();
-                scheme.Replacers().Add(new DivReplacer());
-                scheme.Replacers().Add(new DoubleLineReplacer());
-                Converter converter = new(scheme);
+                if(item.CreatedAt < since)
+                    continue;
 
                 string markdown = converter.Convert(item.Content);
                 yield return new News(item.Url, item.CreatedBy.Name, item.Title, markdown, item.PublishedAt);
