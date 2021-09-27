@@ -20,7 +20,7 @@ namespace HonzaBotner.Discord.Services.Jobs
 
         public static string CronExpression => Cron.Hourly();
 
-        private readonly static ConcurrentDictionary<string, Type> _typesCache = new ConcurrentDictionary<string, Type>();
+        private static readonly ConcurrentDictionary<string, Type> _typesCache = new ConcurrentDictionary<string, Type>();
 
         public NewsJobProvider(ILogger<NewsJobProvider> logger, INewsConfigService configService ,IServiceProvider serviceProvider)
         {
