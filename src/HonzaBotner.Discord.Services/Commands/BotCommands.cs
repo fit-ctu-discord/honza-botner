@@ -60,15 +60,8 @@ namespace HonzaBotner.Discord.Services.Commands
         [GroupCommand]
         public async Task BotInfo(CommandContext ctx)
         {
-            StringBuilder stringBuilder = new();
-            stringBuilder
-                .Append("Tohoto bota vyvíjí komunita. " +
-                        "Budeme rádi, pokud se k vývoji přidáš a pomůžeš nám bota dále vylepšovat.")
-                .Append("\n\n")
-                .Append($"Zdrojový kód najdeš [zde]({_infoOptions.RepositoryUrl}).")
-                .Append("\n")
-                .Append($"Hlásit chyby můžeš [tady]({_infoOptions.IssueTrackerUrl}).")
-                ;
+            string content = "Tohoto bota vyvíjí komunita.\n" +
+                             "Budeme rádi, pokud se k vývoji přidáš a pomůžeš nám bota dále vylepšovat.";
 
             try
             {
@@ -79,10 +72,25 @@ namespace HonzaBotner.Discord.Services.Commands
                         Name = ctx.Client.CurrentUser.Username, IconUrl = ctx.Client.CurrentUser.AvatarUrl
                     },
                     Title = "Informace o botovi",
-                    Description = stringBuilder.ToString()
+                    Description = content,
+                    Color = new Optional<DiscordColor>(DiscordColor.CornflowerBlue)
                 };
+                embed.AddField("Verze: ", _infoOptions.Version);
 
-                await ctx.Channel.SendMessageAsync(embed);
+                DiscordMessageBuilder message = new DiscordMessageBuilder()
+                    .AddEmbed(embed)
+                    .AddComponents(
+                        new DiscordComponent[]
+                        {
+                            new DiscordLinkButtonComponent(_infoOptions.RepositoryUrl, "Zdrojový kód", false,
+                                new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":scroll:"))),
+                            new DiscordLinkButtonComponent(_infoOptions.IssueTrackerUrl, "Hlášení chyb", false,
+                                new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":bug:"))),
+                            new DiscordLinkButtonComponent(_infoOptions.ChangelogUrl, "Novinky", false,
+                                new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":part_alternation_mark:")))
+                        });
+
+                await ctx.Channel.SendMessageAsync(message);
             }
             catch (Exception e)
             {
