@@ -1,12 +1,18 @@
 ﻿# Voice
 
-#### `::voice`
+#### `::voice add`
 
-This command allows you to create (`::voice add`) your custom voice channel
+Adds a custom voice channel,
 that will be available to join for the next 30 seconds.
 After somebody joins, it stays in the server until somebody is in it.
-You can also edit (`::voice edit`) the name and/or limitations of such a channel,
-but be aware that Discord has rate limits that prevent editing multiple times in a row.
+
+#### `::voice edit`
+
+In a custom voice channel,
+the name and/or limitations of such a channel,
+can also be edited.
+Be aware that Discord has rate limits
+that prevent editing multiple times in a row.
 
 #### Custom voice deletion
 

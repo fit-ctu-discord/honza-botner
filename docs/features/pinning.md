@@ -1,8 +1,17 @@
 ﻿# Pinning
 
-#### Pinning
+Similarly to [role granting](granting-roles.md),
+we handle several reactions:
 
-Similarly to role granting,
-we handle adding a 📌 (`:pushpin:`) reaction in a way that we count the number of members (some members, such as teachers, has bigger weight)
-and if it reaches the specified threshold,
-the bot pins the message so other people can see it in the future.
+- 📌 (`:pushpin:`), aka "soft pin"
+- 📍 (`:round_pushpin:`), aka "hard pin"
+- 🔒 (`:lock`), aka "anti pin"
+
+If reacting using 📌 reaches the specific threshold,
+the message is automatically pinned.
+The same goes for 📍.
+The difference is,
+using 📌 means that this pinned message will be removed after end of semester.
+Using 📍 keeps the message pinned forever.
+If 🔒 is used by the bot or a moderator,
+the message is unpinned and is locked from further pinning.

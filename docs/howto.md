@@ -1,4 +1,4 @@
-﻿# Contributing
+﻿# How to Start
 
 ## Configuration
 
@@ -24,6 +24,8 @@ Example file structure:
 {
     "CVUT:ClientId": "<client id>",
     "CVUT:ClientSecret": "<client secret>",
+    "CVUT:ServiceId": "<service id>",
+    "CVUT:ServiceSecret": "<service secret>",
     "DATABASE_URL": "Host=localhost;Database=HonzaBotner;Username=honza-bot;Password=postgres",
     "Discord:Token": "<discord bot token>"
 }
@@ -94,7 +96,7 @@ dotnet ef migrations add "Name of migration"
 ```
 
 [dotnet]: https://dotnet.microsoft.com/download
-[compose]: docker-compose.yml
+[compose]: ../docker-compose.yml
 [discordDev]: https://discord.com/developers/applications
 [oauth]: https://auth.fit.cvut.cz/manager/user/apps.xhtml
 [secrets]: https://docs.microsoft.com/cs-cz/aspnet/core/security/app-secrets

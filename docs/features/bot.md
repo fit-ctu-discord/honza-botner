@@ -1,7 +1,10 @@
 ﻿# Bot
 
-#### `::bot`
+#### `::bot activity <type> <message>`
+![](https://img.shields.io/static/v1?label=role&message=mod&color=red)
 
-Using `::bot info`,
-member can see basic info about the bot,
-mainly a link to this repository and a link to the issue tracker.
+Changes bot's activity status.
+
+#### `::bot info`
+
+Displays useful links to the GitHub repository, bug reporting, news etc.
