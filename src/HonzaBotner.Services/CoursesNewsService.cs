@@ -6,6 +6,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
+using Html2Markdown;
+using Html2Markdown.Scheme;
 using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Services
@@ -105,6 +107,8 @@ namespace HonzaBotner.Services
             HttpResponseMessage responseMessage = await _client.SendAsync(requestMessage);
             responseMessage.EnsureSuccessStatusCode();
 
+
+
             CoursesNews[]? coursesNews = await JsonSerializer.DeserializeAsync<CoursesNews[]>(await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false));
 
             if (coursesNews is null)
@@ -114,9 +118,13 @@ namespace HonzaBotner.Services
 
             foreach (CoursesNews item in coursesNews)
             {
-                // TODO: Think about the content. Is it good enough how it is now, or should we imporve it by adding audience or so.
+                IScheme scheme = new Markdown();
+                scheme.Replacers().Add(new DivReplacer());
+                scheme.Replacers().Add(new DoubleLineReplacer());
+                Converter converter = new(scheme);
 
-                yield return new News(item.Url, item.CreatedBy.Name, item.Title, item.Content, item.PublishedAt);
+                string markdown = converter.Convert(item.Content);
+                yield return new News(item.Url, item.CreatedBy.Name, item.Title, markdown, item.PublishedAt);
             }
         }
     }
