@@ -33,8 +33,6 @@ namespace HonzaBotner.Discord.Services.Commands
         [GroupCommand]
         public async Task ListConfig(CommandContext context)
         {
-            // TODO: Potential issue with too large message
-
             IList<NewsConfig> configs = await _configService.ListConfigsAsync(false).ConfigureAwait(false);
 
             DiscordEmbedBuilder builder = new() { Title = "News List" };
