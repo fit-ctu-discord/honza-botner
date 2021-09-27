@@ -65,30 +65,42 @@ namespace HonzaBotner.Discord.Services.Commands
 
             try
             {
+                DiscordMember botMember = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
+
                 DiscordEmbedBuilder embed = new()
                 {
                     Author = new DiscordEmbedBuilder.EmbedAuthor
                     {
-                        Name = ctx.Client.CurrentUser.Username, IconUrl = ctx.Client.CurrentUser.AvatarUrl
+                        Name = botMember.DisplayName, IconUrl = botMember.AvatarUrl
                     },
                     Title = "Informace o botovi",
                     Description = content,
-                    Color = new Optional<DiscordColor>(DiscordColor.CornflowerBlue)
+                    Color = DiscordColor.CornflowerBlue
                 };
                 embed.AddField("Verze: ", _infoOptions.Version);
 
                 DiscordMessageBuilder message = new DiscordMessageBuilder()
                     .AddEmbed(embed)
                     .AddComponents(
-                        new DiscordComponent[]
-                        {
-                            new DiscordLinkButtonComponent(_infoOptions.RepositoryUrl, "Zdrojový kód", false,
-                                new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":scroll:"))),
-                            new DiscordLinkButtonComponent(_infoOptions.IssueTrackerUrl, "Hlášení chyb", false,
-                                new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":bug:"))),
-                            new DiscordLinkButtonComponent(_infoOptions.ChangelogUrl, "Novinky", false,
-                                new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":part_alternation_mark:")))
-                        });
+                        new DiscordLinkButtonComponent(
+                            _infoOptions.RepositoryUrl,
+                            "Zdrojový kód",
+                            false,
+                            new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":scroll:"))
+                        ),
+                        new DiscordLinkButtonComponent(
+                            _infoOptions.IssueTrackerUrl,
+                            "Hlášení chyb",
+                            false,
+                            new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":bug:"))
+                        ),
+                        new DiscordLinkButtonComponent(
+                            _infoOptions.ChangelogUrl,
+                            "Novinky",
+                            false,
+                            new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":part_alternation_mark:"))
+                        )
+                    );
 
                 await ctx.Channel.SendMessageAsync(message);
             }
