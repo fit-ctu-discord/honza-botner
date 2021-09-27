@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -58,7 +58,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
             builder.AddField("Source", config.Source);
             builder.AddField("Channels", string.Join(',', channels));
-            builder.AddField("Last fetched", config.LastFetched.ToString());
+            builder.AddField("Last fetched", config.LastFetched.ToString(CultureInfo.InvariantCulture));
             builder.AddField("Sourcing news via", config.NewsProviderType);
             builder.AddField("Publishing news via", config.PublisherType);
 
