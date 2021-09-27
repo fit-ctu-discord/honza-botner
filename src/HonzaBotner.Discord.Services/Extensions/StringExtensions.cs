@@ -33,7 +33,7 @@ namespace HonzaBotner.Discord.Services.Extensions
                         {
                             case "!":
                                 DiscordMember member = guild.GetMemberAsync(id).Result;
-                                return member.RatherNicknameThanUsername();
+                                return member.DisplayName;
                             case "&":
                                 DiscordRole role = guild.GetRole(id);
                                 return role.Name;

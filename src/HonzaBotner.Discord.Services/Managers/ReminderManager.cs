@@ -71,7 +71,7 @@ namespace HonzaBotner.Discord.Services.Managers
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithTitle(title)
                 .WithAuthor(
-                    author?.RatherNicknameThanUsername() ?? "Unknown user",
+                    author?.DisplayName ?? "Unknown user",
                     iconUrl: author?.AvatarUrl)
                 .WithDescription(description)
                 .WithColor(color);
