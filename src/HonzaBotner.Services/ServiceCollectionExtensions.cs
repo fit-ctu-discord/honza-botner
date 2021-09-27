@@ -32,6 +32,7 @@ namespace HonzaBotner.Services
             serviceCollection.AddScoped<IWarningService, WarningService>();
             serviceCollection.AddScoped<IRemindersService, RemindersService>();
             serviceCollection.AddTransient<INewsService, CoursesNewsService>();
+            serviceCollection.AddTransient<INewsConfigService, NewsConfigService>();
 
             return serviceCollection;
         }
