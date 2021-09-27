@@ -18,7 +18,7 @@ namespace HonzaBotner.Discord.Services.Jobs
         private readonly INewsConfigService _configService;
         private readonly IServiceProvider _serviceProvider;
 
-        public static string CronExpression => Cron.Hourly();
+        public static string CronExpression => "*/10 * * * *"; // Every ten minute
 
         private static readonly ConcurrentDictionary<string, Type> _typesCache = new ConcurrentDictionary<string, Type>();
 
@@ -54,7 +54,7 @@ namespace HonzaBotner.Discord.Services.Jobs
 
                 await _configService.UpdateFetchDateAsync(newsSource.Id, now);
             }
-            
+
         }
 
         private static Type GetType(string typeName)
