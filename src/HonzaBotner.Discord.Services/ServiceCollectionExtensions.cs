@@ -1,4 +1,5 @@
 ﻿using HonzaBotner.Discord.Services.Options;
+using HonzaBotner.Discord.Services.Publisher;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,8 @@ namespace HonzaBotner.Discord.Services
             services.Configure<InfoOptions>(configuration.GetSection(InfoOptions.ConfigName));
             services.Configure<ReminderOptions>(configuration.GetSection(ReminderOptions.ConfigName));
             services.Configure<ButtonOptions>(configuration.GetSection(ButtonOptions.ConfigName));
+
+            services.AddTransient<DiscordEmbedPublisher>();
 
             return services;
         }

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Jobs
 {
-    internal class NewsJobProvider : IRecurringJobProvider
+    public class NewsJobProvider : IRecurringJobProvider
     {
         public const string Key = "news-publisher";
 
@@ -44,11 +44,11 @@ namespace HonzaBotner.Discord.Services.Jobs
                     ?? throw new InvalidCastException("Type must be IPublisherService");
 
                 DateTime now = DateTime.Now;
-                IAsyncEnumerable<News> news = newsService.FetchDataAsync(newsSource.Source, now);
+                IAsyncEnumerable<News> news = newsService.FetchDataAsync(newsSource.Source, newsSource.LastFetched);
 
                 await foreach (News item in news)
                 {
-                    await publisherService.Publish(item);
+                    await publisherService.Publish(item, newsSource.Channels);
                 }
 
                 await _configService.UpdateFetchDateAsync(newsSource.Id, now);
