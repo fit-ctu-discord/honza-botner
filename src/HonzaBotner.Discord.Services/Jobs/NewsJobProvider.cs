@@ -54,7 +54,6 @@ namespace HonzaBotner.Discord.Services.Jobs
 
                 await _configService.UpdateFetchDateAsync(newsSource.Id, now);
             }
-
         }
 
         private static Type GetType(string typeName)
