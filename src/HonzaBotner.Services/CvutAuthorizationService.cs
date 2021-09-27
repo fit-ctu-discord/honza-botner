@@ -5,13 +5,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using HonzaBotner.Database;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System.Linq;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 

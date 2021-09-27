@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Hangfire;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +19,7 @@ namespace HonzaBotner.Discord.Services.Jobs
 
         public static string CronExpression => "*/10 * * * *"; // Every ten minute
 
-        private static readonly ConcurrentDictionary<string, Type> _typesCache = new ConcurrentDictionary<string, Type>();
+        private static readonly ConcurrentDictionary<string, Type> _typesCache = new();
 
         public NewsJobProvider(ILogger<NewsJobProvider> logger, INewsConfigService configService ,IServiceProvider serviceProvider)
         {
