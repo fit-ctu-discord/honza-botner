@@ -7,8 +7,10 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Services.Attributes;
+using HonzaBotner.Discord.Services.Jobs;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
@@ -19,10 +21,12 @@ namespace HonzaBotner.Discord.Services.Commands
     public class NewsManagementCommands : BaseCommandModule
     {
         private readonly INewsConfigService _configService;
+        private readonly NewsJobProvider _newsJobProvider;
 
-        public NewsManagementCommands(INewsConfigService configService)
+        public NewsManagementCommands(INewsConfigService configService, NewsJobProvider newsJobProvider)
         {
             _configService = configService;
+            _newsJobProvider = newsJobProvider;
         }
 
         [Command("list")]
@@ -95,7 +99,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
         [Command("edit-channels")]
         [Description("Set channels for one config")]
-        public async Task EditConfig(CommandContext context, int id, params DiscordChannel[] channels)
+        public async Task EditChannelsConfig(CommandContext context, int id, params DiscordChannel[] channels)
         {
             NewsConfig config = await _configService.GetById(id);
 
@@ -104,6 +108,24 @@ namespace HonzaBotner.Discord.Services.Commands
             await _configService.AddOrUpdate(config);
         }
 
+        [Command("edit-last-run")]
+        [Description("Set last run time for one config")]
+        public async Task EditLastRunConfig(CommandContext context, int id, DateTime lastRun)
+        {
+            NewsConfig config = await _configService.GetById(id);
+
+            config = config with { LastFetched = lastRun };
+
+            await _configService.AddOrUpdate(config);
+        }
+
+        [Command("run-once")]
+        public async Task RunOnce(CommandContext context)
+        {
+            await context.TriggerTypingAsync();
+            await _newsJobProvider.ExecuteAsync(default);
+            await context.RespondAsync("News job - done");
+        }
 
         private static void CheckIfTypeExists<T>(string typeName, string paramName)
         {
