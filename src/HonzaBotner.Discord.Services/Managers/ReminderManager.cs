@@ -1,6 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Managers;
