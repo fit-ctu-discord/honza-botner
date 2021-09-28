@@ -19,8 +19,12 @@ namespace HonzaBotner.Services
         private readonly IGuildProvider _guildProvider;
         private readonly DiscordRoleConfig _roleConfig;
 
-        public DiscordRoleManager(IOptions<DiscordRoleConfig> options, ILogger<DiscordRoleManager> logger,
-            IGuildProvider guildProvider)
+
+        public DiscordRoleManager(
+            IOptions<DiscordRoleConfig> options,
+            ILogger<DiscordRoleManager> logger,
+            IGuildProvider guildProvider
+        )
         {
             _logger = logger;
             _guildProvider = guildProvider;
@@ -152,6 +156,26 @@ namespace HonzaBotner.Services
                     _logger.LogError(e, "Revoking host role '{RoleId}' failed", roleId);
                 }
             }
+        }
+
+        public async Task<bool> IsUserDiscordAuthenticated(ulong userId)
+        {
+            DiscordGuild _guild = await _guildProvider.GetCurrentGuildAsync();
+
+            try
+            {
+                DiscordMember member = await _guild.GetMemberAsync(userId);
+                foreach (ulong roleId in _roleConfig.AuthenticatedRoleIds)
+                {
+                    if (member.Roles.Select(role => role.Id).Contains(roleId)) return true;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Couldn't get user {UserId}", userId);
+            }
+
+            return false;
         }
     }
 }

@@ -13,5 +13,7 @@ namespace HonzaBotner.Services.Contract
         Task<bool> RevokeRolesPoolAsync(ulong userId, RolesPool rolesPool);
 
         Task RevokeHostRolesAsync(ulong userId);
+
+        Task<bool> IsUserDiscordAuthenticated(ulong userId);
     }
 }

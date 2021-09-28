@@ -43,6 +43,9 @@ namespace HonzaBotner.Services
         public async Task<IAuthorizationService.AuthorizeResult> AuthorizeAsync(string accessToken, string username,
             ulong userId, RolesPool rolesPool)
         {
+            if (rolesPool != RolesPool.Auth && !await _roleManager.IsUserDiscordAuthenticated(userId))
+                return IAuthorizationService.AuthorizeResult.AuthorizeFirst;
+
             bool discordIdPresent = await IsUserVerified(userId);
 
             UsermapPerson? person = await _usermapInfoService.GetUserInfoAsync(accessToken, username);
