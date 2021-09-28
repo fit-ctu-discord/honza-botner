@@ -46,8 +46,8 @@ namespace HonzaBotner.Services
                     Active = configDto.Active,
                     Channels = configDto.Channels,
                     LastFetched = configDto.LastFetched,
-                    NewsProviderType = configDto.NewsProviderType,
-                    PublisherType = configDto.PublisherType
+                    NewsProviderType = configDto.NewsProvider.ToString(),
+                    PublisherType = configDto.Publisher.ToString()
                 };
 
                 Configs.Add(config);
@@ -59,8 +59,8 @@ namespace HonzaBotner.Services
                 config.Active = configDto.Active;
                 config.Channels = configDto.Channels;
                 config.LastFetched = configDto.LastFetched;
-                config.NewsProviderType = configDto.NewsProviderType;
-                config.PublisherType = configDto.PublisherType;
+                config.NewsProviderType = configDto.NewsProvider.ToString();
+                config.PublisherType = configDto.Publisher.ToString();
             }
 
             await _context.SaveChangesAsync();
@@ -76,8 +76,14 @@ namespace HonzaBotner.Services
 
         private static Dto.NewsConfig DomainToDto(NewsConfig config)
         {
-            return new(config.Id, config.Name, config.Source, config.LastFetched, config.NewsProviderType,
-                config.PublisherType, config.Active, config.Channels);
+            Dto.NewsProviderType newsProviderType =
+                NewsConfigHelper.StringToEnum<Dto.NewsProviderType>(config.NewsProviderType);
+
+            Dto.PublisherType publisherType =
+                NewsConfigHelper.StringToEnum<Dto.PublisherType>(config.PublisherType);
+
+            return new(config.Id, config.Name, config.Source, config.LastFetched, newsProviderType,
+                publisherType, config.Active, config.Channels);
         }
 
         public async Task UpdateFetchDateAsync(int id, DateTime date)

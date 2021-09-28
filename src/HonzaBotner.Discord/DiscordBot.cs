@@ -12,6 +12,7 @@ using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.Attributes;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Managers;
+using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -57,6 +58,8 @@ namespace HonzaBotner.Discord
 
             _configurator.Config(Commands);
             Commands.RegisterConverter(new EnumConverter<ActivityType>());
+            Commands.RegisterConverter(new EnumConverter<NewsProviderType>());
+            Commands.RegisterConverter(new EnumConverter<PublisherType>());
 
             await Client.ConnectAsync();
             await Task.Delay(-1, cancellationToken);

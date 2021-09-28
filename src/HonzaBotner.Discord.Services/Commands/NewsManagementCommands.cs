@@ -10,7 +10,6 @@ using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Discord.Services.Jobs;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace HonzaBotner.Discord.Services.Commands
 {
@@ -61,8 +60,8 @@ namespace HonzaBotner.Discord.Services.Commands
             builder.AddField("Source", config.Source);
             builder.AddField("Channels", string.Join(',', channels));
             builder.AddField("Last fetched", config.LastFetched.ToString(CultureInfo.InvariantCulture));
-            builder.AddField("Sourcing news via", config.NewsProviderType);
-            builder.AddField("Publishing news via", config.PublisherType);
+            builder.AddField("Sourcing news via", config.NewsProvider.ToString());
+            builder.AddField("Publishing news via", config.Publisher.ToString());
 
             builder.WithTimestamp(DateTime.Now);
 
@@ -83,12 +82,9 @@ namespace HonzaBotner.Discord.Services.Commands
         }
 
         [Command("add")]
-        public async Task AddConfig(CommandContext context, string name, string source, string newsProviderType,
-            string publisherProviderType, params DiscordChannel[] channels)
+        public async Task AddConfig(CommandContext context, string name, string source, NewsProviderType newsProviderType,
+            PublisherType publisherProviderType, params DiscordChannel[] channels)
         {
-            CheckIfTypeExists<INewsService>(newsProviderType, nameof(newsProviderType));
-            CheckIfTypeExists<IPublisherService>(publisherProviderType, nameof(publisherProviderType));
-
             NewsConfig config = new(default, name, source, DateTime.MinValue, newsProviderType, publisherProviderType,
                 true, channels.Select(ch => ch.Id).ToArray());
 
@@ -123,17 +119,6 @@ namespace HonzaBotner.Discord.Services.Commands
             await context.TriggerTypingAsync();
             await _newsJobProvider.ExecuteAsync(default);
             await context.RespondAsync("News job - done");
-        }
-
-        private static void CheckIfTypeExists<T>(string typeName, string paramName)
-        {
-            Type t = Type.GetType(typeName) ??
-                throw new ArgumentOutOfRangeException(paramName, $"Type `{typeName}` was not found in app domain");
-
-            Type interfaceType = typeof(T);
-
-            if(!t.IsAssignableTo(interfaceType))
-                throw new ArgumentOutOfRangeException(paramName, $"Type `{typeName}` is not inheriting {interfaceType.Name}");
         }
     }
 }
