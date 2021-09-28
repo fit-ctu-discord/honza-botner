@@ -97,7 +97,7 @@ namespace HonzaBotner
                 ;
 
             services.AddHangfire(config => { config.UsePostgreSqlStorage(connectionString); });
-            services.AddHangfireServer(serverOptions => { serverOptions.WorkerCount = 5; });
+            services.AddHangfireServer(serverOptions => { serverOptions.WorkerCount = 3; });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
