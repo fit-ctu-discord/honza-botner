@@ -83,6 +83,9 @@ namespace HonzaBotner.Services
         {
             string accessToken = await _authorizationService.GetServiceTokenAsync(CoursesScope).ConfigureAwait(false);
 
+            if (since == DateTime.MinValue)
+                since = since.AddDays(1);
+
             NameValueCollection queryParams = new()
             {
                 //{ "access_token", accessToken },
