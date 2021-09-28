@@ -1,5 +1,6 @@
 using Hangfire;
 using Hangfire.PostgreSql;
+using HangfireBasicAuthenticationFilter;
 using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
@@ -93,9 +94,10 @@ namespace HonzaBotner
 
                 // Jobs
                 .AddScoped<TriggerRemindersJobProvider>()
-            ;
+                ;
 
             services.AddHangfire(config => { config.UsePostgreSqlStorage(connectionString); });
+            services.AddHangfireServer();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -124,7 +126,6 @@ namespace HonzaBotner
             StartRecurringJobs();
 
             app.UseHttpsRedirection();
-            app.UseHangfireServer();
             app.UseRouting();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
@@ -140,9 +141,12 @@ namespace HonzaBotner
 
         private void SetupDashboard(IApplicationBuilder app)
         {
-            // TODO: Some auth
+            HangfireCustomBasicAuthenticationFilter filter = new()
+            {
+                User = "admin", Pass = Configuration["HANGFIRE_PASSWORD"]
+            };
 
-            app.UseHangfireDashboard(options: new DashboardOptions());
+            app.UseHangfireDashboard(options: new DashboardOptions { Authorization = new[] { filter } });
         }
 
         private static void UpdateDatabase(IApplicationBuilder app)
