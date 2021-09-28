@@ -153,7 +153,7 @@ namespace HonzaBotner.Discord.Services.Commands
                         score += maxRoleScore;
                     }
 
-                    if (score < _pinOptions.Treshold)
+                    if (score < _pinOptions.Threshold)
                     {
                         await message.CreateReactionAsync(lockEmoji);
                     }

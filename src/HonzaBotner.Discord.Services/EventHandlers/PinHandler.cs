@@ -106,7 +106,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             IReadOnlyList<DiscordUser> reactions = await eventArgs.Message.GetReactionsAsync(pinEmoji);
 
             // Fast heuristic to check if threshold is passed.
-            if (reactions.Count >= _pinOptions.Treshold)
+            if (reactions.Count >= _pinOptions.Threshold)
             {
                 await eventArgs.Message.PinAsync();
                 return EventHandlerResult.Continue;
@@ -147,7 +147,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                 score += maxRoleScore;
             }
 
-            if (score >= _pinOptions.Treshold)
+            if (score >= _pinOptions.Threshold)
             {
                 await eventArgs.Message.PinAsync();
             }
