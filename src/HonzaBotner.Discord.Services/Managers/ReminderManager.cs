@@ -1,84 +1,88 @@
 ﻿using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Services.Contract.Dto;
+using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Managers
 {
     public class ReminderManager : IReminderManager
     {
         private readonly IGuildProvider _guildProvider;
+        private readonly ILogger<ReminderManager> _logger;
 
-        public ReminderManager(IGuildProvider guildProvider)
+        public ReminderManager(IGuildProvider guildProvider, ILogger<ReminderManager> logger)
         {
             _guildProvider = guildProvider;
+            _logger = logger;
         }
 
-
-        public async Task<DiscordEmbed> CreateReminderEmbedAsync(Reminder reminder)
+        public async Task<DiscordEmbed> CreateDmReminderEmbedAsync(Reminder reminder)
         {
             var guild = await _guildProvider.GetCurrentGuildAsync();
 
-            return _CreateEmbed(
-                "🔔 Reminder from FIT ČVUT Discord",
-                guild.Members.ContainsKey(reminder.OwnerId)
-                    ? guild.Members[reminder.OwnerId]
-                    : null,
-                reminder.Content.RemoveDiscordMentions(guild),
+            return await _CreateReminderEmbed(
+                $"🔔 Reminder from {guild.Name} Discord",
+                reminder,
                 DiscordColor.Yellow,
-                reminder.DateTime
+                true
+            );
+        }
+
+        public async Task<DiscordEmbed> CreateReminderEmbedAsync(Reminder reminder)
+        {
+            return await _CreateReminderEmbed(
+                "🔔 Reminder",
+                reminder,
+                DiscordColor.Yellow,
+                true
             );
         }
 
         public async Task<DiscordEmbed> CreateExpiredReminderEmbedAsync(Reminder reminder)
         {
-            var guild = await _guildProvider.GetCurrentGuildAsync();
-
-            return _CreateEmbed(
+            return await _CreateReminderEmbed(
                 "🔕 Expired reminder",
-                guild.Members.ContainsKey(reminder.OwnerId)
-                    ? guild.Members[reminder.OwnerId]
-                    : null,
-                reminder.Content.RemoveDiscordMentions(guild),
+                reminder,
                 DiscordColor.Grayple
             );
         }
 
         public async Task<DiscordEmbed> CreateCanceledReminderEmbedAsync(Reminder reminder)
         {
-            var guild = await _guildProvider.GetCurrentGuildAsync();
-
-            return _CreateEmbed(
+            return await _CreateReminderEmbed(
                 "🛑 Canceled reminder",
-                guild.Members.ContainsKey(reminder.OwnerId)
-                    ? guild.Members[reminder.OwnerId]
-                    : null,
-                reminder.Content.RemoveDiscordMentions(guild),
+                reminder,
                 DiscordColor.Red
             );
         }
 
-        private static DiscordEmbed _CreateEmbed(
+        private async Task<DiscordEmbed> _CreateReminderEmbed(
             string title,
-            DiscordMember? author,
-            string description,
+            Reminder reminder,
             DiscordColor color,
-            DateTime? dateTime = null
+            bool useDateTime = false
         )
         {
+            var guild = await _guildProvider.GetCurrentGuildAsync();
+            DiscordMember? author = guild.Members.ContainsKey(reminder.OwnerId)
+                ? guild.Members[reminder.OwnerId]
+                : null;
+
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithTitle(title)
                 .WithAuthor(
                     author?.DisplayName ?? "Unknown user",
                     iconUrl: author?.AvatarUrl)
-                .WithDescription(description)
+                .WithDescription(reminder.Content.RemoveDiscordMentions(guild, _logger))
                 .WithColor(color);
 
-            if (dateTime != null)
+            if (useDateTime)
             {
-                embedBuilder.WithTimestamp(dateTime);
+                embedBuilder.WithTimestamp(reminder.DateTime);
             }
 
             return embedBuilder.Build();

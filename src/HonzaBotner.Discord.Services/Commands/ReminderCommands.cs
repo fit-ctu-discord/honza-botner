@@ -83,7 +83,7 @@ namespace HonzaBotner.Discord.Services.Commands
             }
 
             await context.TriggerTypingAsync();
-            DiscordMessage message = await context.RespondAsync("Creating reminder...");
+            DiscordMessage message = await context.Channel.SendMessageAsync("Creating reminder...");
 
             Reminder reminder = await _service.CreateReminderAsync(
                 context.User.Id,
