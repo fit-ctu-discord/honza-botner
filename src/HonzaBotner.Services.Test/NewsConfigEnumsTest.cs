@@ -41,7 +41,7 @@ namespace HonzaBotner.Services.Test
         [MemberData(nameof(GetPublisherEnums))]
         public void PublisherToTypeTest(PublisherType publisherType)
         {
-            Type interfaceType = typeof(INewsService);
+            Type interfaceType = typeof(IPublisherService);
             string type = publisherType.ToType();
 
             Type? t = Type.GetType(type);
