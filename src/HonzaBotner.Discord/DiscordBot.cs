@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -145,6 +146,13 @@ namespace HonzaBotner.Discord
                                     .WithTitle("Přístup zakázán")
                                     .WithDescription("Tento příkaz může používat pouze Moderátor.")
                                     .WithColor(DiscordColor.Violet)
+                                    .Build(),
+                                CooldownAttribute check => new DiscordEmbedBuilder() 
+                                    .WithTitle("Příkaz používáš příliš často")
+                                    .WithDescription("Příkaz můžeš opět použít až za " +
+                                                     $"{(int) check.GetRemainingCooldown(exception.Context).TotalMinutes} " +
+                                                     "minut")
+                                    .WithColor(DiscordColor.Yellow)
                                     .Build(),
                                 _ => new DiscordEmbedBuilder()
                                     .WithTitle("Přístup zakázán")
