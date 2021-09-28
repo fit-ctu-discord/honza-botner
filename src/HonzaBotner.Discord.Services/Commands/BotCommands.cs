@@ -66,8 +66,7 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             string content = "Tohoto bota vyvíjí komunita.\n" +
                              "Budeme rádi, pokud se k vývoji přidáš a pomůžeš nám bota dále vylepšovat.";
-            Version? version = Assembly.GetEntryAssembly()?.GetName().Version;
-            string versionEntry = $"{version?.Major}.{version?.Minor}.{version?.Revision}{_infoOptions.VersionSuffix}";
+            string? version = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
             DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
             DiscordMember bot = await guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
 
@@ -84,7 +83,7 @@ namespace HonzaBotner.Discord.Services.Commands
                     Description = content,
                     Color = DiscordColor.CornflowerBlue
                 };
-                embed.AddField("Verze:", versionEntry);
+                embed.AddField("Verze:", version ?? "Neznámá");
 
                 DiscordMessageBuilder message = new DiscordMessageBuilder()
                     .AddEmbed(embed)
