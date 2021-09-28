@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Hangfire no longer breaks the app due to Heroku db connection limit. Number of workers have been limited to 3, db connections stays at 14/20. (by [@tenhobi][tenhobi])
+- Hangfire no longer breaks the app due to Heroku db connection limit. Number of workers have been limited to 3, db connections stays at 10-12/20. (by [@tenhobi][tenhobi])
 - Path to FIT Discord logo in auth page. (by [@tenhobi][tenhobi])
 
 ## [1.0.0] - 2021-09-28
