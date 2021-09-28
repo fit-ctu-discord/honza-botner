@@ -27,7 +27,8 @@ Example file structure:
     "CVUT:ServiceId": "<service id>",
     "CVUT:ServiceSecret": "<service secret>",
     "DATABASE_URL": "Host=localhost;Database=HonzaBotner;Username=honza-bot;Password=postgres",
-    "Discord:Token": "<discord bot token>"
+    "Discord:Token": "<discord bot token>",
+    "HANGFIRE_PASSWORD": "<password to dashboard>"
 }
 ```
 
