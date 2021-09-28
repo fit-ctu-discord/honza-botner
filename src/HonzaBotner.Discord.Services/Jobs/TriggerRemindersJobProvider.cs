@@ -69,7 +69,7 @@ namespace HonzaBotner.Discord.Services.Jobs
                     receivers = receivers.Append(message.Channel.Guild.Members[reminder.OwnerId]);
                 }
 
-                DiscordEmbed embed = await _reminderManager.CreateReminderEmbedAsync(reminder);
+                DiscordEmbed embed = await _reminderManager.CreateDmReminderEmbedAsync(reminder);
 
                 // DM all users.
                 foreach (DiscordUser user in receivers)
