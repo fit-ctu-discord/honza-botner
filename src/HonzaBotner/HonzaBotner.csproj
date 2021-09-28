@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <VersionPrefix>1.1.0</VersionPrefix>
-    <VersionSuffix>SNAPSHOT</VersionSuffix>
+    <Version>1.1.0</Version>
     <UserSecretsId>aspnet-HonzaBotner-BB5C7FC1-EA3A-442E-A565-3F2FCAB7E22D</UserSecretsId>
     <CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
