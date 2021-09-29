@@ -10,6 +10,7 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.EventArgs;
 using HonzaBotner.Discord.Attributes;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Managers;
@@ -32,7 +33,7 @@ namespace HonzaBotner.Discord
         private SlashCommandsExtension SlashCommands => _discordWrapper.SlashCommands;
 
         public DiscordBot(DiscordWrapper discordWrapper, EventHandler.EventHandler eventHandler,
-            CommandConfigurator configurator, SlashCommandsConfigurator slashConfigurator, IVoiceManager voiceManager, 
+            CommandConfigurator configurator, SlashCommandsConfigurator slashConfigurator, IVoiceManager voiceManager,
             IOptions<DiscordConfig> discordOptions)
         {
             _discordWrapper = discordWrapper;
@@ -52,6 +53,9 @@ namespace HonzaBotner.Discord
 
             Commands.CommandExecuted += Commands_CommandExecuted;
             Commands.CommandErrored += Commands_CommandErrored;
+
+            SlashCommands.SlashCommandExecuted += SlashCommands_CommandExecuted;
+            SlashCommands.SlashCommandErrored += SlashCommands_CommandErrored;
 
             Client.ComponentInteractionCreated += Client_ComponentInteractionCreated;
             Client.MessageReactionAdded += Client_MessageReactionAdded;
@@ -178,6 +182,26 @@ namespace HonzaBotner.Discord
                     break;
             }
 
+            e.Handled = true;
+        }
+
+        private Task SlashCommands_CommandExecuted(SlashCommandsExtension sender, SlashCommandExecutedEventArgs args)
+        {
+            args.Context.Client.Logger.LogInformation(
+                $"{args.Context.User.Username} successfully executed '{args.Context.CommandName}'");
+            return Task.CompletedTask;
+        }
+
+        private async Task SlashCommands_CommandErrored(SlashCommandsExtension sender, SlashCommandErrorEventArgs e)
+        {
+            DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder()
+                .WithContent("Je to rozbity")
+                .AsEphemeral(true);
+            await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
+            e.Context.Client.Logger.LogError(
+                e.Exception,
+                $"{e.Context.User.Username} tried executing '{e.Context.CommandName}' but it errored: " +
+                $"{e.Exception.GetType()}: {e.Exception.Message}");
             e.Handled = true;
         }
 

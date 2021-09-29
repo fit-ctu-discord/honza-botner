@@ -37,7 +37,7 @@ namespace HonzaBotner
         {
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddControllers();
-            
+
             // TODO: Temporary solution - should be rewritten once someone who knows coding stuff sees this!!
             ulong? guildId = Configuration.GetSection("Discord").GetValue<ulong>("GuildId");
 
@@ -91,6 +91,7 @@ namespace HonzaBotner
                     }, slash =>
                     {
                         slash.RegisterCommands<FunSCommands>(guildId);
+                        slash.RegisterCommands<BotSCommands>(guildId);
                     }
                 )
 
