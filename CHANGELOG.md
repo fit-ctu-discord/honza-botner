@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Version is grabbed from .csproj file and corresponding config ([#201](https://github.com/fit-ctu-discord/honza-botner/pull/201) by [@stepech][stepech]) 
+- Version is grabbed from `Directory.Build.props` file and corresponding config ([#201](https://github.com/fit-ctu-discord/honza-botner/pull/201) by [@stepech][stepech]) 
 
 ## [1.0.1] - 2021-09-28
 
