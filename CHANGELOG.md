@@ -1,8 +1,4 @@
-﻿[tenhobi]: https://github.com/tenhobi
-[ostorc]: https://github.com/ostorc
-[stepech]: https://github.com/stepech
-
-# Changelog
+﻿# Changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -11,31 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2021-09-30
+
+### Fixed
+
+- Use async getter to fix potential issue with verification. ([#205](https://github.com/fit-ctu-discord/honza-botner/pull/205))
+- Fix Hangfire too-much-expired logs issue. ([#203](https://github.com/fit-ctu-discord/honza-botner/pull/203))
+- Fix weird behavior of emotes command by adding a proper failed check handler. ([#202](https://github.com/fit-ctu-discord/honza-botner/pull/202))
+
 ## [1.0.1] - 2021-09-28
 
 ### Fixed
 
-- Hangfire no longer breaks the app due to Heroku db connection limit. Number of workers have been limited to 3, db connections stays at 10-12/20. (by [@tenhobi][tenhobi])
-- Path to FIT Discord logo in auth page. (by [@tenhobi][tenhobi])
+- Hangfire no longer breaks the app due to Heroku db connection limit. Number of workers have been limited to 3, db connections stays at 10-12/20. ([#196](https://github.com/fit-ctu-discord/honza-botner/pull/196))
+- Path to FIT Discord logo in auth page. ([#196](https://github.com/fit-ctu-discord/honza-botner/pull/196))
 
 ## [1.0.0] - 2021-09-28
 
 ### Added
 
-- Logging to Discord channel. ([#158](https://github.com/fit-ctu-discord/honza-botner/issues/158), by [@ostorc][ostorc])
-- Verification using buttons. (by [@stepech][stepech])
-- Reminder command. ([#7](https://github.com/fit-ctu-discord/honza-botner/issues/7), by [@jirkavrba](https://github.com/jirkavrba) and [@tenhobi][tenhobi])
-- Voice command and event handler, containing auto creating voice channel by joining special voice channel or using command to create and edit it. (by [@tenhobi][tenhobi])
-- Granting roles event handler. (by [@ostorc][ostorc])
-- Welcome message handler.  (by [@tenhobi][tenhobi])
-- Warning command, containing adding and listing warning to guild members. (by [@tenhobi][tenhobi])
-- Bot command, containing activity changing and bot info. (by [@tenhobi][tenhobi] and [@stepech][stepech])
-- Channel command, containing channel cloning. (by [@tenhobi][tenhobi])
-- Member command, containing guild member counting, getting info, and removing. (by [@tenhobi][tenhobi])
-- Message command, containing message sending, editing, removing and binding handler to some reaction. (by [@tenhobi][tenhobi] and [@ostorc][ostorc])
-- Fun command, containing random picker of provided options. (by [@tenhobi][tenhobi])
-- User pinning, containing event handler, soft pin pruning etc. ([#181](https://github.com/fit-ctu-discord/honza-botner/pull/181), by [@tenhobi][tenhobi] and [@stepech][stepech])
-- Poll command, containing ABC or yes/no polls. (by [@albru123](https://github.com/albru123), [@ostorc][ostorc] and [@tenhobi][tenhobi])
-- Emotes counting command and event handler. (by [@ostorc][ostorc])
-- Authorization using CTU OAuth2. (by [@ostorc][ostorc])
-- Core functionality and design of the bot. (by [@ostorc][ostorc])
+- Logging to Discord channel. ([#158](https://github.com/fit-ctu-discord/honza-botner/issues/158))
+- Verification using buttons. ([#170](https://github.com/fit-ctu-discord/honza-botner/pull/170))
+- Reminder command. ([#7](https://github.com/fit-ctu-discord/honza-botner/issues/7))
+- Voice command and event handler, containing auto creating voice channel by joining special voice channel or using command to create and edit it. ([#68](https://github.com/fit-ctu-discord/honza-botner/pull/68))
+- Granting roles event handler. ([#87](https://github.com/fit-ctu-discord/honza-botner/pull/87))
+- Welcome message handler. ([#128](https://github.com/fit-ctu-discord/honza-botner/pull/128))
+- Warning command, containing adding and listing warning to guild members. ([#113](https://github.com/fit-ctu-discord/honza-botner/pull/113))
+- Bot command, containing activity changing and bot info.
+- Channel command, containing channel cloning.
+- Member command, containing guild member counting, getting info, and removing.
+- Message command, containing message sending, editing, removing and binding handler to some reaction.
+- Fun command, containing random picker of provided options. ([#122](https://github.com/fit-ctu-discord/honza-botner/pull/122))
+- User pinning, containing event handler, soft pin pruning etc. ([#181](https://github.com/fit-ctu-discord/honza-botner/pull/181))
+- Emotes counting command and event handler.
+- Authorization using CTU OAuth2.
+- Core functionality and design of the bot.
+- Poll command, containing ABC or yes/no polls. ([#58](https://github.com/fit-ctu-discord/honza-botner/pull/58), [#78](https://github.com/fit-ctu-discord/honza-botner/pull/78))
+
+[Unreleased]: https://github.com/https://github.com/fit-ctu-discord/honza-botner/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/fit-ctu-discord/honza-botner/compare/v1.0.2...v1.0.1
+[1.0.1]: https://github.com/fit-ctu-discord/honza-botner/compare/v1.0.1...v1.0.0
+[1.0.0]: https://github.com/fit-ctu-discord/honza-botner/releases/tag/v1.0.0
