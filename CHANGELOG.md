@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Use async getter to fix potential issue with verification. ([#205](https://github.com/fit-ctu-discord/honza-botner/pull/205))
+- Use async getter to fix potential issue with verification. ([#205](https://github.com/fit-ctu-discord/honza-botner/pull/205), [#206](https://github.com/fit-ctu-discord/honza-botner/pull/206))
 - Fix Hangfire too-much-expired logs issue. ([#203](https://github.com/fit-ctu-discord/honza-botner/pull/203))
 - Fix weird behavior of emotes command by adding a proper failed check handler. ([#202](https://github.com/fit-ctu-discord/honza-botner/pull/202))
 
