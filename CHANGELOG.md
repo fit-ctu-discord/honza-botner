@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Updated
 
-- Version is grabbed from `Directory.Build.props` file and corresponding config. ([#201](https://github.com/fit-ctu-discord/honza-botner/pull/201) by [@stepech][stepech]) 
+- Version is grabbed from `Directory.Build.props` file and corresponding config. ([#201](https://github.com/fit-ctu-discord/honza-botner/pull/201)) 
 
 ## [1.0.2] - 2021-09-30
 
