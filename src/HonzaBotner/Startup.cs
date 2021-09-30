@@ -1,3 +1,4 @@
+using System;
 using Hangfire;
 using Hangfire.PostgreSql;
 using HangfireBasicAuthenticationFilter;
@@ -96,7 +97,13 @@ namespace HonzaBotner
                 .AddScoped<TriggerRemindersJobProvider>()
                 ;
 
-            services.AddHangfire(config => { config.UsePostgreSqlStorage(connectionString); });
+            services.AddHangfire(config =>
+            {
+                config.UsePostgreSqlStorage(connectionString, new PostgreSqlStorageOptions
+                {
+                    JobExpirationCheckInterval = TimeSpan.FromMinutes(15)
+                }).WithJobExpirationTimeout(TimeSpan.FromHours(1));
+            });
             services.AddHangfireServer(serverOptions => { serverOptions.WorkerCount = 3; });
         }
 

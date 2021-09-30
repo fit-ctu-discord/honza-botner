@@ -132,13 +132,14 @@ namespace HonzaBotner.Discord
                         IReadOnlyList<CheckBaseAttribute> failedChecks = exception.FailedChecks;
                         foreach (var failedCheck in failedChecks)
                         {
-                            DiscordEmoji emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
+                            DiscordEmoji permissionEmoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
+                            DiscordEmoji timerEmoji = DiscordEmoji.FromName(e.Context.Client, ":alarm_clock:");
 
                             DiscordEmbed embed = failedCheck switch
                             {
                                 RequireGuildAttribute => new DiscordEmbedBuilder()
                                     .WithTitle("Příkaz nelze použít mimo server")
-                                    .WithDescription($"{emoji} Příkaz lze použít jen na discord serveru.")
+                                    .WithDescription($"{permissionEmoji} Příkaz lze použít jen na discord serveru.")
                                     .WithColor(DiscordColor.Red)
                                     .Build(),
                                 IRequireModAttribute => new DiscordEmbedBuilder()
@@ -146,9 +147,16 @@ namespace HonzaBotner.Discord
                                     .WithDescription("Tento příkaz může používat pouze Moderátor.")
                                     .WithColor(DiscordColor.Violet)
                                     .Build(),
+                                CooldownAttribute check => new DiscordEmbedBuilder()
+                                    .WithTitle("Příkaz používáš příliš často")
+                                    .WithDescription($"{timerEmoji} Příkaz můžeš opět použít až za " +
+                                                     $"{(int) check.GetRemainingCooldown(exception.Context).TotalMinutes} " +
+                                                     "minut")
+                                    .WithColor(DiscordColor.Yellow)
+                                    .Build(),
                                 _ => new DiscordEmbedBuilder()
                                     .WithTitle("Přístup zakázán")
-                                    .WithDescription($"{emoji} Na vykonání příkazu nemáte dostatečná práva." +
+                                    .WithDescription($"{permissionEmoji} Na vykonání příkazu nemáte dostatečná práva." +
                                                      "Pokud si myslíte že ano, kontaktujte svého MODa.")
                                     .WithColor(DiscordColor.Red)
                                     .Build()

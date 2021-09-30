@@ -35,7 +35,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
 
             DiscordUser user = eventArgs.User;
-            DiscordMember member = eventArgs.Guild.Members[user.Id];
+            DiscordMember member = await eventArgs.Guild.GetMemberAsync(user.Id);
 
             string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
 
