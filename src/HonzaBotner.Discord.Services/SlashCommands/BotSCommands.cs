@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -43,22 +43,23 @@ namespace HonzaBotner.Discord.Services.SlashCommands
             };
 
             DiscordActivity activity = new (message, type);
-            try
-            {
+            // Commented for debugging reasons. It's better to catch exact error instead of all
+            // try
+            // {
                 await ctx.Client.UpdateStatusAsync(activity, UserStatus.Online);
                 DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder()
                     .WithContent($"Aktivita nastavena na {slashActivityType}: {message}");
                 await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
-            }
-            catch (Exception e)
-            {
-                _logger.LogWarning("Couldn't set activity to {SlashActivityType}: {Message}",
-                    slashActivityType, message);
-                DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder()
-                    .WithContent($"Chyba: nepovedlo se nastavit aktivitu na {slashActivityType}:{message}")
-                    .AsEphemeral(true);
-                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
-            }
+            // }
+            // catch (Exception e)
+            // {
+            //     _logger.LogWarning("Couldn't set activity to {SlashActivityType}: {Message}",
+            //         slashActivityType, message);
+            //     DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder()
+            //         .WithContent($"Chyba: nepovedlo se nastavit aktivitu na {slashActivityType}: {message}")
+            //         .AsEphemeral(true);
+            //     await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
+            // }
         }
 
         [SlashCommand("info", "Zakaldni informace o botovi")]

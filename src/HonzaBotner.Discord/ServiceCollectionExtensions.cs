@@ -16,9 +16,12 @@ namespace HonzaBotner.Discord
             return serviceCollection;
         }
 
-        public static IServiceCollection AddDiscordBot(this IServiceCollection serviceCollection,
-            Action<CommandsNextExtension> commandConfig, Action<EventHandlersListBuilder> reactionConfig,
-            Action<SlashCommandsExtension> slashConfig)
+        public static IServiceCollection AddDiscordBot(
+            this IServiceCollection serviceCollection,
+            Action<CommandsNextExtension> commandConfig,
+            Action<EventHandlersListBuilder> reactionConfig,
+            Action<SlashCommandsExtension> slashConfig
+            )
         {
             serviceCollection.AddHostedService<DiscordWorker>();
             serviceCollection.AddSingleton<IDiscordBot, DiscordBot>();

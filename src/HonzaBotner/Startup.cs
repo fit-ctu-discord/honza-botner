@@ -92,6 +92,8 @@ namespace HonzaBotner
                     {
                         slash.RegisterCommands<FunSCommands>(guildId);
                         slash.RegisterCommands<BotSCommands>(guildId);
+                        slash.RegisterCommands<ChannelSCommands>(guildId);
+                        slash.RegisterCommands<EmojiSCommands>(guildId);
                     }
                 )
 
