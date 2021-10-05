@@ -18,9 +18,11 @@ namespace HonzaBotner.Discord.Services.Commands
         private readonly InfoOptions _infoOptions;
         private readonly IGuildProvider _guildProvider;
 
-        public BotCommands(ILogger<BotCommands> logger,
+        public BotCommands(
+            ILogger<BotCommands> logger,
             IOptions<InfoOptions> infoOptions,
-            IGuildProvider guildProvider)
+            IGuildProvider guildProvider
+            )
         {
             _logger = logger;
             _infoOptions = infoOptions.Value;
