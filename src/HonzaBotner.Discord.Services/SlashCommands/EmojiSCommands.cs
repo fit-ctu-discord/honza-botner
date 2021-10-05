@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
-using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
@@ -18,7 +17,6 @@ using Microsoft.Extensions.Logging;
 namespace HonzaBotner.Discord.Services.SlashCommands
 {
     [SlashCommandGroup("emoji", "prikazy k zobrazeni statistik emoji")]
-    [ModuleLifespan(ModuleLifespan.Transient)]
     public class EmojiSCommands : ApplicationCommandModule
     {
 
@@ -33,7 +31,6 @@ namespace HonzaBotner.Discord.Services.SlashCommands
 
         [SlashCommand("stats", "get emoji stats of this server", false)]
         [SlashRequireGuild]
-        [SlashRequireUserPermissions(Permissions.ManageEmojis)]
         public async Task EmojiStatsAsync(
             InteractionContext ctx,
             [Option("type", "Display stats per day or total?")]

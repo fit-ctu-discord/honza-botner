@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -22,8 +21,7 @@ namespace HonzaBotner.Discord.Services.SlashCommands
             _options = options.Value;
         }
 
-        [SlashCommand("activity", "Aktivita kterou bot zobrazí na svém profilu", false)]
-        [SlashRequireUserPermissions(Permissions.ManageGuild, false)]
+        [SlashCommand("activity", "Aktivita kterou bot zobrazí na svém profilu")]
         public async Task ActivityAsync(InteractionContext ctx,
             [Option("Aktivita", "Nazev vykonavane aktivity")] string message,
             [Option("Druh", "Druh aktivity ktera se zobrazi u bota")]

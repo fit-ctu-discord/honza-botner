@@ -17,8 +17,7 @@ namespace HonzaBotner.Discord.Services.SlashCommands
             _logger = logger;
         }
 
-        [SlashCommand("clone", "Duplikuje kanal", false)]
-        [SlashRequirePermissions(Permissions.ManageChannels, false)]
+        [SlashCommand("clone", "Duplikuje kanal")]
         [SlashRequireGuild]
         public async Task CloneAsync(InteractionContext ctx,
             [Option("kanal", "Kanal co se zduplikuje")] DiscordChannel channel,
