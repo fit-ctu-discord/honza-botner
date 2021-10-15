@@ -16,11 +16,17 @@ namespace HonzaBotner.Discord.Services.Commands
     {
         private readonly ILogger<BotCommands> _logger;
         private readonly InfoOptions _infoOptions;
+        private readonly IGuildProvider _guildProvider;
 
-        public BotCommands(ILogger<BotCommands> logger, IOptions<InfoOptions> infoOptions)
+        public BotCommands(
+            ILogger<BotCommands> logger,
+            IOptions<InfoOptions> infoOptions,
+            IGuildProvider guildProvider
+            )
         {
             _logger = logger;
             _infoOptions = infoOptions.Value;
+            _guildProvider = guildProvider;
         }
 
         [Command("activity")]
@@ -34,7 +40,7 @@ namespace HonzaBotner.Discord.Services.Commands
             string status
         )
         {
-            if (type == ActivityType.Custom || type == ActivityType.Streaming)
+            if (type is ActivityType.Custom or ActivityType.Streaming)
             {
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
                 return;
@@ -62,21 +68,23 @@ namespace HonzaBotner.Discord.Services.Commands
             string content = "Tohoto bota vyvíjí komunita.\n" +
                              "Budeme rádi, pokud se k vývoji přidáš a pomůžeš nám bota dále vylepšovat.";
 
+            DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
+            DiscordMember bot = await guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
+
             try
             {
-                DiscordMember botMember = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
-
                 DiscordEmbedBuilder embed = new()
                 {
                     Author = new DiscordEmbedBuilder.EmbedAuthor
                     {
-                        Name = botMember.DisplayName, IconUrl = botMember.AvatarUrl
+                        Name = bot.DisplayName,
+                        IconUrl = bot.AvatarUrl
                     },
                     Title = "Informace o botovi",
                     Description = content,
                     Color = DiscordColor.CornflowerBlue
                 };
-                embed.AddField("Verze: ", _infoOptions.Version);
+                embed.AddField("Verze:", _infoOptions.Version);
 
                 DiscordMessageBuilder message = new DiscordMessageBuilder()
                     .AddEmbed(embed)
