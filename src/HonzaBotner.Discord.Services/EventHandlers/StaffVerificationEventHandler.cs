@@ -41,7 +41,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             }
 
             DiscordUser user = eventArgs.User;
-            DiscordMember member = eventArgs.Guild.Members[user.Id];
+            DiscordMember member = await eventArgs.Guild.GetMemberAsync(user.Id);
             var builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
 
             // Check if the button to remove staff roles was pressed.
