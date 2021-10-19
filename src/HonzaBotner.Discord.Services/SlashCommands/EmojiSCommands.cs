@@ -29,7 +29,7 @@ namespace HonzaBotner.Discord.Services.SlashCommands
             _logger = logger;
         }
 
-        [SlashCommand("stats", "get emoji stats of this server", false)]
+        [SlashCommand("stats", "get emoji stats of this server")]
         [SlashRequireGuild]
         public async Task EmojiStatsAsync(
             InteractionContext ctx,
@@ -53,17 +53,9 @@ namespace HonzaBotner.Discord.Services.SlashCommands
             };
 
             IEnumerable<CountedEmoji> results = await _emojiCounter.ListAsync();
-            IOrderedEnumerable<CountedEmoji> orderedResults;
 
-            if (isTotal)
-            {
-                orderedResults = results.OrderByDescending(emoji => emoji.Used);
-            }
-            else
-            {
-                orderedResults = results.OrderByDescending(emoji => emoji.UsagePerDay);
-
-            }
+            IOrderedEnumerable<CountedEmoji> orderedResults = isTotal ? results.OrderByDescending(emoji => emoji.Used) :
+                results.OrderByDescending(emoji => emoji.UsagePerDay);
             StringBuilder builder = new();
             builder.Append("\n");
 
