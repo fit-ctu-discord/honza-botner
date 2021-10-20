@@ -7,6 +7,10 @@ and this project adheres to [Calendar Versioning](https://calver.org).
 
 ## [Unreleased]
 
+### Added
+
+- English localization for verify. ([#224](https://github.com/fit-ctu-discord/honza-botner/pull/224))
+
 ## [2021.2.0] - 2021-10-15
 
 ### Changed
