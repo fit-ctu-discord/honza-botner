@@ -63,20 +63,28 @@ namespace HonzaBotner.Discord.Services.Jobs
 
                 // Get receivers from reactions + reminder owner.
                 var receiversFromReactions = await message.GetReactionsAsync(emoji);
-                var receivers = receiversFromReactions.Where(user => !user.IsBot);
-                if (message.Channel.Guild.Members.ContainsKey(reminder.OwnerId))
-                {
-                    receivers = receivers.Append(message.Channel.Guild.Members[reminder.OwnerId]);
-                }
+                var receivers = receiversFromReactions.Where(user => !user.IsBot)
+                    .Select(u => u.Id).ToList();
+                receivers.Add(reminder.OwnerId);
 
                 DiscordEmbed embed = await _reminderManager.CreateDmReminderEmbedAsync(reminder);
 
                 // DM all users.
-                foreach (DiscordUser user in receivers)
+                foreach (ulong user in receivers)
                 {
-                    if (!message.Channel.Guild.Members.ContainsKey(user.Id)) continue;
+                    DiscordMember? member;
+                    try
+                    {
+                        member = await message.Channel.Guild.GetMemberAsync(user);
+                    }
+                    catch (Exception)
+                    {
+                        _logger.LogWarning("Couldn't find user with id {Id}", user);
+                        continue;
 
-                    DiscordDmChannel dmChannel = await message.Channel.Guild.Members[user.Id].CreateDmChannelAsync();
+                    }
+
+                    DiscordDmChannel dmChannel = await member.CreateDmChannelAsync();
                     await dmChannel.SendMessageAsync(embed: embed);
                 }
 
