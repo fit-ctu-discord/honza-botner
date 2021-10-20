@@ -3,9 +3,21 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to [Calendar Versioning](https://calver.org).
 
 ## [Unreleased]
+
+## [2021.2.0] - 2021-10-15
+
+### Changed
+
+- Version is now taken from `Directory.Build.props` config file. ([#218](https://github.com/fit-ctu-discord/honza-botner/pull/218))
+- Using CalVer from now on.
+
+### Fixed
+
+- Getting users from DiscordGuild object sometimes failed, used async API instead. ([#217](https://github.com/fit-ctu-discord/honza-botner/pull/217))
+- `::bot info` not responding in DMs. ([#209](https://github.com/fit-ctu-discord/honza-botner/pull/209))
 
 ## [1.0.2] - 2021-09-30
 
@@ -44,7 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Core functionality and design of the bot.
 - Poll command, containing ABC or yes/no polls. ([#58](https://github.com/fit-ctu-discord/honza-botner/pull/58), [#78](https://github.com/fit-ctu-discord/honza-botner/pull/78))
 
-[Unreleased]: https://github.com/https://github.com/fit-ctu-discord/honza-botner/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/https://github.com/fit-ctu-discord/honza-botner/compare/v2021.2.0...HEAD
+[2021.2.0]: https://github.com/fit-ctu-discord/honza-botner/compare/v2021.2.0...v1.0.2
 [1.0.2]: https://github.com/fit-ctu-discord/honza-botner/compare/v1.0.2...v1.0.1
 [1.0.1]: https://github.com/fit-ctu-discord/honza-botner/compare/v1.0.1...v1.0.0
 [1.0.0]: https://github.com/fit-ctu-discord/honza-botner/releases/tag/v1.0.0
