@@ -265,7 +265,11 @@ namespace HonzaBotner.Discord.Services.Commands
 
             [Description("Marks message as verification message")]
             [Command("setup")]
-            public async Task SetupButtons(CommandContext ctx, [Description("URL of the message")] string url)
+            public async Task SetupButtons(
+                CommandContext ctx,
+                [Description("URL of the message")] string url,
+                bool english = true
+                )
             {
                 DiscordGuild guild = ctx.Guild;
                 DiscordMessage? message = await DiscordHelper.FindMessageFromLink(guild, url);
@@ -276,7 +280,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
                 try
                 {
-                    await _buttonManager.SetupVerificationButtons(message);
+                    await _buttonManager.SetupVerificationButtons(message, english);
                 }
                 catch (UnauthorizedException)
                 {
