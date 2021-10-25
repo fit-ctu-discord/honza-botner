@@ -7,7 +7,7 @@ namespace HonzaBotner.Discord.Utils
         /// <summary>
         /// Language options to choose from.
         /// </summary>
-        public enum Language
+        enum Language
         {
             English,
             Czech
