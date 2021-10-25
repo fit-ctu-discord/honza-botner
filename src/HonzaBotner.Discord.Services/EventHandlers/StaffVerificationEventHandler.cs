@@ -25,7 +25,6 @@ namespace HonzaBotner.Discord.Services.EventHandlers
         private enum _textsKeys
         {
             SuccessFullyDeleted,
-            CouldNotDelete,
             NotVerifiedYet,
             VerifyBtn,
             AlreadyVerified,
@@ -37,47 +36,66 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
         private readonly Dictionary<_textsKeys, Dictionary<Language, string>> _texts = new()
         {
-            [_textsKeys.SuccessFullyDeleted] =
             {
-                [Language.Czech] = "Role byly úspěšně odstraněny.",
-                [Language.English] = "Roles have been successfully deleted."
+                _textsKeys.SuccessFullyDeleted,
+                new()
+                {
+                    { Language.Czech, "Role byly úspěšně odstraněny." },
+                    { Language.English, "Roles have been successfully deleted." }
+                }
             },
-            [_textsKeys.CouldNotDelete] =
             {
-                [Language.Czech] = "Zaměstnanecké role se nepodařilo odebrat. Prosím, kontaktujte moderátory.",
-                [Language.English] = "Zaměstnanecké role se nepodařilo odebrat. Prosím, kontaktujte moderátory."
+                _textsKeys.NotVerifiedYet, new()
+                {
+                    {
+                        Language.Czech, "Ahoj, ještě nejsi ověřený!\n" +
+                                        "1) Pro ověření a přidělení rolí dle UserMap klikni na tlačítko dole. ✅\n" +
+                                        "2) Následně znovu klikni na tlačítko pro přidání zaměstnaneckých rolí. 👑"
+                    },
+                    {
+                        Language.English, "Hi, you are not verified yet!\n" +
+                                          "1) Click the button below to verify and assign roles according to UserMap. ✅\n" +
+                                          "2) Then click the button to add employee roles again. 👑"
+                    }
+                }
             },
-            [_textsKeys.NotVerifiedYet] =
             {
-                [Language.Czech] = "Ahoj, ještě nejsi ověřený!\n" +
-                                   "1) Pro ověření a přidělení rolí dle UserMap klikni na tlačítko dole. ✅\n" +
-                                   "2) Následně znovu klikni na tlačítko pro přidání zaměstnaneckých rolí. 👑",
-                [Language.English] = "Hi, you are not verified yet!\n" +
-                                     "1) Click the button below to verify and assign roles according to UserMap. ✅\n" +
-                                     "2) Then click the button to add employee roles again. 👑"
+                _textsKeys.AlreadyVerified, new()
+                {
+                    {
+                        Language.Czech, "Ahoj, už jsi ověřený.\n" +
+                                        "Pro aktualizaci zaměstnaneckých rolí klikni na tlačítko."
+                    },
+                    {
+                        Language.English, "Hi, you are already verified.\n" +
+                                          "Click the button to update employee roles."
+                    }
+                }
             },
-            [_textsKeys.AlreadyVerified] =
+            { _textsKeys.VerifyBtn, new() { { Language.Czech, "Ověřit se" }, { Language.English, "Verify" } } },
             {
-                [Language.Czech] = "Ahoj, už jsi ověřený.\n" +
-                                   "Pro aktualizaci zaměstnaneckých rolí klikni na tlačítko.",
-                [Language.English] = "Hi, you are already verified.\n" +
-                                     "Click the button to update employee roles."
+                _textsKeys.UpdateStaffRolesBtn,
+                new()
+                    {
+                        { Language.Czech, "Aktualizovat role zaměstnance" }, { Language.English, "Update staff roles" }
+                    }
             },
-            [_textsKeys.VerifyBtn] = { [Language.Czech] = "Ověřit se", [Language.English] = "Verify" },
-            [_textsKeys.UpdateStaffRolesBtn] =
             {
-                [Language.Czech] = "Aktualizovat role zaměstnance", [Language.English] = "Update staff roles"
+                _textsKeys.VerifyStaffRolesBtn,
+                new() { { Language.Czech, "Ověřit role zaměstnance" }, { Language.English, "Verify staff roles" } }
             },
-            [_textsKeys.VerifyStaffRolesBtn] =
             {
-                [Language.Czech] = "Ověřit role zaměstnance", [Language.English] = "Verify staff roles"
+                _textsKeys.RemoveRolesBtn,
+                new() { { Language.Czech, "Odebrat role" }, { Language.English, "Remove roles" } }
             },
-            [_textsKeys.RemoveRolesBtn] = { [Language.Czech] = "Odebrat role", [Language.English] = "Remove roles" },
-            [_textsKeys.VerifyStaff] =
             {
-                [Language.Czech] = "Ahoj, pro ověření rolí zaměstnance klikni na tlačítko.",
-                [Language.English] = "Hi, click the button to verify the staff roles."
-            },
+                _textsKeys.VerifyStaff,
+                new()
+                {
+                    { Language.Czech, "Ahoj, pro ověření rolí zaměstnance klikni na tlačítko." },
+                    { Language.English, "Hi, click the button to verify the staff roles." }
+                }
+            }
         };
 
         public StaffVerificationEventHandler(IUrlProvider urlProvider,
@@ -123,7 +141,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                         eventArgs.User.Username,
                         eventArgs.User.Id
                     );
-                    builder.Content = _texts[_textsKeys.CouldNotDelete][currentLanguage];
+                    builder.Content = "Staff roles failed to remove. Please contact the moderators.";
                 }
 
                 await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, builder);
