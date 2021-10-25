@@ -1,6 +1,7 @@
 using System;
 using DSharpPlus.CommandsNext;
 using HonzaBotner.Discord.EventHandler;
+using HonzaBotner.Discord.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

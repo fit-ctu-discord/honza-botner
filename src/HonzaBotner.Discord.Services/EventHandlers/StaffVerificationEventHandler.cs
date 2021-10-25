@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -21,94 +20,22 @@ namespace HonzaBotner.Discord.Services.EventHandlers
         private readonly DiscordRoleConfig _discordRoleConfig;
         private readonly IDiscordRoleManager _roleManager;
         private readonly ILogger<StaffVerificationEventHandler> _logger;
-
-        private enum _textsKeys
-        {
-            SuccessFullyDeleted,
-            NotVerifiedYet,
-            VerifyBtn,
-            AlreadyVerified,
-            UpdateStaffRolesBtn,
-            RemoveRolesBtn,
-            VerifyStaff,
-            VerifyStaffRolesBtn
-        }
-
-        private readonly Dictionary<_textsKeys, Dictionary<Language, string>> _texts = new()
-        {
-            {
-                _textsKeys.SuccessFullyDeleted,
-                new()
-                {
-                    { Language.Czech, "Role byly úspěšně odstraněny." },
-                    { Language.English, "Roles have been successfully deleted." }
-                }
-            },
-            {
-                _textsKeys.NotVerifiedYet, new()
-                {
-                    {
-                        Language.Czech, "Ahoj, ještě nejsi ověřený!\n" +
-                                        "1) Pro ověření a přidělení rolí dle UserMap klikni na tlačítko dole. ✅\n" +
-                                        "2) Následně znovu klikni na tlačítko pro přidání zaměstnaneckých rolí. 👑"
-                    },
-                    {
-                        Language.English, "Hi, you are not verified yet!\n" +
-                                          "1) Click the button below to verify and assign roles according to UserMap. ✅\n" +
-                                          "2) Then click the button to add employee roles again. 👑"
-                    }
-                }
-            },
-            {
-                _textsKeys.AlreadyVerified, new()
-                {
-                    {
-                        Language.Czech, "Ahoj, už jsi ověřený.\n" +
-                                        "Pro aktualizaci zaměstnaneckých rolí klikni na tlačítko."
-                    },
-                    {
-                        Language.English, "Hi, you are already verified.\n" +
-                                          "Click the button to update employee roles."
-                    }
-                }
-            },
-            { _textsKeys.VerifyBtn, new() { { Language.Czech, "Ověřit se" }, { Language.English, "Verify" } } },
-            {
-                _textsKeys.UpdateStaffRolesBtn,
-                new()
-                    {
-                        { Language.Czech, "Aktualizovat role zaměstnance" }, { Language.English, "Update staff roles" }
-                    }
-            },
-            {
-                _textsKeys.VerifyStaffRolesBtn,
-                new() { { Language.Czech, "Ověřit role zaměstnance" }, { Language.English, "Verify staff roles" } }
-            },
-            {
-                _textsKeys.RemoveRolesBtn,
-                new() { { Language.Czech, "Odebrat role" }, { Language.English, "Remove roles" } }
-            },
-            {
-                _textsKeys.VerifyStaff,
-                new()
-                {
-                    { Language.Czech, "Ahoj, pro ověření rolí zaměstnance klikni na tlačítko." },
-                    { Language.English, "Hi, click the button to verify the staff roles." }
-                }
-            }
-        };
+        private readonly ITranslation _translation;
 
         public StaffVerificationEventHandler(IUrlProvider urlProvider,
             IOptions<DiscordRoleConfig> discordRoleConfig,
             IDiscordRoleManager roleManager,
             ILogger<StaffVerificationEventHandler> logger,
-            IOptions<ButtonOptions> buttonConfig)
+            IOptions<ButtonOptions> buttonConfig,
+            ITranslation translation
+        )
         {
             _urlProvider = urlProvider;
             _buttonOptions = buttonConfig.Value;
             _discordRoleConfig = discordRoleConfig.Value;
             _roleManager = roleManager;
             _logger = logger;
+            _translation = translation;
         }
 
         public async Task<EventHandlerResult> Handle(ComponentInteractionCreateEventArgs eventArgs)
@@ -118,10 +45,9 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                 return EventHandlerResult.Continue;
             }
 
-            Language currentLanguage = Language.English;
             if (_buttonOptions.CzechChannelsIds?.Contains(eventArgs.Channel.Id) ?? false)
             {
-                currentLanguage = Language.Czech;
+                _translation.SetLanguage(ITranslation.Language.Czech);
             }
 
             DiscordUser user = eventArgs.User;
@@ -132,7 +58,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             if (eventArgs.Id == _buttonOptions.StaffRemoveRoleId)
             {
                 bool revoked = await _roleManager.RevokeRolesPoolAsync(eventArgs.User.Id, RolesPool.Staff);
-                builder.Content = _texts[_textsKeys.SuccessFullyDeleted][currentLanguage];
+                builder.Content = _translation.GetText("RolesSuccessfullyDeleted");
 
                 if (!revoked)
                 {
@@ -162,11 +88,11 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             if (!isAuthenticated)
             {
                 string verificationLink = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
-                builder.Content = _texts[_textsKeys.NotVerifiedYet][currentLanguage];
+                builder.Content = _translation.GetText("UserNotVerified");
                 builder.AddComponents(
                     new DiscordLinkButtonComponent(
                         verificationLink,
-                        _texts[_textsKeys.VerifyBtn][currentLanguage],
+                        _translation.GetText("VerifyRolesButton"),
                         false,
                         new DiscordComponentEmoji("✅")
                     )
@@ -195,18 +121,18 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             if (isStaffAuthenticated && _buttonOptions.StaffRemoveRoleId is not null)
             {
-                builder.Content = _texts[_textsKeys.AlreadyVerified][currentLanguage];
+                builder.Content = _translation.GetText("AlreadyVerified");
                 builder.AddComponents(
                     new DiscordLinkButtonComponent(
                         link,
-                        _texts[_textsKeys.UpdateStaffRolesBtn][currentLanguage],
+                        _translation.GetText("UpdateStaffRolesButton"),
                         false,
                         new DiscordComponentEmoji("👑")
                     ),
                     new DiscordButtonComponent(
                         ButtonStyle.Danger,
                         _buttonOptions.StaffRemoveRoleId,
-                        _texts[_textsKeys.RemoveRolesBtn][currentLanguage],
+                        _translation.GetText("RemoveRolesButton"),
                         false,
                         new DiscordComponentEmoji("🗑️")
                     )
@@ -214,10 +140,10 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             }
             else
             {
-                builder.Content = _texts[_textsKeys.VerifyStaff][currentLanguage];
+                builder.Content = _translation.GetText("VerifyStaff");
                 builder.AddComponents(new DiscordLinkButtonComponent(
                     link,
-                    _texts[_textsKeys.VerifyStaffRolesBtn][currentLanguage],
+                    _translation.GetText("VerifyStaffRolesButton"),
                     false,
                     new DiscordComponentEmoji("👑"))
                 );

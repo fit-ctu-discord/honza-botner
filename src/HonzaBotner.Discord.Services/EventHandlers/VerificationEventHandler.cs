@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -18,58 +17,28 @@ namespace HonzaBotner.Discord.Services.EventHandlers
         private readonly IUrlProvider _urlProvider;
         private readonly ButtonOptions _buttonOptions;
         private DiscordRoleConfig _discordRoleConfig;
-
-        private enum _textsKeys
-        {
-            AlreadyVerified,
-            Verify,
-            VerifyBtn,
-            UpdateRolesBtn
-        }
-
-        private readonly Dictionary<_textsKeys, Dictionary<Language, string>> _texts = new()
-        {
-            {
-                _textsKeys.AlreadyVerified,
-                new()
-                {
-                    { Language.Czech, "Ahoj, už jsi ověřený.\nPro aktualizaci rolí klikni na tlačítko." },
-                    { Language.English, "Hi, you are already verified.\nClick the button to update the roles." }
-                }
-            },
-            {
-                _textsKeys.Verify,
-                new()
-                {
-                    { Language.Czech, "Ahoj, pro ověření a přidělení rolí klikni na tlačítko." },
-                    { Language.English, "Hi, click the button to verify and assign roles." }
-                }
-            },
-            { _textsKeys.VerifyBtn, new() { { Language.Czech, "Ověřit se" }, { Language.English, "Verify" } } },
-            {
-                _textsKeys.UpdateRolesBtn,
-                new() { { Language.Czech, "Aktualizovat role" }, { Language.English, "Update roles" } }
-            }
-        };
+        private readonly ITranslation _translation;
 
         public VerificationEventHandler(
             IUrlProvider urlProvider,
             IOptions<ButtonOptions> options,
-            IOptions<DiscordRoleConfig> discordRoleConfig
+            IOptions<DiscordRoleConfig> discordRoleConfig,
+            ITranslation translation
         )
         {
             _urlProvider = urlProvider;
             _buttonOptions = options.Value;
             _discordRoleConfig = discordRoleConfig.Value;
+            _translation = translation;
         }
 
         public async Task<EventHandlerResult> Handle(ComponentInteractionCreateEventArgs eventArgs)
         {
             if (eventArgs.Id != _buttonOptions.VerificationId) return EventHandlerResult.Continue;
-            var currentLanguage = Language.English;
+
             if (_buttonOptions.CzechChannelsIds?.Contains(eventArgs.Channel.Id) ?? false)
             {
-                currentLanguage = Language.Czech;
+                _translation.SetLanguage(ITranslation.Language.Czech);
             }
 
             DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
@@ -90,11 +59,11 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             if (isAuthenticated)
             {
-                builder.Content = _texts[_textsKeys.AlreadyVerified][currentLanguage];
+                builder.Content = _translation.GetText("UserAlreadyVerified");
                 builder.AddComponents(
                     new DiscordLinkButtonComponent(
                         link,
-                        _texts[_textsKeys.UpdateRolesBtn][currentLanguage],
+                        _translation.GetText("UpdateRolesButton"),
                         false,
                         new DiscordComponentEmoji("🔄")
                     )
@@ -102,11 +71,11 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             }
             else
             {
-                builder.Content = _texts[_textsKeys.Verify][currentLanguage];
+                builder.Content = _translation.GetText("Verify");
                 builder.AddComponents(
                     new DiscordLinkButtonComponent(
                         link,
-                        _texts[_textsKeys.VerifyBtn][currentLanguage],
+                        _translation.GetText("VerifyRolesButton"),
                         false,
                         new DiscordComponentEmoji("✅")
                     )

@@ -11,6 +11,8 @@ using HonzaBotner.Discord.Services;
 using HonzaBotner.Discord.Services.EventHandlers;
 using HonzaBotner.Discord.Services.Jobs;
 using HonzaBotner.Discord.Services.Managers;
+using HonzaBotner.Discord.Services.Utils;
+using HonzaBotner.Discord.Utils;
 using HonzaBotner.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -87,6 +89,9 @@ namespace HonzaBotner
                             ;
                     }
                 )
+
+                // Utils
+                .AddTransient<ITranslation, Translation>()
 
                 // Managers
                 .AddTransient<IVoiceManager, VoiceManager>()
