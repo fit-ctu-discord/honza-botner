@@ -81,7 +81,6 @@ namespace HonzaBotner.Discord.Services.Jobs
                     {
                         _logger.LogWarning("Couldn't find user with id {Id}", user);
                         continue;
-
                     }
 
                     DiscordDmChannel dmChannel = await member.CreateDmChannelAsync();
