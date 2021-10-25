@@ -118,12 +118,20 @@ namespace HonzaBotner.Discord.Services.Utils
 
         public string GetText(string key, ITranslation.Language? language)
         {
+            ITranslation.Language selectedLanguage = language ?? _language;
+
             if (!Texts.ContainsKey(key))
             {
                 throw new ArgumentException($"Provided key '{key}' is not a valid translation key.");
             }
 
-            return Texts[key][language ?? _language];
+            if (!Texts[key].ContainsKey(selectedLanguage))
+            {
+                throw new ArgumentException(
+                    $"Provided language '{selectedLanguage}' has no available translations for key {key}.");
+            }
+
+            return Texts[key][selectedLanguage];
         }
     }
 }

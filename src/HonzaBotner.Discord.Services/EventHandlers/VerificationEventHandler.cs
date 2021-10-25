@@ -59,11 +59,11 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             if (isAuthenticated)
             {
-                builder.Content = _translation.GetText("UserAlreadyVerified");
+                builder.Content = _translation["UserAlreadyVerified"];
                 builder.AddComponents(
                     new DiscordLinkButtonComponent(
                         link,
-                        _translation.GetText("UpdateRolesButton"),
+                        _translation["UpdateRolesButton"],
                         false,
                         new DiscordComponentEmoji("🔄")
                     )
@@ -71,11 +71,11 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             }
             else
             {
-                builder.Content = _translation.GetText("Verify");
+                builder.Content = _translation["Verify"];
                 builder.AddComponents(
                     new DiscordLinkButtonComponent(
                         link,
-                        _translation.GetText("VerifyRolesButton"),
+                        _translation["VerifyRolesButton"],
                         false,
                         new DiscordComponentEmoji("✅")
                     )

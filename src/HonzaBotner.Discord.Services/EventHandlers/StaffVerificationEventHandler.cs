@@ -58,7 +58,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             if (eventArgs.Id == _buttonOptions.StaffRemoveRoleId)
             {
                 bool revoked = await _roleManager.RevokeRolesPoolAsync(eventArgs.User.Id, RolesPool.Staff);
-                builder.Content = _translation.GetText("RolesSuccessfullyDeleted");
+                builder.Content = _translation["RolesSuccessfullyDeleted"];
 
                 if (!revoked)
                 {
@@ -88,11 +88,11 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             if (!isAuthenticated)
             {
                 string verificationLink = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
-                builder.Content = _translation.GetText("UserNotVerified");
+                builder.Content = _translation["UserNotVerified"];
                 builder.AddComponents(
                     new DiscordLinkButtonComponent(
                         verificationLink,
-                        _translation.GetText("VerifyRolesButton"),
+                        _translation["VerifyRolesButton"],
                         false,
                         new DiscordComponentEmoji("✅")
                     )
@@ -121,18 +121,18 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             if (isStaffAuthenticated && _buttonOptions.StaffRemoveRoleId is not null)
             {
-                builder.Content = _translation.GetText("AlreadyVerified");
+                builder.Content = _translation["AlreadyVerified"];
                 builder.AddComponents(
                     new DiscordLinkButtonComponent(
                         link,
-                        _translation.GetText("UpdateStaffRolesButton"),
+                        _translation["UpdateStaffRolesButton"],
                         false,
                         new DiscordComponentEmoji("👑")
                     ),
                     new DiscordButtonComponent(
                         ButtonStyle.Danger,
                         _buttonOptions.StaffRemoveRoleId,
-                        _translation.GetText("RemoveRolesButton"),
+                        _translation["RemoveRolesButton"],
                         false,
                         new DiscordComponentEmoji("🗑️")
                     )
@@ -140,10 +140,10 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             }
             else
             {
-                builder.Content = _translation.GetText("VerifyStaff");
+                builder.Content = _translation["VerifyStaff"];
                 builder.AddComponents(new DiscordLinkButtonComponent(
                     link,
-                    _translation.GetText("VerifyStaffRolesButton"),
+                    _translation["VerifyStaffRolesButton"],
                     false,
                     new DiscordComponentEmoji("👑"))
                 );
