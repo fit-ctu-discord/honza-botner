@@ -268,7 +268,7 @@ namespace HonzaBotner.Discord.Services.Commands
             public async Task SetupButtons(
                 CommandContext ctx,
                 [Description("URL of the message")] string url,
-                bool english = true
+                bool isCzech = true
                 )
             {
                 DiscordGuild guild = ctx.Guild;
@@ -280,7 +280,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
                 try
                 {
-                    await _buttonManager.SetupVerificationButtons(message, english);
+                    await _buttonManager.SetupVerificationButtons(message, isCzech);
                 }
                 catch (UnauthorizedException)
                 {

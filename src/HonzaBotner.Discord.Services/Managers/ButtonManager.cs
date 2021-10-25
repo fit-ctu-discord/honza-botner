@@ -19,7 +19,7 @@ namespace HonzaBotner.Discord.Services.Managers
             _logger = logger;
         }
 
-        public async Task SetupVerificationButtons(DiscordMessage message, bool english)
+        public async Task SetupVerificationButtons(DiscordMessage message, bool isCzech)
         {
             if (_buttonOptions.VerificationId is null || _buttonOptions.StaffVerificationId is null)
             {
@@ -33,14 +33,14 @@ namespace HonzaBotner.Discord.Services.Managers
                     new DiscordButtonComponent(
                         ButtonStyle.Primary,
                         _buttonOptions.VerificationId,
-                        english ? "Verify" : "Ověř se",
+                        !isCzech ? "Verify" : "Ověř se",
                         false,
                         new DiscordComponentEmoji("✅")
                     ),
                     new DiscordButtonComponent(
                         ButtonStyle.Secondary,
                         _buttonOptions.StaffVerificationId,
-                        english ? "Add staff roles" : "Přidat role zaměstnance",
+                        !isCzech ? "Add staff roles" : "Přidat role zaměstnance",
                         false,
                         new DiscordComponentEmoji("👑")
                     )

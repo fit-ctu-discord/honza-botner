@@ -9,8 +9,8 @@ namespace HonzaBotner.Discord.Managers
         /// Sets up default buttons on verification messages
         /// </summary>
         /// <param name="target">Target message where the buttons will be added</param>
-        /// <param name="english">Determines if the target language should be english, or alternatively czech.</param>
-        Task SetupVerificationButtons(DiscordMessage target, bool english = true);
+        /// <param name="isCzech">Determines if the target language should be english, or alternatively czech.</param>
+        Task SetupVerificationButtons(DiscordMessage target, bool isCzech = true);
 
         /// <summary>
         /// Removes all button interactions from provided message

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -6,6 +6,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.EventHandler;
 using HonzaBotner.Discord.Services.Options;
+using HonzaBotner.Discord.Utils;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Options;
@@ -18,11 +19,32 @@ namespace HonzaBotner.Discord.Services.EventHandlers
         private readonly ButtonOptions _buttonOptions;
         private DiscordRoleConfig _discordRoleConfig;
 
-        private enum _Language
+        private enum _textKeys
         {
-            CS,
-            EN
+            AlreadyVerified,
+            Verify,
+            VerifyBtn,
+            UpdateRolesBtn
         }
+
+        private readonly Dictionary<_textKeys, Dictionary<Language, string>> _texts = new()
+        {
+            [_textKeys.AlreadyVerified] =
+            {
+                [Language.Czech] = "Ahoj, už jsi ověřený.\nPro aktualizaci rolí klikni na tlačítko.",
+                [Language.English] = "Hi, you are already verified.\nClick the button to update the roles."
+            },
+            [_textKeys.Verify] =
+            {
+                [Language.Czech] = "Ahoj, pro ověření a přidělení rolí klikni na tlačítko.",
+                [Language.English] = "Hi, click the button to verify and assign roles."
+            },
+            [_textKeys.VerifyBtn] = { [Language.Czech] = "Ověřit se", [Language.English] = "Verify" },
+            [_textKeys.UpdateRolesBtn] =
+            {
+                [Language.Czech] = "Aktualizovat role", [Language.English] = "Update roles"
+            }
+        };
 
         public VerificationEventHandler(
             IUrlProvider urlProvider,
@@ -39,10 +61,10 @@ namespace HonzaBotner.Discord.Services.EventHandlers
         {
             if (eventArgs.Id != _buttonOptions.VerificationId) return EventHandlerResult.Continue;
 
-            _Language current = _Language.EN;
+            var currentLanguage = Language.English;
             if (_buttonOptions.CzechChannelsIds?.Contains(eventArgs.Channel.Id) ?? false)
             {
-                current = _Language.CS;
+                currentLanguage = Language.Czech;
             }
 
             DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
@@ -65,21 +87,11 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             if (isAuthenticated)
             {
-                builder.Content = current switch {
-                    _Language.EN => "Hi, you are already verified.\n" +
-                                    "Click the button to update the roles.",
-                    _Language.CS => "Ahoj, už jsi ověřený.\n" +
-                                    "Pro aktualizaci rolí klikni na tlačítko.",
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                builder.Content = _texts[_textKeys.AlreadyVerified][currentLanguage];
                 builder.AddComponents(
                     new DiscordLinkButtonComponent(
                         link,
-                        current switch {
-                            _Language.EN => "Update roles",
-                            _Language.CS => "Aktualizovat role",
-                            _ => throw new ArgumentOutOfRangeException()
-                        },
+                        _texts[_textKeys.UpdateRolesBtn][currentLanguage],
                         false,
                         new DiscordComponentEmoji("🔄")
                     )
@@ -87,19 +99,11 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             }
             else
             {
-                builder.Content = current switch {
-                    _Language.EN => "Hi, click the button to verify and assign roles.",
-                    _Language.CS => "Ahoj, pro ověření a přidělení rolí klikni na tlačítko.",
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                builder.Content = _texts[_textKeys.Verify][currentLanguage];
                 builder.AddComponents(
                     new DiscordLinkButtonComponent(
                         link,
-                        current switch {
-                            _Language.EN => "Verify",
-                            _Language.CS => "Ověřit se",
-                            _ => throw new ArgumentOutOfRangeException()
-                        },
+                        _texts[_textKeys.VerifyBtn][currentLanguage],
                         false,
                         new DiscordComponentEmoji("✅")
                     )
