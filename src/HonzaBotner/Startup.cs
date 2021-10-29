@@ -1,3 +1,4 @@
+using System;
 using Hangfire;
 using Hangfire.PostgreSql;
 using HangfireBasicAuthenticationFilter;
@@ -70,7 +71,7 @@ namespace HonzaBotner
                         config.RegisterCommands<MessageCommands>();
                         config.RegisterCommands<PinCommands>();
                         config.RegisterCommands<PollCommands>();
-                        //config.RegisterCommands<ReminderCommands>();
+                        config.RegisterCommands<ReminderCommands>();
                         config.RegisterCommands<TestCommands>();
                         config.RegisterCommands<VoiceCommands>();
                         config.RegisterCommands<WarningCommands>();
@@ -82,7 +83,7 @@ namespace HonzaBotner
                             .AddEventHandler<HornyJailHandler>()
                             .AddEventHandler<NewChannelHandler>()
                             .AddEventHandler<PinHandler>()
-                            //.AddEventHandler<ReminderReactionsHandler>()
+                            .AddEventHandler<ReminderReactionsHandler>()
                             .AddEventHandler<RoleBindingsHandler>(EventHandlerPriority.High)
                             .AddEventHandler<StaffVerificationEventHandler>(EventHandlerPriority.Urgent)
                             .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
@@ -99,15 +100,21 @@ namespace HonzaBotner
 
                 // Managers
                 .AddTransient<IVoiceManager, VoiceManager>()
-                //.AddTransient<IReminderManager, ReminderManager>()
+                .AddTransient<IReminderManager, ReminderManager>()
                 .AddTransient<IButtonManager, ButtonManager>()
 
                 // Jobs
-                //.AddScoped<TriggerRemindersJobProvider>()
+                .AddScoped<TriggerRemindersJobProvider>()
                 ;
 
-            //services.AddHangfire(config => { config.UsePostgreSqlStorage(connectionString); });
-            //services.AddHangfireServer();
+            services.AddHangfire(config =>
+            {
+                config.UsePostgreSqlStorage(connectionString, new PostgreSqlStorageOptions
+                {
+                    JobExpirationCheckInterval = TimeSpan.FromMinutes(15)
+                }).WithJobExpirationTimeout(TimeSpan.FromHours(1));
+            });
+            services.AddHangfireServer(serverOptions => { serverOptions.WorkerCount = 3; });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -123,17 +130,17 @@ namespace HonzaBotner
                     c.RoutePrefix = string.Empty;
                 });
                 app.UseHttpsRedirection();
-                //app.UseHangfireDashboard();
+                app.UseHangfireDashboard();
             }
             else
             {
                 UpdateDatabase(app);
-                //SetupDashboard(app);
+                SetupDashboard(app);
                 app.UseReverseProxyHttpsEnforcer();
                 app.UseExceptionHandler("/error");
             }
 
-            //StartRecurringJobs();
+            StartRecurringJobs();
 
             app.UseHttpsRedirection();
             app.UseRouting();
