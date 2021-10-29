@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -17,11 +17,17 @@ namespace HonzaBotner.Discord.Services.Commands
     {
         private readonly ILogger<BotCommands> _logger;
         private readonly InfoOptions _infoOptions;
+        private readonly IGuildProvider _guildProvider;
 
-        public BotCommands(ILogger<BotCommands> logger, IOptions<InfoOptions> infoOptions)
+        public BotCommands(
+            ILogger<BotCommands> logger,
+            IOptions<InfoOptions> infoOptions,
+            IGuildProvider guildProvider
+        )
         {
             _logger = logger;
             _infoOptions = infoOptions.Value;
+            _guildProvider = guildProvider;
         }
 
         [Command("activity")]
@@ -35,7 +41,7 @@ namespace HonzaBotner.Discord.Services.Commands
             string status
         )
         {
-            if (type == ActivityType.Custom || type == ActivityType.Streaming)
+            if (type is ActivityType.Custom or ActivityType.Streaming)
             {
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
                 return;
@@ -60,43 +66,55 @@ namespace HonzaBotner.Discord.Services.Commands
         [GroupCommand]
         public async Task BotInfo(CommandContext ctx)
         {
-            string content = "Tohoto bota vyvíjí komunita.\n" +
-                             "Budeme rádi, pokud se k vývoji přidáš a pomůžeš nám bota dále vylepšovat.";
+            string content = "This bot is developed by the community.\n" +
+                             "We will be happy if you join the development and help us further improve it.";
+
+            DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
+            DiscordMember bot = await guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
 
             try
             {
-                DiscordMember botMember = await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
-
                 DiscordEmbedBuilder embed = new()
                 {
-                    Author = new DiscordEmbedBuilder.EmbedAuthor
-                    {
-                        Name = botMember.DisplayName, IconUrl = botMember.AvatarUrl
-                    },
-                    Title = "Informace o botovi",
+                    Author =
+                        new DiscordEmbedBuilder.EmbedAuthor { Name = bot.DisplayName, IconUrl = bot.AvatarUrl },
+                    Title = "Information about the bot",
                     Description = content,
                     Color = DiscordColor.CornflowerBlue
                 };
-                embed.AddField("Verze: ", _infoOptions.Version);
+                string version =
+                    Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                        ?.InformationalVersion ?? "<unknown version>";
+                if (!string.IsNullOrEmpty(_infoOptions.VersionSuffix))
+                {
+                    version += "-" + _infoOptions.VersionSuffix;
+                }
+                embed.AddField("Version:", version);
 
                 DiscordMessageBuilder message = new DiscordMessageBuilder()
                     .AddEmbed(embed)
                     .AddComponents(
                         new DiscordLinkButtonComponent(
                             _infoOptions.RepositoryUrl,
-                            "Zdrojový kód",
+                            "Source code",
                             false,
                             new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":scroll:"))
                         ),
                         new DiscordLinkButtonComponent(
                             _infoOptions.IssueTrackerUrl,
-                            "Hlášení chyb",
+                            "Report an issue",
                             false,
                             new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":bug:"))
                         ),
                         new DiscordLinkButtonComponent(
+                            _infoOptions.RepositoryUrl + "/tree/main/docs",
+                            "Documentation",
+                            false,
+                            new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":book:"))
+                        ),
+                        new DiscordLinkButtonComponent(
                             _infoOptions.ChangelogUrl,
-                            "Novinky",
+                            "News",
                             false,
                             new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":part_alternation_mark:"))
                         )

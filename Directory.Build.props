@@ -1,5 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
+    <Version>2021.2.0</Version>
     <TargetFramework>net5.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
