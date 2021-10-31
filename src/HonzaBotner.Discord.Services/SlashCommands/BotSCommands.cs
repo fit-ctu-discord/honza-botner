@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -9,62 +10,100 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.SlashCommands
 {
-    [SlashCommandGroup("bot", "Příkazy pro získání informací o botovi a jeho základní nastavení")]
+    [SlashCommandGroup("bot", "Commands to get/set bot's basic information")]
     public class BotSCommands : ApplicationCommandModule
     {
         private readonly ILogger<BotSCommands> _logger;
         private readonly InfoOptions _options;
+        private readonly IGuildProvider _guildProvider;
 
-        public BotSCommands(ILogger<BotSCommands> logger, IOptions<InfoOptions> options)
+        public BotSCommands(ILogger<BotSCommands> logger, IOptions<InfoOptions> options, IGuildProvider guildProvider)
         {
             _logger = logger;
             _options = options.Value;
+            _guildProvider = guildProvider;
         }
 
-        [SlashCommand("activity", "Aktivita kterou bot zobrazí na svém profilu")]
+        [SlashCommand("activity", "Activity bot displays on his profile")]
         public async Task ActivityAsync(InteractionContext ctx,
-            [Option("Aktivita", "Nazev vykonavane aktivity")] string message,
-            [Option("Druh", "Druh aktivity ktera se zobrazi u bota")]
-            [Choice("Competing", "Competing")]
-            [Choice("ListeningTo", "ListeningTo")]
-            [Choice("Playing", "Playing")]
-            [Choice("Watching", "Watching")]
-            string slashActivityType = "Competing")
+            [Option("Message", "Name of the activity")] string message,
+            [Option("Type", "Activity type")]
+            [Choice("Competing", "competing")]
+            [Choice("ListeningTo", "listeningTo")]
+            [Choice("Playing", "playing")]
+            [Choice("Watching", "watching")]
+            string slashActivityType = "competing")
         {
             ActivityType type = slashActivityType switch
             {
-                "Competing" => ActivityType.Competing,
-                "ListeningTo" => ActivityType.ListeningTo,
-                "Playing" => ActivityType.Playing,
-                "Watching" => ActivityType.Watching,
+                "competing" => ActivityType.Competing,
+                "listeningTo" => ActivityType.ListeningTo,
+                "playing" => ActivityType.Playing,
+                "watching" => ActivityType.Watching,
                 _ => throw new ArgumentException("Unknown activity type", slashActivityType)
             };
 
             DiscordActivity activity = new (message, type);
-            // Commented for debugging reasons. It's better to catch exact error instead of all
-            // try
-            // {
-                await ctx.Client.UpdateStatusAsync(activity, UserStatus.Online);
-                DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder()
-                    .WithContent($"Aktivita nastavena na {slashActivityType}: {message}");
-                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
-            // }
-            // catch (Exception e)
-            // {
-            //     _logger.LogWarning("Couldn't set activity to {SlashActivityType}: {Message}",
-            //         slashActivityType, message);
-            //     DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder()
-            //         .WithContent($"Chyba: nepovedlo se nastavit aktivitu na {slashActivityType}: {message}")
-            //         .AsEphemeral(true);
-            //     await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
-            // }
+            await ctx.Client.UpdateStatusAsync(activity, UserStatus.Online);
+            DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder()
+                .WithContent($"Activity set to {slashActivityType}: {message}");
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
         }
 
-        [SlashCommand("info", "Zakaldni informace o botovi")]
+        [SlashCommand("info", "Basic bot information")]
         public async Task InfoAsync(InteractionContext ctx)
         {
-            return;
-            // TODO: wait for #201 merge
+            string content = "This bot is developed by the community.\n" +
+                             "We will be happy if you join the development and help us further improve it.";
+
+            DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
+            DiscordMember bot = await guild.GetMemberAsync(ctx.Client.CurrentUser.Id);
+            DiscordEmbedBuilder embed = new()
+                {
+                    Author = new DiscordEmbedBuilder.EmbedAuthor { Name = bot.DisplayName, IconUrl = bot.AvatarUrl },
+                    Title = "Information about the bot",
+                    Description = content,
+                    Color = DiscordColor.CornflowerBlue
+                };
+            string version = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion ?? "<unknown version>";
+            if (!string.IsNullOrEmpty(_options.VersionSuffix))
+            {
+                version += "-" + _options.VersionSuffix;
+            }
+            embed.AddField("Version:", version);
+
+            DiscordInteractionResponseBuilder message = new DiscordInteractionResponseBuilder()
+                .AddEmbed(embed)
+                .AsEphemeral(true)
+                .AddComponents(
+                    new DiscordLinkButtonComponent(
+                        _options.RepositoryUrl,
+                        "Source code",
+                        false,
+                        new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":scroll:"))
+                    ),
+                    new DiscordLinkButtonComponent(
+                        _options.IssueTrackerUrl,
+                        "Report an issue",
+                        false,
+                        new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":bug:"))
+                    ),
+                    new DiscordLinkButtonComponent(
+                        _options.RepositoryUrl + "/tree/main/docs",
+                        "Documentation",
+                        false,
+                        new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":book:"))
+                    ),
+                    new DiscordLinkButtonComponent(
+                        _options.ChangelogUrl,
+                        "News",
+                        false,
+                        new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":part_alternation_mark:"))
+                    )
+                );
+
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, message);
         }
     }
 }

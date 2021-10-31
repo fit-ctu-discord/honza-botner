@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.SlashCommands
 {
-    [SlashCommandGroup("emoji", "prikazy k zobrazeni statistik emoji")]
+    [SlashCommandGroup("emoji", "Display emoji stats")]
     public class EmojiSCommands : ApplicationCommandModule
     {
 
@@ -33,14 +33,14 @@ namespace HonzaBotner.Discord.Services.SlashCommands
         [SlashRequireGuild]
         public async Task EmojiStatsAsync(
             InteractionContext ctx,
-            [Option("type", "Display stats per day or total?")]
+            [Option("type", "Display stats per day or total")]
             [Choice("Per day", "perDay")]
             [Choice("Total", "total")]
             string statsType = "perDay",
             [Option("EmojiType", "Only animated or static?")]
-            [Choice("animated", "animated")]
-            [Choice("static", "null")]
-            [Choice("all", "all")]
+            [Choice("Animated", "animated")]
+            [Choice("Static", "null")]
+            [Choice("All", "all")]
             string emojiType = "all")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
@@ -60,7 +60,6 @@ namespace HonzaBotner.Discord.Services.SlashCommands
             builder.Append("\n");
 
             int emojisAppended = 0;
-            //const int chunkSize = 30;
 
             IReadOnlyDictionary<ulong, DiscordEmoji> emojis = ctx.Guild.Emojis;
 
@@ -102,9 +101,14 @@ namespace HonzaBotner.Discord.Services.SlashCommands
                     },
                     Title = "Statistika používání custom emotes"
                 };
-                await ctx.CreateResponseAsync(InteractionResponseType.Pong);
+                await ctx.DeleteResponseAsync();
                 IEnumerable<Page> pages = interactivity.GeneratePages(builder.ToString(), embedBuilder, 12);
                 await ctx.Channel.SendPaginatedMessageAsync(ctx.Member, pages);
+            }
+            else
+            {
+                DiscordWebhookBuilder response = new DiscordWebhookBuilder().WithContent("No emoji stats to display.");
+                await ctx.EditResponseAsync(response);
             }
 
         }

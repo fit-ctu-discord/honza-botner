@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.SlashCommands
 {
-    [SlashCommandGroup("channel", "Prikazy spravujici kanaly")]
+    [SlashCommandGroup("channel", "Commands to manage channels")]
     public class ChannelSCommands : ApplicationCommandModule
     {
         private readonly ILogger<ChannelSCommands> _logger;
@@ -17,11 +17,11 @@ namespace HonzaBotner.Discord.Services.SlashCommands
             _logger = logger;
         }
 
-        [SlashCommand("clone", "Duplikuje kanal")]
+        [SlashCommand("clone", "Clones the channel")]
         [SlashRequireGuild]
         public async Task CloneAsync(InteractionContext ctx,
-            [Option("kanal", "Kanal co se zduplikuje")] DiscordChannel channel,
-            [Option("jmeno", "Jmeno noveho kanalu")] string name)
+            [Option("oldChannel", "Channel we want to duplicate")] DiscordChannel channel,
+            [Option("newChannel", "New channel's name")] string name)
         {
             DiscordChannel cloned = await channel.CloneAsync();
 
@@ -33,7 +33,7 @@ namespace HonzaBotner.Discord.Services.SlashCommands
 
             _logger.LogInformation("Duplicated channel `{Name}` by `{MemberName}`",
                 channel.Name, ctx.Member.DisplayName);
-            var response = new DiscordInteractionResponseBuilder().WithContent($"Duplikovano jako {cloned.Mention}");
+            var response = new DiscordInteractionResponseBuilder().WithContent($"Created channel {cloned.Mention}");
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, response);
         }
 

@@ -9,15 +9,15 @@ namespace HonzaBotner.Discord.Services.SlashCommands
 {
     public class FunSCommands : ApplicationCommandModule
     {
-        [SlashCommand("choose", "Nech rozhodnout osud!")]
+        [SlashCommand("choose", "Let destiny decide")]
         public async Task ChooseAsync(InteractionContext ctx,
-            [Option("Moznosti", "Moznosti oddelene mezerou")] string args)
+            [Option("Options", "Options separated by ';'")] string args)
         {
             SecureRandom random = new();
-            string[] choices = args.Split(" ");
+            string[] choices = args.Split(";");
             string choice = choices[random.Next(choices.Length)].RemoveDiscordMentions(ctx.Guild);
 
-            string response = (choices.Length == 1 ? "Jak prosté: " : "Vybral jsem: ")
+            string response = (choices.Length == 1 ? "How simple: " : "Destiny decided: ")
                               + $"**{choice}**";
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().WithContent(response));
