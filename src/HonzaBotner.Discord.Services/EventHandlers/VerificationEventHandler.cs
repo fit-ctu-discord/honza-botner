@@ -16,7 +16,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
     {
         private readonly IUrlProvider _urlProvider;
         private readonly ButtonOptions _buttonOptions;
-        private DiscordRoleConfig _discordRoleConfig;
+        private readonly DiscordRoleConfig _discordRoleConfig;
         private readonly ITranslation _translation;
 
         public VerificationEventHandler(
