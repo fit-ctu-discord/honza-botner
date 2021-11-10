@@ -21,7 +21,7 @@
     - title: Security 🔒
       labels:
         - 'release: security'
-    - title: Dependencies 📦⬆️
+    - title: Dependencies 📦
       labels:
         - dependencies
     - title: Other Changes
