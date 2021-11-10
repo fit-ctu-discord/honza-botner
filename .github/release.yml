@@ -1,0 +1,30 @@
+﻿changelog:
+  exclude:
+    labels:
+      - 'release: ignore'
+  categories:
+    - title: Added ✨
+      labels:
+        - 'release: added'
+    - title: Changed 💥
+      labels:
+        - 'release: changed'
+    - title: Deprecated 🧓
+      labels:
+        - 'release: deprecated'
+    - title: Removed 🔥
+      labels:
+        - 'release: removed'
+    - title: Fixed 🚑
+      labels:
+        - 'release: fixed'
+    - title: Security 🔒
+      labels:
+        - 'release: security'
+    - title: Dependencies 📦
+      labels:
+        - dependencies
+        - 'release: dependencies'
+    - title: Other Changes
+      labels:
+        - "*"

@@ -34,9 +34,10 @@ Before making a Pull Request:
 - choose one of the available [issues][issues]
 - read the [Documentation][docs]
 
-After making your PR,
-please,
-state all your changes to the [Changelog](CHANGELOG.md).
+After making a Pull Request:
+
+- choose a descriptive name: we use it in release notes
+- provide as much information as needed to understand the changes
 
 [code-of-conduct]: https://github.com/fit-ctu-discord/honza-botnerblob/master/CODE_OF_CONDUCT.md
 [docs]: https://github.com/fit-ctu-discord/honza-botner/tree/master/docs
