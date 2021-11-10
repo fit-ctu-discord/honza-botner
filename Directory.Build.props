@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
     <WarningsAsErrors>true</WarningsAsErrors>
   </PropertyGroup>
+
+   <PropertyGroup>
+     <CentralPackagesFile>$(MSBuildThisFileDirectory)Packages.props</CentralPackagesFile>
+  </PropertyGroup>
 </Project>

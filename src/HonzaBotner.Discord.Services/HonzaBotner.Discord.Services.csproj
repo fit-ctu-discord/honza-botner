@@ -7,8 +7,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Chronic.Core" Version="0.4.0" />
-    <PackageReference Include="Hangfire.Core" Version="1.7.27" />
+    <PackageReference Include="Chronic.Core" />
+    <PackageReference Include="Hangfire.Core" />
   </ItemGroup>
   
 </Project>
