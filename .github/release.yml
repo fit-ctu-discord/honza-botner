@@ -24,6 +24,7 @@
     - title: Dependencies 📦
       labels:
         - dependencies
+        - 'release: dependencies'
     - title: Other Changes
       labels:
         - "*"
