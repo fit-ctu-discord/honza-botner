@@ -19,7 +19,7 @@ namespace HonzaBotner.Controllers
         private const string RolesPoolCookieName = "honza-botner-roles-pool";
         private readonly ILogger<AuthController> _logger;
         private readonly IAuthorizationService _authorizationService;
-        private string RedirectUri => Url.ActionLink(nameof(Callback));
+        private string RedirectUri => Url.ActionLink(nameof(Callback))!;
 
         public AuthController(ILogger<AuthController> logger, IAuthorizationService authorizationService, IOptions<InfoOptions> options) : base(options)
         {

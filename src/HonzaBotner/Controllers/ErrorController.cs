@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord;
 using HonzaBotner.Discord.Extensions;
@@ -28,7 +29,7 @@ namespace HonzaBotner.Controllers
         [Route("/error")]
         public async Task<IActionResult> Index()
         {
-            IExceptionHandlerFeature context = HttpContext.Features.Get<IExceptionHandlerFeature>();
+            IExceptionHandlerFeature? context = HttpContext.Features.Get<IExceptionHandlerFeature>();
             DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
 
             ulong logChannelId = _discordOptions.Value.LogChannelId;
@@ -40,7 +41,7 @@ namespace HonzaBotner.Controllers
 
             DiscordChannel channel = guild.GetChannel(logChannelId);
 
-            await channel.ReportException("ASP Core .NET", context.Error);
+            await channel.ReportException("ASP Core .NET", context?.Error ?? new ArgumentException());
 
             return Page("Something went wrong. They were notified, but still please contact @Mod at server.", 500);
         }

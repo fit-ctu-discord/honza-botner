@@ -1,8 +1,10 @@
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Options;
+using HonzaBotner.Discord.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -12,11 +14,16 @@ namespace HonzaBotner.Discord.Services.Managers
     {
         private readonly ButtonOptions _buttonOptions;
         private readonly ILogger<ButtonManager> _logger;
+        private readonly ITranslation _translation;
 
-        public ButtonManager(IOptions<ButtonOptions> buttonConfig, ILogger<ButtonManager> logger)
+        public ButtonManager(
+            IOptions<ButtonOptions> buttonConfig,
+            ILogger<ButtonManager> logger,
+            ITranslation translation)
         {
             _buttonOptions = buttonConfig.Value;
             _logger = logger;
+            _translation = translation;
         }
 
         public async Task SetupVerificationButtons(DiscordMessage message)
@@ -27,20 +34,25 @@ namespace HonzaBotner.Discord.Services.Managers
                 return;
             }
 
+            if (_buttonOptions.CzechChannelsIds?.Contains(message.ChannelId) ?? false)
+            {
+                _translation.SetLanguage(ITranslation.Language.Czech);
+            }
+
             var builder = new DiscordMessageBuilder()
                 .WithContent(message.Content)
                 .AddComponents(
                     new DiscordButtonComponent(
                         ButtonStyle.Primary,
                         _buttonOptions.VerificationId,
-                        "Ověř se",
+                        _translation["VerifyRolesButton"],
                         false,
                         new DiscordComponentEmoji("✅")
                     ),
                     new DiscordButtonComponent(
                         ButtonStyle.Secondary,
                         _buttonOptions.StaffVerificationId,
-                        "Přidat role zaměstnance",
+                        _translation["VerifyStaffRolesButton"],
                         false,
                         new DiscordComponentEmoji("👑")
                     )

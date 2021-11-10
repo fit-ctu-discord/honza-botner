@@ -5,6 +5,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.EventHandler;
 using HonzaBotner.Discord.Services.Options;
+using HonzaBotner.Discord.Utils;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Options;
@@ -15,28 +16,34 @@ namespace HonzaBotner.Discord.Services.EventHandlers
     {
         private readonly IUrlProvider _urlProvider;
         private readonly ButtonOptions _buttonOptions;
-        private DiscordRoleConfig _discordRoleConfig;
+        private readonly DiscordRoleConfig _discordRoleConfig;
+        private readonly ITranslation _translation;
 
         public VerificationEventHandler(
             IUrlProvider urlProvider,
             IOptions<ButtonOptions> options,
-            IOptions<DiscordRoleConfig> discordRoleConfig
+            IOptions<DiscordRoleConfig> discordRoleConfig,
+            ITranslation translation
         )
         {
             _urlProvider = urlProvider;
             _buttonOptions = options.Value;
             _discordRoleConfig = discordRoleConfig.Value;
+            _translation = translation;
         }
 
         public async Task<EventHandlerResult> Handle(ComponentInteractionCreateEventArgs eventArgs)
         {
             if (eventArgs.Id != _buttonOptions.VerificationId) return EventHandlerResult.Continue;
 
-            DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
+            if (_buttonOptions.CzechChannelsIds?.Contains(eventArgs.Channel.Id) ?? false)
+            {
+                _translation.SetLanguage(ITranslation.Language.Czech);
+            }
 
+            DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
             DiscordUser user = eventArgs.User;
             DiscordMember member = await eventArgs.Guild.GetMemberAsync(user.Id);
-
             string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
 
             // Check if the user is authenticated.
@@ -52,12 +59,11 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             if (isAuthenticated)
             {
-                builder.Content = "Ahoj, už jsi ověřený.\n" +
-                                  "Pro aktualizaci rolí klikni na tlačítko.";
+                builder.Content = _translation["UserAlreadyVerified"];
                 builder.AddComponents(
                     new DiscordLinkButtonComponent(
                         link,
-                        "Aktualizovat role",
+                        _translation["UpdateRolesButton"],
                         false,
                         new DiscordComponentEmoji("🔄")
                     )
@@ -65,11 +71,11 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             }
             else
             {
-                builder.Content = "Ahoj, pro ověření a přidělení rolí klikni na tlačítko.";
+                builder.Content = _translation["Verify"];
                 builder.AddComponents(
                     new DiscordLinkButtonComponent(
                         link,
-                        "Ověřit se",
+                        _translation["VerifyRolesButton"],
                         false,
                         new DiscordComponentEmoji("✅")
                     )

@@ -1,9 +1,13 @@
 ﻿<Project>
   <PropertyGroup>
-    <Version>2021.2.0</Version>
-    <TargetFramework>net5.0</TargetFramework>
+    <Version>2021.3</Version>
+    <TargetFramework>net6.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
     <WarningsAsErrors>true</WarningsAsErrors>
+  </PropertyGroup>
+
+   <PropertyGroup>
+     <CentralPackagesFile>$(MSBuildThisFileDirectory)Packages.props</CentralPackagesFile>
   </PropertyGroup>
 </Project>

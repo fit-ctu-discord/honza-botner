@@ -49,9 +49,14 @@ namespace HonzaBotner.Services
 
         public async Task<Reminder?> GetByMessageIdAsync(ulong messageId)
         {
-            return GetDto(await _dbContext.Reminders
+            Database.Reminder? reminder = await _dbContext.Reminders
                 .Where(reminder => reminder.MessageId == messageId)
-                .FirstOrDefaultAsync());
+                .FirstOrDefaultAsync();
+
+            if (reminder == null)
+                return null;
+
+            return GetDto(reminder);
         }
 
         public async Task<List<Reminder>> GetRemindersToExecuteAsync(DateTime? dateTime)
