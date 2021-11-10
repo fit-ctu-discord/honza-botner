@@ -72,7 +72,7 @@ namespace HonzaBotner.Services
                 foreach (ulong roleId in roleIds)
                 {
                     binding.RoleId = roleId;
-                    RoleBinding toDelete = await _dbContext.RoleBindings.FirstOrDefaultAsync(db =>
+                    RoleBinding? toDelete = await _dbContext.RoleBindings.FirstOrDefaultAsync(db =>
                         db.Emoji == binding.Emoji && db.ChannelId == binding.ChannelId
                                                   && db.MessageId == binding.MessageId
                                                   && db.RoleId == binding.RoleId);

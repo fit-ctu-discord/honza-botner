@@ -34,7 +34,13 @@ namespace HonzaBotner.Services
 
         public async Task<Warning?> GetWarningAsync(int id)
         {
-            return GetDto(await _dbContext.Warnings.FirstOrDefaultAsync(w => w.Id == id));
+            Database.Warning? warning = await _dbContext.Warnings
+                .FirstOrDefaultAsync(w => w.Id == id);
+
+            if (warning == null)
+                return null;
+
+            return GetDto(warning);
         }
 
         public async Task<bool> DeleteWarningAsync(int id)
