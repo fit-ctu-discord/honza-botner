@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using HonzaBotner.Database;
 using HonzaBotner.Services.Contract;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Reminder = HonzaBotner.Services.Contract.Dto.Reminder;
 
 namespace HonzaBotner.Services
@@ -12,10 +13,12 @@ namespace HonzaBotner.Services
     public class RemindersService : IRemindersService
     {
         private readonly HonzaBotnerDbContext _dbContext;
+        private readonly ILogger<RemindersService> _logger;
 
-        public RemindersService(HonzaBotnerDbContext dbContext)
+        public RemindersService(HonzaBotnerDbContext dbContext, ILogger<RemindersService> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         public async Task<Reminder> CreateReminderAsync(ulong ownerId, ulong messageId, ulong channelId,
@@ -39,7 +42,7 @@ namespace HonzaBotner.Services
             Database.Reminder? dbReminder = await _dbContext.Reminders.FirstOrDefaultAsync(r => r.Id == id);
             if (dbReminder == null)
             {
-                Console.WriteLine("shit");
+                _logger.LogWarning("Couldn't find reminder to delete");
                 return;
             }
 
