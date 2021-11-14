@@ -369,3 +369,7 @@ FodyWeavers.xsd
 
 # Postgress data
 postgres-data/
+
+# VS Code
+.vscode
+
