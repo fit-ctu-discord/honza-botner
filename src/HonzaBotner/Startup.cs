@@ -1,7 +1,3 @@
-using System;
-using Hangfire;
-using Hangfire.PostgreSql;
-using HangfireBasicAuthenticationFilter;
 using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
@@ -13,6 +9,7 @@ using HonzaBotner.Discord.Services.Jobs;
 using HonzaBotner.Discord.Services.Managers;
 using HonzaBotner.Discord.Services.Utils;
 using HonzaBotner.Discord.Utils;
+using HonzaBotner.Scheduler;
 using HonzaBotner.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -97,19 +94,10 @@ namespace HonzaBotner
                 .AddTransient<IVoiceManager, VoiceManager>()
                 .AddTransient<IReminderManager, ReminderManager>()
                 .AddTransient<IButtonManager, ButtonManager>()
-
-                // Jobs
-                .AddScoped<TriggerRemindersJobProvider>()
                 ;
 
-            services.AddHangfire(config =>
-            {
-                config.UsePostgreSqlStorage(connectionString, new PostgreSqlStorageOptions
-                {
-                    JobExpirationCheckInterval = TimeSpan.FromMinutes(15)
-                }).WithJobExpirationTimeout(TimeSpan.FromHours(1));
-            });
-            services.AddHangfireServer(serverOptions => { serverOptions.WorkerCount = 3; });
+            services.AddScheduler(5000)
+                .AddScopedCronJob<TriggerRemindersJobProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -125,40 +113,17 @@ namespace HonzaBotner
                     c.RoutePrefix = string.Empty;
                 });
                 app.UseHttpsRedirection();
-                app.UseHangfireDashboard();
             }
             else
             {
                 UpdateDatabase(app);
-                SetupDashboard(app);
                 app.UseReverseProxyHttpsEnforcer();
                 app.UseExceptionHandler("/error");
             }
 
-            StartRecurringJobs();
-
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-        }
-
-        private void StartRecurringJobs()
-        {
-            RecurringJob.AddOrUpdate(
-                TriggerRemindersJobProvider.Key,
-                (TriggerRemindersJobProvider remindersJobProvider) => remindersJobProvider.Run(),
-                TriggerRemindersJobProvider.CronExpression
-            );
-        }
-
-        private void SetupDashboard(IApplicationBuilder app)
-        {
-            HangfireCustomBasicAuthenticationFilter filter = new()
-            {
-                User = "admin", Pass = Configuration["HANGFIRE_PASSWORD"]
-            };
-
-            app.UseHangfireDashboard(options: new DashboardOptions { Authorization = new[] { filter } });
         }
 
         private static void UpdateDatabase(IApplicationBuilder app)

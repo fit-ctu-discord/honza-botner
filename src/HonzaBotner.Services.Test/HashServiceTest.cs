@@ -1,5 +1,6 @@
 using HonzaBotner.Services.Contract;
 using Xunit;
+using Shouldly;
 
 namespace HonzaBotner.Services.Test
 {
@@ -13,7 +14,7 @@ namespace HonzaBotner.Services.Test
 
             string output = hashService.Hash(input);
 
-            Assert.Equal(hash, output);
+            hash.ShouldBe(output);
         }
     }
 }

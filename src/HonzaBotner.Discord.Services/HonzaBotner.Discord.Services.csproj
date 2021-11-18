@@ -3,12 +3,12 @@
   <ItemGroup>
     <ProjectReference Include="..\HonzaBotner.Database\HonzaBotner.Database.csproj" />
     <ProjectReference Include="..\HonzaBotner.Discord\HonzaBotner.Discord.csproj" />
+    <ProjectReference Include="..\HonzaBotner.Scheduler\HonzaBotner.Scheduler.csproj" />
     <ProjectReference Include="..\HonzaBotner.Services.Contract\HonzaBotner.Services.Contract.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Chronic.Core" />
-    <PackageReference Include="Hangfire.Core" />
   </ItemGroup>
-  
+
 </Project>

@@ -8,11 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Chronic.Core" />
-    <PackageReference Include="Hangfire.AspNetCore" />
-    <PackageReference Include="Hangfire.Dashboard.Basic.Authentication" />
-    <PackageReference Include="Hangfire.MemoryStorage" />
-    <PackageReference Include="Hangfire.PostgreSql" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
@@ -27,6 +22,7 @@
     <ProjectReference Include="..\HonzaBotner.Database\HonzaBotner.Database.csproj" />
     <ProjectReference Include="..\HonzaBotner.Discord\HonzaBotner.Discord.csproj" />
     <ProjectReference Include="..\HonzaBotner.Discord.Services\HonzaBotner.Discord.Services.csproj" />
+    <ProjectReference Include="..\HonzaBotner.Scheduler\HonzaBotner.Scheduler.csproj" />
     <ProjectReference Include="..\HonzaBotner.Services\HonzaBotner.Services.csproj" />
     <ProjectReference Include="..\HonzaBotner.Services.Contract\HonzaBotner.Services.Contract.csproj" />
   </ItemGroup>

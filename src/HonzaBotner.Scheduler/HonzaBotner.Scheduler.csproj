@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   
     <ItemGroup>
-      <PackageReference Include="Chronic.Core" />
       <PackageReference Include="Cronos" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
