@@ -6,6 +6,6 @@ namespace HonzaBotner.Database
     {
         public ulong Id { get; set; }
         public ulong Times { get; set; }
-        public DateTime FirstUsedAt { get; set; } = DateTime.Now;
+        public DateTime FirstUsedAt { get; set; } = DateTime.UtcNow;
     }
 }

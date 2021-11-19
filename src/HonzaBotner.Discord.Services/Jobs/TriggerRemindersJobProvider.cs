@@ -45,7 +45,7 @@ namespace HonzaBotner.Discord.Services.Jobs
 
         public async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var now = DateTime.Now; // Fix one point in time.
+            var now = DateTime.UtcNow; // Fix one point in time.
             var reminders = await _remindersService.GetRemindersToExecuteAsync(now);
             await _remindersService.DeleteExecutedRemindersAsync(now);
 

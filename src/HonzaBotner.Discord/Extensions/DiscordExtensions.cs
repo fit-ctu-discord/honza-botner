@@ -20,7 +20,7 @@ namespace HonzaBotner.Discord.Extensions
                     .WithColor(DiscordColor.Red)
                     .AddField("Message:", exception.Message, true)
                     .AddField("Stack Trace:", Truncate(exception.StackTrace ?? "No stack trace", 500))
-                    .WithTimestamp(DateTime.Now)
+                    .WithTimestamp(DateTime.UtcNow)
                     .WithDescription(
                         "Please react to this message to indicate that it is already logged in isssue or solved"
                     )
