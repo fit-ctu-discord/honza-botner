@@ -18,6 +18,8 @@ jobs:
         dotnet-version: 6.0.x
     - name: Install dependencies
       run: dotnet restore
+    - name: Move to HonzaBotner
+      run: cd src/HonzaBotner
     - name: Build
       run: dotnet publish --configuration Release --no-restore -o botner-build
     - name: Pack the build to tar
