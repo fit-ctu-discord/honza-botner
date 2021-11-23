@@ -51,7 +51,7 @@ namespace HonzaBotner.Discord.Services.Commands
             string? content
         )
         {
-            DateTime now = DateTime.Now;
+            DateTime now = DateTime.UtcNow;
             DateTime? datetime = ParseDateTime(rawDatetime);
 
             if (content == null)
@@ -89,7 +89,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 context.User.Id,
                 message.Id,
                 message.ChannelId,
-                datetime.Value, // This is safe, as the nullability is validated above
+                datetime.Value.ToUniversalTime(), // This is safe, as the nullability is validated above
                 content
             );
 

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  
+    <ItemGroup>
+      <PackageReference Include="Cronos" />
+      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    </ItemGroup>
+
+</Project>

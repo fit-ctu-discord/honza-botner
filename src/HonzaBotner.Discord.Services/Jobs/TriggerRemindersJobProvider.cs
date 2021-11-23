@@ -1,10 +1,11 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
-using Hangfire;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Options;
+using HonzaBotner.Scheduler.Contract;
 using HonzaBotner.Services.Contract;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -12,7 +13,8 @@ using HonzaBotner.Services.Contract.Dto;
 
 namespace HonzaBotner.Discord.Services.Jobs
 {
-    public class TriggerRemindersJobProvider : IRecurringJobProvider
+    [Cron("*/5 * * * * *")]
+    public class TriggerRemindersJobProvider : IJob
     {
         private readonly IRemindersService _remindersService;
 
@@ -39,13 +41,11 @@ namespace HonzaBotner.Discord.Services.Jobs
             _reminderManager = reminderManager;
         }
 
-        public const string Key = "reminders-trigger";
+        public string Name { get; } = "reminders-trigger";
 
-        public static string CronExpression => Cron.Minutely();
-
-        public async Task Run()
+        public async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var now = DateTime.Now; // Fix one point in time.
+            var now = DateTime.UtcNow; // Fix one point in time.
             var reminders = await _remindersService.GetRemindersToExecuteAsync(now);
             await _remindersService.DeleteExecutedRemindersAsync(now);
 

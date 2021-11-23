@@ -65,7 +65,7 @@ namespace HonzaBotner.Services
         public async Task<List<Reminder>> GetRemindersToExecuteAsync(DateTime? dateTime)
         {
             var expired = await _dbContext.Reminders
-                .Where(reminder => reminder.DateTime <= (dateTime ?? DateTime.Now))
+                .Where(reminder => reminder.DateTime <= (dateTime ?? DateTime.UtcNow))
                 .ToListAsync();
 
             return expired.Select(GetDto).ToList();
@@ -74,7 +74,7 @@ namespace HonzaBotner.Services
         public async Task DeleteExecutedRemindersAsync(DateTime? dateTime)
         {
             var expired = await _dbContext.Reminders
-                .Where(reminder => reminder.DateTime <= (dateTime ?? DateTime.Now))
+                .Where(reminder => reminder.DateTime <= (dateTime ?? DateTime.UtcNow))
                 .ToListAsync();
 
             _dbContext.Reminders.RemoveRange(expired);

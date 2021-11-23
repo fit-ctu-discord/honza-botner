@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
 		CONTRIBUTING.md = CONTRIBUTING.md
+		Packages.props = Packages.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HonzaBotner", "src\HonzaBotner\HonzaBotner.csproj", "{04BEA8DF-6FDB-465A-BF6C-D28BADBD572F}"
@@ -22,6 +23,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HonzaBotner.Database", "src\HonzaBotner.Database\HonzaBotner.Database.csproj", "{2ABD6D91-B0C2-4580-A094-C6EA2EA0A506}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HonzaBotner.Services.Test", "src\HonzaBotner.Services.Test\HonzaBotner.Services.Test.csproj", "{AB6030AC-D422-4A52-A980-08D3836E4437}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HonzaBotner.Scheduler", "src\HonzaBotner.Scheduler\HonzaBotner.Scheduler.csproj", "{3C66CBA5-C1F4-4B3E-8D23-94B15652A452}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +60,10 @@ Global
 		{AB6030AC-D422-4A52-A980-08D3836E4437}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB6030AC-D422-4A52-A980-08D3836E4437}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB6030AC-D422-4A52-A980-08D3836E4437}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C66CBA5-C1F4-4B3E-8D23-94B15652A452}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C66CBA5-C1F4-4B3E-8D23-94B15652A452}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C66CBA5-C1F4-4B3E-8D23-94B15652A452}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C66CBA5-C1F4-4B3E-8D23-94B15652A452}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -14,7 +14,7 @@ namespace HonzaBotner.Discord.Services.Extensions
                 .WithTitle(title.RemoveDiscordMentions(context.Guild))
                 .WithDescription(content?.RemoveDiscordMentions(context.Guild) ?? "No additional content provided")
                 .WithColor(DiscordColor.Red)
-                .WithTimestamp(DateTime.Now)
+                .WithTimestamp(DateTime.UtcNow)
                 .Build();
 
             await context.RespondAsync(embed);

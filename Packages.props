@@ -1,6 +1,7 @@
 <Project>
     <ItemGroup>
         <PackageReference Update="Chronic.Core" Version="0.4.0" />
+        <PackageReference Update="Cronos" Version="0.7.1" />
         <PackageReference Update="DSharpPlus" Version="4.1.0" />
         <PackageReference Update="DSharpPlus.CommandsNext" Version="4.1.0" />
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.1.0" />
@@ -26,5 +27,6 @@
         <PackageReference Update="coverlet.collector" Version="3.1.0" />
         <PackageReference Update="xunit" Version="2.4.1" />
         <PackageReference Update="xunit.runner.visualstudio" Version="2.4.3" />
+        <PackageReference Update="Shouldly" Version="4.0.3" />
     </ItemGroup>
 </Project>
