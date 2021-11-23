@@ -18,15 +18,15 @@ jobs:
         dotnet-version: 6.0.x
     - name: Install dependencies
       run: dotnet restore
-    - name: Move to HonzaBotner
-      run: cd src/HonzaBotner
     - name: Build
+      working-directory: ./src/HonzaBotner
       run: dotnet publish --configuration Release --no-restore -o botner-build
     - name: Pack the build to tar
+      working-directory: ./src/HonzaBotner
       run: tar -czvf botner-build.tar.gz botner-build
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: botner-build.tar.gz
+        files: src/HonzaBotner/botner-build.tar.gz
         generate_release_notes: true
