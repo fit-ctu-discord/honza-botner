@@ -22,7 +22,7 @@ namespace HonzaBotner.Services
 
         private async Task<NewsConfig> GetConfig(int id)
         {
-            NewsConfig config = await Configs.FirstOrDefaultAsync(c => c.Id == id);
+            NewsConfig? config = await Configs.FirstOrDefaultAsync(c => c.Id == id);
 
             if (config is null)
             {
@@ -34,7 +34,7 @@ namespace HonzaBotner.Services
 
         public async Task AddOrUpdate(Dto.NewsConfig configDto)
         {
-            NewsConfig config = await Configs.FirstOrDefaultAsync(c => c.Id == configDto.Id);
+            NewsConfig? config = await Configs.FirstOrDefaultAsync(c => c.Id == configDto.Id);
 
             if (config is null)
             {

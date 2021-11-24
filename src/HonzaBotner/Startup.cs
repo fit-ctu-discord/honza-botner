@@ -98,7 +98,8 @@ namespace HonzaBotner
                 ;
 
             services.AddScheduler(5000)
-                .AddScopedCronJob<TriggerRemindersJobProvider>();
+                .AddScopedCronJob<TriggerRemindersJobProvider>()
+                .AddScopedCronJob<NewsJobProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
