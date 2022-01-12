@@ -135,6 +135,16 @@ namespace HonzaBotner.Discord
                             DiscordEmoji permissionEmoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
                             DiscordEmoji timerEmoji = DiscordEmoji.FromName(e.Context.Client, ":alarm_clock:");
 
+                            if (failedCheck is CooldownAttribute)
+                            {
+                                if (exception.Context.Guild is not null &&
+                                    (exception.Context.Member.Permissions & Permissions.ManageMessages) != 0)
+                                {
+                                    await exception.Command.ExecuteAsync(exception.Context);
+                                    return;
+                                }
+                            }
+
                             DiscordEmbed embed = failedCheck switch
                             {
                                 RequireGuildAttribute => new DiscordEmbedBuilder()
