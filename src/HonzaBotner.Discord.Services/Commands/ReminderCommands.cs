@@ -16,9 +16,8 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("reminder")]
     [Aliases("remind")]
-    [Description("Commands to manager reminders.")]
+    [Description("Create a new reminder using formats like: `18.08.2018 07:22:16`, `07:22:16`, `in 2 hours`, ...")]
     [ModuleLifespan(ModuleLifespan.Transient)]
-    [Cooldown(2, 60 * 60, CooldownBucketType.User)]
     [RequireGuild]
     public class ReminderCommands : BaseCommandModule
     {
@@ -39,10 +38,10 @@ namespace HonzaBotner.Discord.Services.Commands
             _reminderManager = reminderManager;
         }
 
-        [GroupCommand]
         [Command("create")]
         [Aliases("me")] // Allows a more "fluent" usage ::remind me <>
-        [Description("Create a new reminder.")]
+        [Description("Create a new reminder using formats like: `18.08.2018 07:22:16`, `07:22:16`, `in 2 hours`, ...")]
+        [Cooldown(2, 60 * 60, CooldownBucketType.User)]
         public async Task Create(
             CommandContext context,
             [Description("Date or time of the reminder")]
@@ -68,7 +67,8 @@ namespace HonzaBotner.Discord.Services.Commands
             {
                 await context.RespondErrorAsync(
                     $"Cannot parse datetime string `{rawDatetime}`",
-                    "Try using an explicit datetime or expressions like `in 30 minutes`, `tomorrow at 8:00`, ..."
+                    "Try using an explicit datetime or expressions like:" +
+                    "`in 30 minutes`, `tomorrow at 8:00`, `18.08.2021 07:22:16`, ..."
                 );
                 return;
             }
