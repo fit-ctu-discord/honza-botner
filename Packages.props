@@ -5,7 +5,7 @@
         <PackageReference Update="DSharpPlus" Version="4.1.0" />
         <PackageReference Update="DSharpPlus.CommandsNext" Version="4.1.0" />
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.1.0" />
-        <PackageReference Update="Hangfire.AspNetCore" Version="1.7.27" />
+        <PackageReference Update="Hangfire.AspNetCore" Version="1.7.28" />
         <PackageReference Update="Hangfire.Core" Version="1.7.27" />
         <PackageReference Update="Hangfire.Dashboard.Basic.Authentication" Version="5.0.0" />
         <PackageReference Update="Hangfire.MemoryStorage" Version="1.7.0" />
