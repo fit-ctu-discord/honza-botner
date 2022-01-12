@@ -16,7 +16,8 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("reminder")]
     [Aliases("remind")]
-    [Description("Create a new reminder using formats like: `18.08.2018 07:22:16`, `07:22:16`, `in 2 hours`, ...")]
+    [Description("Create a new reminder using subcommand `create` " +
+                 "and formats like: `03.03.2002 01:05:16`, `07:22:16`, `in 2 hours`, ...")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     [RequireGuild]
     public class ReminderCommands : BaseCommandModule
@@ -38,11 +39,41 @@ namespace HonzaBotner.Discord.Services.Commands
             _reminderManager = reminderManager;
         }
 
+        [GroupCommand]
+        [Command("help")]
+        [Description("Get help about reminder creation")]
+        public async Task HelpAsync(CommandContext ctx)
+        {
+            var helpEmbed = new DiscordEmbedBuilder()
+                .WithTitle("Creating reminders")
+                .WithDescription(ctx.Command.Parent?.Description ?? ctx.Command.Description)
+                .WithColor(DiscordColor.Blue)
+                .AddField(
+                    "Usage:",
+                    "`reminder create \"<rawDatetime>\" [content...]`" +
+                    "\n`remind me \"in 10 years\" fix that small botner bug`" +
+                    "\n`reminder create \"1.9. 12:00\" Welcome new first-graders`"
+                    )
+                .AddField(
+                    "Cooldown",
+                    "Due to database limitations, everyone is capped at creating max 2 reminders per hour")
+                .Build();
+            var message = new DiscordMessageBuilder()
+                .AddEmbed(helpEmbed)
+                .AddComponents(
+                    new DiscordLinkButtonComponent(
+                        "https://docs.microsoft.com/en-us/dotnet/api/system.datetime.parse#the-string-to-parse",
+                        "More datetime formats"));
+
+            await ctx.RespondAsync(message);
+        }
+
         [Command("create")]
         [Aliases("me")] // Allows a more "fluent" usage ::remind me <>
-        [Description("Create a new reminder using formats like: `18.08.2018 07:22:16`, `07:22:16`, `in 2 hours`, ...")]
+        [Description("Create a new reminder using formats like: `03.03.2002 01:05:16`, `07:22:16`, `in 2 hours`, ..." +
+                     "\nUsage: `remind me \"*when*\" *what about*`")]
         [Cooldown(2, 60 * 60, CooldownBucketType.User)]
-        public async Task Create(
+        public async Task CreateAsync(
             CommandContext context,
             [Description("Date or time of the reminder")]
             string rawDatetime,
@@ -56,7 +87,7 @@ namespace HonzaBotner.Discord.Services.Commands
             if (content == null)
             {
                 await context.RespondErrorAsync(
-                    $"Cannot parse content string",
+                    "Cannot parse content string",
                     "You didn't provide any content for the reminder."
                 );
                 await context.Message.DeleteAsync();

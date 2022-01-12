@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
@@ -69,7 +70,7 @@ namespace HonzaBotner.Discord.Services.Jobs
                 receivers.Add(reminder.OwnerId);
 
                 DiscordEmbed embed = await _reminderManager.CreateDmReminderEmbedAsync(reminder);
-                string remindedUsers = "Ahoj ";
+                var remindedUsers = new StringBuilder("Ahoj ");
 
                 // DM all users.
                 foreach (ulong user in receivers)
@@ -88,12 +89,12 @@ namespace HonzaBotner.Discord.Services.Jobs
                         if (e is not UnauthorizedException) throw;
                     }
 
-                    remindedUsers += ("<@" + user + ">, ");
+                    remindedUsers.Append("<@" + user + ">, ");
 
                 }
 
-                remindedUsers = remindedUsers.Remove(remindedUsers.LastIndexOf(",", StringComparison.Ordinal));
-                remindedUsers += " - nezapomeňte na `" + reminder.Content + "`";
+                remindedUsers = remindedUsers.Remove(remindedUsers.Length - 2, 2);
+                remindedUsers.Append(" - nezapomeň" + (receivers.Count > 1 ? "te" : "") + " na `" + reminder.Content + "`");
 
                 DiscordEmbed expiredEmbed = await _reminderManager.CreateExpiredReminderEmbedAsync(reminder);
 
@@ -101,7 +102,7 @@ namespace HonzaBotner.Discord.Services.Jobs
                 await message.ModifyAsync("", expiredEmbed);
                 await new DiscordMessageBuilder()
                     .WithReply(message.Id)
-                    .WithContent(remindedUsers)
+                    .WithContent(remindedUsers.ToString())
                     .SendAsync(message.Channel.Guild.GetChannel(message.ChannelId));
 
             }
