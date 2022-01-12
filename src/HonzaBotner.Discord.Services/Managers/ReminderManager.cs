@@ -67,29 +67,18 @@ namespace HonzaBotner.Discord.Services.Managers
         )
         {
             var guild = await _guildProvider.GetCurrentGuildAsync();
-            DiscordMember? author;
 
-            try
-            {
-                author = await guild.GetMemberAsync(reminder.OwnerId);
-            }
-            catch (Exception)
-            {
-                author = null;
-            }
+            DiscordMember? author = await guild.GetMemberAsync(reminder.OwnerId);
+
+            string datetime = useDateTime ? "\n\n<t:" + Math.Floor(reminder.DateTime.Subtract(new DateTime(1970, 1, 1)).TotalSeconds) + ":f>" : "";
 
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithTitle(title)
                 .WithAuthor(
                     author?.DisplayName ?? "Unknown user",
                     iconUrl: author?.AvatarUrl)
-                .WithDescription(reminder.Content.RemoveDiscordMentions(guild, _logger))
+                .WithDescription(reminder.Content.RemoveDiscordMentions(guild, _logger) + datetime)
                 .WithColor(color);
-
-            if (useDateTime)
-            {
-                embedBuilder.WithTimestamp(reminder.DateTime);
-            }
 
             return embedBuilder.Build();
         }
