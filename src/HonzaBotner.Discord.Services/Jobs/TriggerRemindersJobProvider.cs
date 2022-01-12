@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Scheduler.Contract;
@@ -68,34 +69,45 @@ namespace HonzaBotner.Discord.Services.Jobs
                 receivers.Add(reminder.OwnerId);
 
                 DiscordEmbed embed = await _reminderManager.CreateDmReminderEmbedAsync(reminder);
+                string remindedUsers = "Ahoj ";
 
                 // DM all users.
                 foreach (ulong user in receivers)
                 {
-                    DiscordMember? member;
+                    DiscordMember? member = await message.Channel.Guild.GetMemberAsync(user);
+                    if (member is null) continue;
+
                     try
                     {
-                        member = await message.Channel.Guild.GetMemberAsync(user);
+                        DiscordDmChannel dmChannel = await member.CreateDmChannelAsync();
+                        await dmChannel.SendMessageAsync(embed: embed);
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-                        _logger.LogWarning("Couldn't find user with id {Id}", user);
-                        continue;
+                        if (e is NotFoundException) continue;
+                        if (e is not UnauthorizedException) throw;
                     }
 
-                    DiscordDmChannel dmChannel = await member.CreateDmChannelAsync();
-                    await dmChannel.SendMessageAsync(embed: embed);
+                    remindedUsers += ("<@" + user + ">, ");
+
                 }
+
+                remindedUsers = remindedUsers.Remove(remindedUsers.LastIndexOf(",", StringComparison.Ordinal));
+                remindedUsers += " - nezapomeňte na `" + reminder.Content + "`";
 
                 DiscordEmbed expiredEmbed = await _reminderManager.CreateExpiredReminderEmbedAsync(reminder);
 
                 // Expire old reaction message.
                 await message.ModifyAsync("", expiredEmbed);
-                await message.DeleteAllReactionsAsync();
+                await new DiscordMessageBuilder()
+                    .WithReply(message.Id)
+                    .WithContent(remindedUsers)
+                    .SendAsync(message.Channel.Guild.GetChannel(message.ChannelId));
+
             }
             catch (Exception e)
             {
-                _logger.LogCritical(e, "Exception during reminder trigger: {Message}", e.Message);
+                _logger.LogError(e, "Exception during reminder trigger: {Message}", e.Message);
             }
         }
     }

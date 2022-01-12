@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Managers;
@@ -67,16 +66,8 @@ namespace HonzaBotner.Discord.Services.Managers
         )
         {
             var guild = await _guildProvider.GetCurrentGuildAsync();
-            DiscordMember? author;
 
-            try
-            {
-                author = await guild.GetMemberAsync(reminder.OwnerId);
-            }
-            catch (Exception)
-            {
-                author = null;
-            }
+            DiscordMember? author = await guild.GetMemberAsync(reminder.OwnerId);
 
             var embedBuilder = new DiscordEmbedBuilder()
                 .WithTitle(title)
