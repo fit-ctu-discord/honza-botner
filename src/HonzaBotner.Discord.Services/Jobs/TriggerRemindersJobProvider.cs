@@ -75,18 +75,21 @@ namespace HonzaBotner.Discord.Services.Jobs
                 // DM all users.
                 foreach (ulong user in receivers)
                 {
-                    DiscordMember? member = await message.Channel.Guild.GetMemberAsync(user);
-                    if (member is null) continue;
-
                     try
                     {
+                        DiscordMember? member = await message.Channel.Guild.GetMemberAsync(user);
+                        if (member is null) continue;
                         DiscordDmChannel dmChannel = await member.CreateDmChannelAsync();
                         await dmChannel.SendMessageAsync(embed: embed);
                     }
                     catch (Exception e)
                     {
-                        if (e is NotFoundException) continue;
-                        if (e is not UnauthorizedException) throw;
+                        if (e is NotFoundException) continue; // User not found, skip him
+                        if (e is not UnauthorizedException) // Anything else apart from user refusing direct messages
+                        {
+                            _logger.LogError(e, "Exception when sending reminder direct message: {Message}",
+                                e.Message);
+                        }
                     }
 
                     remindedUsers.Append("<@" + user + ">, ");
