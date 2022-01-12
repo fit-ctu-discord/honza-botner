@@ -5,11 +5,6 @@
         <PackageReference Update="DSharpPlus" Version="4.1.0" />
         <PackageReference Update="DSharpPlus.CommandsNext" Version="4.1.0" />
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.1.0" />
-        <PackageReference Update="Hangfire.AspNetCore" Version="1.7.28" />
-        <PackageReference Update="Hangfire.Core" Version="1.7.28" />
-        <PackageReference Update="Hangfire.Dashboard.Basic.Authentication" Version="5.0.0" />
-        <PackageReference Update="Hangfire.MemoryStorage" Version="1.7.0" />
-        <PackageReference Update="Hangfire.PostgreSql" Version="1.8.6" />
         <PackageReference Update="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.1" />
         <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.1" />
         <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="6.0.1" />
