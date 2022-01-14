@@ -32,15 +32,13 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
             ":regional_indicator_p:"
         };
 
-        private readonly string _authorUsername;
-        private readonly string _authorAvatarUrl;
+        private readonly string _authorMention;
         private readonly string _question;
         private readonly List<string> _options;
 
-        public AbcPoll(string authorUsername, string authorAvatarUrl, string question, List<string> options)
+        public AbcPoll(string authorMention, string question, List<string> options)
         {
-            _authorUsername = authorUsername;
-            _authorAvatarUrl = authorAvatarUrl;
+            _authorMention = authorMention;
             _question = question;
             _options = options;
         }
@@ -48,6 +46,13 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
         public async Task PostAsync(DiscordClient client, DiscordChannel channel)
         {
             DiscordMessage pollMessage = await client.SendMessageAsync(channel, Build(client, channel.Guild));
+
+            Task _ = Task.Run(async () => { await AddReactions(client, pollMessage); });
+        }
+
+        public async Task UpdateAsync(DiscordClient client, DiscordMessage message)
+        {
+            DiscordMessage pollMessage = await message.ModifyAsync(embed: Build(client, message.Channel.Guild));
 
             Task _ = Task.Run(async () => { await AddReactions(client, pollMessage); });
         }
@@ -64,8 +69,8 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
         {
             DiscordEmbedBuilder builder = new()
             {
-                Author = new DiscordEmbedBuilder.EmbedAuthor {Name = _authorUsername, IconUrl = _authorAvatarUrl},
-                Title = _question.RemoveDiscordMentions(guild)
+                Title = _question.RemoveDiscordMentions(guild),
+                Description = "By: " + _authorMention
             };
 
             if (_options.Count > _optionsEmoji.Count)
@@ -83,7 +88,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
                     true);
             });
 
-            return builder.Build();
+            return builder.WithFooter("AbcPoll").Build();
         }
     }
 }
