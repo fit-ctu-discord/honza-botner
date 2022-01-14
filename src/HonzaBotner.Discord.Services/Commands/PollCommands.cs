@@ -132,8 +132,7 @@ namespace HonzaBotner.Discord.Services.Commands
             }
 
             DiscordEmbed originalPoll = originalMessage.Embeds[0];
-            DiscordGuild targetGuild = await ctx.Client.GetGuildAsync(ctx.Guild.Id);
-            DiscordRole modRole = targetGuild.GetRole(_options.ModRoleId);
+            DiscordRole modRole = (await ctx.Client.GetGuildAsync(ctx.Guild.Id)).GetRole(_options.ModRoleId);
 
             // Extract original author ID via discord's mention format <@!123456789>
             string authorId = originalPoll.Description.Substring(

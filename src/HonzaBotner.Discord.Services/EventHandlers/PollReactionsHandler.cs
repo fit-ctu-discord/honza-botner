@@ -3,18 +3,15 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.EventHandler;
-using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.EventHandlers;
 
 public class PollReactionsHandler : IEventHandler<MessageReactionAddEventArgs>
 {
-    private readonly ILogger<PollReactionsHandler> _logger;
     private readonly DiscordClient _client;
 
-    public PollReactionsHandler(ILogger<PollReactionsHandler> logger, DiscordWrapper wrapper)
+    public PollReactionsHandler(DiscordWrapper wrapper)
     {
-        _logger = logger;
         _client = wrapper.Client;
     }
     public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs args)
