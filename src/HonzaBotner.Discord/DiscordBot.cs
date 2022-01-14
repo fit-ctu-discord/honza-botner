@@ -54,6 +54,7 @@ namespace HonzaBotner.Discord
             Client.VoiceStateUpdated += Client_VoiceStateUpdated;
             Client.GuildMemberUpdated += Client_GuildMemberUpdated;
             Client.ChannelCreated += Client_ChannelCreated;
+            Client.MessageCreated += Client_MessageCreated;
 
             _configurator.Config(Commands);
             Commands.RegisterConverter(new EnumConverter<ActivityType>());
@@ -220,6 +221,11 @@ namespace HonzaBotner.Discord
         }
 
         private Task Client_ChannelCreated(DiscordClient client, ChannelCreateEventArgs args)
+        {
+            return _eventHandler.Handle(args);
+        }
+
+        private Task Client_MessageCreated(DiscordClient client, MessageCreateEventArgs args)
         {
             return _eventHandler.Handle(args);
         }

@@ -77,6 +77,7 @@ namespace HonzaBotner
                             .AddEventHandler<EmojiCounterHandler>()
                             .AddEventHandler<HornyJailHandler>()
                             .AddEventHandler<NewChannelHandler>()
+                            .AddEventHandler<MemeChannelMessageHandler>()
                             .AddEventHandler<PinHandler>()
                             .AddEventHandler<ReminderReactionsHandler>()
                             .AddEventHandler<RoleBindingsHandler>(EventHandlerPriority.High)

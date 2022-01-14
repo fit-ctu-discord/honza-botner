@@ -21,5 +21,6 @@
         public ulong BoosterRoleId { get; set; }
 
         public ulong[]? ReactionIgnoreChannels { get; set; }
+        public ulong[]? MemeChannels { get; set; }
     }
 }
