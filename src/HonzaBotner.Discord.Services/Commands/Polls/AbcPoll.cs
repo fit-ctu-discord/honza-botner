@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using DSharpPlus;
+﻿using System.Collections.Generic;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord.Services.Extensions;
 
 namespace HonzaBotner.Discord.Services.Commands.Polls
 {
-    public class AbcPoll : IPoll
+    public class AbcPoll : Poll
     {
-        public static int MaxOptions => _optionsEmoji.Count;
-
-        private static readonly List<string> _optionsEmoji = new List<string>
+        public override List<string> OptionsEmoji => new List<string>
         {
             ":regional_indicator_a:",
             ":regional_indicator_b:",
@@ -32,63 +25,10 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
             ":regional_indicator_p:"
         };
 
-        private readonly string _authorMention;
-        private readonly string _question;
-        private readonly List<string> _options;
+        public override string PollType => "AbcPoll";
 
-        public AbcPoll(string authorMention, string question, List<string> options)
-        {
-            _authorMention = authorMention;
-            _question = question;
-            _options = options;
-        }
+        public AbcPoll(string question, List<string> options) : base(question, options) {}
 
-        public async Task PostAsync(DiscordClient client, DiscordChannel channel)
-        {
-            DiscordMessage pollMessage = await client.SendMessageAsync(channel, Build(client, channel.Guild));
-
-            Task _ = Task.Run(async () => { await AddReactions(client, pollMessage); });
-        }
-
-        public async Task UpdateAsync(DiscordClient client, DiscordMessage message)
-        {
-            DiscordMessage pollMessage = await message.ModifyAsync(embed: Build(client, message.Channel.Guild));
-
-            Task _ = Task.Run(async () => { await AddReactions(client, pollMessage); });
-        }
-
-        private async Task AddReactions(DiscordClient client, DiscordMessage message)
-        {
-            foreach (string emoji in _optionsEmoji.Take(_options.Count))
-            {
-                await message.CreateReactionAsync(DiscordEmoji.FromName(client, emoji));
-            }
-        }
-
-        private DiscordEmbed Build(DiscordClient client, DiscordGuild guild)
-        {
-            DiscordEmbedBuilder builder = new()
-            {
-                Title = _question.RemoveDiscordMentions(guild),
-                Description = "By: " + _authorMention
-            };
-
-            if (_options.Count > _optionsEmoji.Count)
-            {
-                throw new ArgumentException($"Too many options. Maximum options is {MaxOptions}.");
-            }
-
-            _options.Zip(_optionsEmoji).ToList().ForEach(pair =>
-            {
-                (string? answer, string? emojiName) = pair;
-
-                builder.AddField(
-                    DiscordEmoji.FromName(client, emojiName).ToString(),
-                    answer.RemoveDiscordMentions(guild),
-                    true);
-            });
-
-            return builder.WithFooter("AbcPoll").Build();
-        }
+        public AbcPoll(DiscordMessage message) : base(message) {}
     }
 }
