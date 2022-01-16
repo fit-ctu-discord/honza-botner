@@ -5,6 +5,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
 {
     public class AbcPoll : Poll
     {
+        public override string PollType => "AbcPoll";
         public override List<string> OptionsEmoji => new List<string>
         {
             ":regional_indicator_a:",
@@ -25,9 +26,8 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
             ":regional_indicator_p:"
         };
 
-        public override string PollType => "AbcPoll";
-
-        public AbcPoll(string question, List<string> options) : base(question, options) {}
+        public AbcPoll(string authorMention, string question, List<string> options)
+            : base(authorMention, question, options) {}
 
         public AbcPoll(DiscordMessage message) : base(message) {}
     }

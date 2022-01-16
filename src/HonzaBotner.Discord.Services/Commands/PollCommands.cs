@@ -41,10 +41,10 @@ namespace HonzaBotner.Discord.Services.Commands
                     await PollHelpAsync(ctx);
                     break;
                 case 1:
-                    await CreatePollAsync(ctx, options.First());
+                    await CreateDefaultPollAsync(ctx, options.First());
                     break;
                 default:
-                    await CreatePollAsync(ctx, options.First(), options.Skip(1).ToList());
+                    await CreateDefaultPollAsync(ctx, options.First(), options.Skip(1).ToList());
                     break;
             }
         }
@@ -52,11 +52,11 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("yesno")]
         [Description("Creates a yesno pool.")]
         [Priority(2)]
-        public async Task YesNoPollCommand(CommandContext ctx,
+        public async Task YesNoPollCommandAsync(CommandContext ctx,
             [RemainingText, Description("Poll's question.")]
             string question)
         {
-            await CreatePollAsync(ctx, question);
+            await CreateDefaultPollAsync(ctx, question);
         }
 
         [Command("abc")]
@@ -66,18 +66,18 @@ namespace HonzaBotner.Discord.Services.Commands
             [Description("Poll's question.")] string question,
             [Description("Poll's options.")] params string[] answers)
         {
-            await CreatePollAsync(ctx, question, answers.ToList());
+            await CreateDefaultPollAsync(ctx, question, answers.ToList());
         }
 
-        private async Task CreatePollAsync(CommandContext ctx, string question, List<string>? answers = null)
+        private async Task CreateDefaultPollAsync(CommandContext ctx, string question, List<string>? answers = null)
         {
             Poll poll;
-            if (answers is null) poll = new YesNoPoll(question);
-            else poll = new AbcPoll(question, answers);
+            if (answers is null) poll = new YesNoPoll(ctx.Member.Mention, question);
+            else poll = new AbcPoll(ctx.Member.Mention, question, answers);
 
             try
             {
-                await poll.PostAsync(ctx.Client, ctx.Channel, ctx.Member.Mention);
+                await poll.PostAsync(ctx.Client, ctx.Channel);
                 await ctx.Message.DeleteAsync();
             }
             catch (ArgumentException e)
@@ -115,15 +115,16 @@ namespace HonzaBotner.Discord.Services.Commands
         }
 
         [Command("add")]
-        [Description("Adds options to an existing poll. You need to reference it via reply.")]
+        [Description("Adds options to an existing abc poll. You need to reference it via reply.")]
         [Priority(2)]
-        public async Task AddAbcOptionAsync(CommandContext ctx,
+        public async Task AddPollOptionAsync(CommandContext ctx,
             [Description("Additional options.")]
             params string[] options)
         {
             DiscordMessage? originalMessage = ctx.Message.ReferencedMessage;
 
             if (originalMessage is null
+                || options.Length == 0
                 || !originalMessage.Author.IsCurrent
                 || (originalMessage.Embeds?.Count.Equals(0) ?? true)
                 || !(originalMessage.Embeds[0].Footer?.Text.Equals("AbcPoll") ?? false))
@@ -132,14 +133,10 @@ namespace HonzaBotner.Discord.Services.Commands
                 return;
             }
 
-            DiscordEmbed originalPoll = originalMessage.Embeds[0];
             DiscordRole modRole = (await ctx.Client.GetGuildAsync(ctx.Guild.Id)).GetRole(_options.ModRoleId);
+            AbcPoll poll = new (originalMessage);
 
-            // Extract original author Mention via discord's mention format <@!123456789>
-            string authorMention = originalPoll.Description.Substring(
-                originalPoll.Description.LastIndexOf("<", StringComparison.Ordinal));
-
-            if (authorMention != ctx.Member.Mention && !ctx.Member.Roles.Contains(modRole))
+            if (poll.AuthorMention != ctx.Member.Mention && !ctx.Member.Roles.Contains(modRole))
             {
                 await ctx.RespondAsync("You are not authorized to edit this poll");
                 return;
@@ -147,16 +144,17 @@ namespace HonzaBotner.Discord.Services.Commands
 
             try
             {
-                await new AbcPoll(originalMessage).AddOptionsAsync(ctx.Client, authorMention, options.ToList());
+                await new AbcPoll(originalMessage).AddOptionsAsync(ctx.Client, options.ToList());
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
             }
             catch (ArgumentException e)
             {
                 await ctx.RespondAsync(e.Message);
             }
-            catch
+            catch (Exception e)
             {
                 await ctx.RespondAsync(PollErrorMessage);
+                _logger.LogWarning(e, "Failed to add options to abc poll");
             }
         }
     }

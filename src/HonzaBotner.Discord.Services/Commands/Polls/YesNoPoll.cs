@@ -12,11 +12,11 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
         public override List<string> OptionsEmoji => new List<string>() { ":+1:", ":-1:" };
         public override List<string> ActiveEmojis => OptionsEmoji;
 
-        public YesNoPoll(string question) : base(question){}
+        public YesNoPoll(string authorMention, string question) : base(authorMention, question){}
 
         public YesNoPoll(DiscordMessage message) : base(message){}
 
-        public override Task AddOptionsAsync(DiscordClient client, string Mention, List<string> newOptions) =>
-            throw new NotImplementedException($"You can not edit {PollType}");
+        public override Task AddOptionsAsync(DiscordClient client, List<string> newOptions) =>
+            throw new ArgumentException($"Adding options is disabled for {PollType}");
     }
 }
