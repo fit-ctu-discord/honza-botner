@@ -18,7 +18,9 @@ public class PollReactionsHandler : IEventHandler<MessageReactionAddEventArgs>
     public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs args)
     {
         if (args.User.IsBot) return EventHandlerResult.Continue;
-        DiscordMessage message = await args.Channel.GetMessageAsync(args.Message.Id);
+        DiscordMessage message = args.Message.Content is null
+                                 ? await args.Channel.GetMessageAsync(args.Message.Id)
+                                 : args.Message;
         if (!message.Author.IsCurrent
             || (message.Embeds?.Count.Equals(0) ?? true)
             || !(message.Embeds[0].Footer?.Text.EndsWith("Poll") ?? false))
