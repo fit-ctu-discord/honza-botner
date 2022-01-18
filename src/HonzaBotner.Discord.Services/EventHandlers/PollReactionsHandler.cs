@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -18,14 +19,20 @@ public class PollReactionsHandler : IEventHandler<MessageReactionAddEventArgs>
     public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs args)
     {
         if (args.User.IsBot) return EventHandlerResult.Continue;
+        _ = Task.Run(() => HandleAsync(args));
+        return EventHandlerResult.Continue;
+    }
+
+    private async Task HandleAsync(MessageReactionAddEventArgs args)
+    {
         DiscordMessage message = args.Message.Content is null
-                                 ? await args.Channel.GetMessageAsync(args.Message.Id)
-                                 : args.Message;
+            ? await args.Channel.GetMessageAsync(args.Message.Id)
+            : args.Message;
         if (!message.Author.IsCurrent
             || (message.Embeds?.Count.Equals(0) ?? true)
             || !(message.Embeds[0].Footer?.Text.EndsWith("Poll") ?? false))
         {
-            return EventHandlerResult.Continue;
+            return;
         }
 
         Poll poll;
@@ -38,14 +45,13 @@ public class PollReactionsHandler : IEventHandler<MessageReactionAddEventArgs>
                 poll = new YesNoPoll(message);
                 break;
             default:
-                return EventHandlerResult.Continue;
+                return;
         }
-        foreach (var emoji in poll.ActiveEmojis)
+        if (poll.ActiveEmojis.Any(emoji => DiscordEmoji.FromName(_client, emoji) == args.Emoji))
         {
-            if(DiscordEmoji.FromName(_client, emoji) == args.Emoji) return EventHandlerResult.Continue;
+            return;
         }
 
         await args.Message.DeleteReactionAsync(args.Emoji, args.User);
-        return EventHandlerResult.Stop;
     }
 }
