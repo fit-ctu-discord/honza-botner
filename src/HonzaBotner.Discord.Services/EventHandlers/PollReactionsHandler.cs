@@ -1,25 +1,18 @@
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using HonzaBotner.Discord.EventHandler;
-using HonzaBotner.Discord.Services.Commands.Polls;
 
 namespace HonzaBotner.Discord.Services.EventHandlers;
 
 public class PollReactionsHandler : IEventHandler<MessageReactionAddEventArgs>
 {
-    private readonly DiscordClient _client;
-
-    public PollReactionsHandler(DiscordWrapper wrapper)
-    {
-        _client = wrapper.Client;
-    }
     public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs args)
     {
         if (args.User.IsBot) return EventHandlerResult.Continue;
         _ = Task.Run(() => HandleAsync(args));
+        await Task.Delay(0);
         return EventHandlerResult.Continue;
     }
 
@@ -35,22 +28,7 @@ public class PollReactionsHandler : IEventHandler<MessageReactionAddEventArgs>
             return;
         }
 
-        Poll poll;
-        switch (message.Embeds[0].Footer.Text)
-        {
-            case "AbcPoll":
-                poll = new AbcPoll(message);
-                break;
-            case "YesNoPoll":
-                poll = new YesNoPoll(message);
-                break;
-            default:
-                return;
-        }
-        if (poll.ActiveEmojis.Any(emoji => DiscordEmoji.FromName(_client, emoji) == args.Emoji))
-        {
-            return;
-        }
+        if (message.Reactions.Any(x => x.Emoji == args.Emoji && x.Count > 1)) return;
 
         await args.Message.DeleteReactionAsync(args.Emoji, args.User);
     }
