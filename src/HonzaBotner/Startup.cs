@@ -83,6 +83,7 @@ namespace HonzaBotner
                             .AddEventHandler<StaffVerificationEventHandler>(EventHandlerPriority.Urgent)
                             .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
                             .AddEventHandler<VoiceHandler>()
+                            .AddEventHandler<ThreadCreatedHandler>()
                             ;
                     }
                 )

@@ -55,6 +55,8 @@ namespace HonzaBotner.Discord
             Client.GuildMemberUpdated += Client_GuildMemberUpdated;
             Client.ChannelCreated += Client_ChannelCreated;
 
+            Client.ThreadCreated += Client_ThreadCreated;
+
             _configurator.Config(Commands);
             Commands.RegisterConverter(new EnumConverter<ActivityType>());
 
@@ -220,6 +222,11 @@ namespace HonzaBotner.Discord
         }
 
         private Task Client_ChannelCreated(DiscordClient client, ChannelCreateEventArgs args)
+        {
+            return _eventHandler.Handle(args);
+        }
+
+        private Task Client_ThreadCreated(DiscordClient client, ThreadCreateEventArgs args)
         {
             return _eventHandler.Handle(args);
         }
