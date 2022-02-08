@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Scheduler.Contract;
@@ -68,34 +70,48 @@ namespace HonzaBotner.Discord.Services.Jobs
                 receivers.Add(reminder.OwnerId);
 
                 DiscordEmbed embed = await _reminderManager.CreateDmReminderEmbedAsync(reminder);
+                var remindedUsers = new StringBuilder("Ahoj ");
 
                 // DM all users.
                 foreach (ulong user in receivers)
                 {
-                    DiscordMember? member;
                     try
                     {
-                        member = await message.Channel.Guild.GetMemberAsync(user);
+                        DiscordMember? member = await message.Channel.Guild.GetMemberAsync(user);
+                        if (member is null) continue;
+                        DiscordDmChannel dmChannel = await member.CreateDmChannelAsync();
+                        await dmChannel.SendMessageAsync(embed: embed);
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-                        _logger.LogWarning("Couldn't find user with id {Id}", user);
-                        continue;
+                        if (e is NotFoundException) continue; // User not found, skip him
+                        if (e is not UnauthorizedException) // Anything else apart from user refusing direct messages
+                        {
+                            _logger.LogError(e, "Exception when sending reminder direct message: {Message}",
+                                e.Message);
+                        }
                     }
 
-                    DiscordDmChannel dmChannel = await member.CreateDmChannelAsync();
-                    await dmChannel.SendMessageAsync(embed: embed);
+                    remindedUsers.Append("<@" + user + ">, ");
+
                 }
+
+                remindedUsers = remindedUsers.Remove(remindedUsers.Length - 2, 2);
+                remindedUsers.Append(" - nezapomeň" + (receivers.Count > 1 ? "te" : "") + " na `" + reminder.Content + "`");
 
                 DiscordEmbed expiredEmbed = await _reminderManager.CreateExpiredReminderEmbedAsync(reminder);
 
                 // Expire old reaction message.
                 await message.ModifyAsync("", expiredEmbed);
-                await message.DeleteAllReactionsAsync();
+                await new DiscordMessageBuilder()
+                    .WithReply(message.Id)
+                    .WithContent(remindedUsers.ToString())
+                    .SendAsync(message.Channel.Guild.GetChannel(message.ChannelId));
+
             }
             catch (Exception e)
             {
-                _logger.LogCritical(e, "Exception during reminder trigger: {Message}", e.Message);
+                _logger.LogError(e, "Exception during reminder trigger: {Message}", e.Message);
             }
         }
     }

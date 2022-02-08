@@ -56,7 +56,6 @@ namespace HonzaBotner.Discord.Services.EventHandlers
                 await _service.DeleteReminderAsync(reminder.Id);
                 await arguments.Message.ModifyAsync("",
                     await _reminderManager.CreateCanceledReminderEmbedAsync(reminder));
-                await arguments.Message.DeleteAllReactionsAsync("Reminder canceled");
 
                 return EventHandlerResult.Stop;
             }
@@ -71,7 +70,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
 
             // Otherwise just remove the emoji...
             await arguments.Message.DeleteReactionAsync(arguments.Emoji, arguments.User, "It is not a valid reaction.");
-            return EventHandlerResult.Continue;
+            return EventHandlerResult.Stop;
         }
     }
 }
