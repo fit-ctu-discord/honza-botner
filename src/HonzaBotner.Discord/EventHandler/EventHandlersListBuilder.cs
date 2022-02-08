@@ -15,7 +15,7 @@ namespace HonzaBotner.Discord.EventHandler
             _serviceCollection = serviceCollection;
         }
 
-        public EventHandlersListBuilder AddEventHandler<T>(EventHandlerPriority priority = EventHandlerPriority.Low)
+        public EventHandlersListBuilder AddEventHandler<T>(EventHandlerPriority priority = EventHandlerPriority.Medium)
         {
             Type handlerType = typeof(T);
             _eventHandlersHandlers.Add((handlerType, priority));

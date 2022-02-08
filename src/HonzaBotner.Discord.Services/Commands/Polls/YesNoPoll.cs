@@ -1,43 +1,25 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord.Services.Extensions;
 
-namespace HonzaBotner.Discord.Services.Commands.Polls
+namespace HonzaBotner.Discord.Services.Commands.Polls;
+
+public class YesNoPoll : Poll
 {
-    public class YesNoPoll : IPoll
+    public override string PollType => "YesNoPoll";
+    public override List<string> OptionsEmoji => new() { ":+1:", ":-1:" };
+    public override List<string> ActiveEmojis => OptionsEmoji;
+
+    public YesNoPoll(string authorMention, string question) : base(authorMention, question)
     {
-        private readonly string _authorUsername;
-        private readonly string _authorAvatarUrl;
-        private readonly string _question;
-
-        public YesNoPoll(string authorUsername, string authorAvatarUrl, string question)
-        {
-            _authorUsername = authorUsername;
-            _authorAvatarUrl = authorAvatarUrl;
-            _question = question;
-        }
-
-        public async Task PostAsync(DiscordClient client, DiscordChannel channel)
-        {
-            DiscordMessage pollMessage = await client.SendMessageAsync(channel, Build(channel.Guild));
-
-            Task _ = Task.Run(async () => { await AddReactions(client, pollMessage); });
-        }
-
-        private async Task AddReactions(DiscordClient client, DiscordMessage message)
-        {
-            await message.CreateReactionAsync(DiscordEmoji.FromName(client, ":thumbsup:"));
-            await message.CreateReactionAsync(DiscordEmoji.FromName(client, ":thumbsdown:"));
-        }
-
-        private DiscordEmbed Build(DiscordGuild guild)
-        {
-            return new DiscordEmbedBuilder
-            {
-                Author = new DiscordEmbedBuilder.EmbedAuthor {Name = _authorUsername, IconUrl = _authorAvatarUrl},
-                Title = _question.RemoveDiscordMentions(guild)
-            }.Build();
-        }
     }
+
+    public YesNoPoll(DiscordMessage message) : base(message)
+    {
+    }
+
+    public override Task AddOptionsAsync(DiscordClient client, IEnumerable<string> newOptions) =>
+        throw new ArgumentException($"Adding options is disabled for {PollType}");
 }

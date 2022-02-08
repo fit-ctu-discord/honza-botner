@@ -8,7 +8,7 @@ namespace HonzaBotner.Discord.EventHandler
     public enum EventHandlerResult
     {
         /// <summary>
-        /// Event should be handle by other event handlers, if there are any avaliable
+        /// Event should be handled by other event handlers, if there are any available
         /// </summary>
         Continue,
         /// <summary>
