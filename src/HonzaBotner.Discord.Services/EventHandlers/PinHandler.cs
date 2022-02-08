@@ -95,7 +95,7 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             {
                 DiscordMember member = await eventArgs.Guild.GetMemberAsync(user.Id);
 
-                // Mod locked the message, no need to process further.
+                // Mod or bot locked the message, no need to process further.
                 if (member.Roles.Contains(eventArgs.Guild.GetRole(_options.ModRoleId)) ||
                     member.Id == eventArgs.Guild.CurrentMember.Id)
                 {
@@ -132,15 +132,28 @@ namespace HonzaBotner.Discord.Services.EventHandlers
             foreach (DiscordUser user in reactions)
             {
                 int maxRoleScore = 1;
-                DiscordMember member = await eventArgs.Guild.GetMemberAsync(user.Id);
+
+                DiscordMember? member = null;
+                try
+                {
+                    member = await eventArgs.Guild.GetMemberAsync(user.Id);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogInformation(e, "Could not initialize Guild member {MemberId}", user.Id);
+                }
+                if (member == null) continue;
+
                 foreach (DiscordRole role in member.Roles)
                 {
-                    if (roleToScore.ContainsKey(role.Id))
+                    if (!roleToScore.ContainsKey(role.Id))
                     {
-                        if (maxRoleScore < roleToScore[role.Id])
-                        {
-                            maxRoleScore = roleToScore[role.Id];
-                        }
+                        continue;
+                    }
+
+                    if (maxRoleScore < roleToScore[role.Id])
+                    {
+                        maxRoleScore = roleToScore[role.Id];
                     }
                 }
 
