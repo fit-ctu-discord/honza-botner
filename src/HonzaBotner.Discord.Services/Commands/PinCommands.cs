@@ -58,7 +58,6 @@ namespace HonzaBotner.Discord.Services.Commands
 
                 if (result.TimedOut) return;
 
-
                 await ctx.TriggerTypingAsync();
 
                 var permanentPinEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.PermanentPinName);
@@ -78,8 +77,15 @@ namespace HonzaBotner.Discord.Services.Commands
 
                 await Task.WhenAll(channelTasks);
 
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(_discordWrapper.Client, ":+1:"));
-                await ctx.RespondAsync("Removed all temporary pins");
+                try
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(_discordWrapper.Client, ":+1:"));
+                    await ctx.RespondAsync("Removed all temporary pins");
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Could not add reaction or respond to {Message}", ctx.Message);
+                }
             }
 
             [GroupCommand]
@@ -111,7 +117,16 @@ namespace HonzaBotner.Discord.Services.Commands
 
                 await DeletePinsInChannelAsync(channel, permanentPinEmoji, lockPinEmoji, roleToScore);
 
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(_discordWrapper.Client, ":+1:"));
+
+                try
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(_discordWrapper.Client, ":+1:"));
+                    await ctx.RespondAsync($"Removed temporary pins in the channel");
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Could not add reaction or respond to {Message}", ctx.Message);
+                }
             }
 
             private async Task DeletePinsInChannelAsync(
@@ -125,39 +140,61 @@ namespace HonzaBotner.Discord.Services.Commands
                 foreach (DiscordMessage message in messages)
                 {
                     int score = 0;
-                    IReadOnlyList<DiscordUser> reactions = await message.GetReactionsAsync(permanentEmoji, _pinOptions.Treshold);
+                    IReadOnlyList<DiscordUser> reactions =
+                        await message.GetReactionsAsync(permanentEmoji, _pinOptions.Treshold);
 
                     if (reactions.Count == _pinOptions.Treshold) continue;
 
                     foreach (DiscordUser user in reactions)
                     {
                         int maxRoleScore = 1;
+
+                        DiscordMember? member = null;
                         try
                         {
-                            DiscordMember member = await channel.Guild.GetMemberAsync(user.Id);
-                            foreach (DiscordRole role in member.Roles.Where(role => roleToScore.ContainsKey(role.Id)))
+                            member = await channel.Guild.GetMemberAsync(user.Id);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogInformation(e, "Could not initialize Guild member {MemberId}", user.Id);
+                        }
+
+                        if (member == null) continue;
+
+                        foreach (DiscordRole role in member.Roles)
+                        {
+                            if (!roleToScore.ContainsKey(role.Id))
                             {
-                                if (maxRoleScore < roleToScore[role.Id])
-                                {
-                                    maxRoleScore = roleToScore[role.Id];
-                                }
+                                continue;
+                            }
+
+                            if (maxRoleScore < roleToScore[role.Id])
+                            {
+                                maxRoleScore = roleToScore[role.Id];
                             }
                         }
-                        catch (Exception) {}
 
                         score += maxRoleScore;
                     }
 
-                    if (score < _pinOptions.Treshold)
+                    // Do not delete anything.
+                    if (score >= _pinOptions.Treshold)
                     {
-                        try
-                        {
-                            await message.CreateReactionAsync(lockEmoji);
-                        }
-                        catch (Exception)
-                        {
-                            await message.UnpinAsync();
-                        }
+                        continue;
+                    }
+
+                    try
+                    {
+                        await message.CreateReactionAsync(lockEmoji);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e,
+                            "Could not create a lock emoji reaction for message {Message} in channel {Channel}",
+                            message.Id,
+                            channel.Id
+                        );
+                        await message.UnpinAsync();
                     }
                 }
             }
