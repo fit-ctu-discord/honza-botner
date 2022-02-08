@@ -132,14 +132,18 @@ namespace HonzaBotner.Discord.Services.Commands
                     foreach (DiscordUser user in reactions)
                     {
                         int maxRoleScore = 1;
-                        DiscordMember member = await channel.Guild.GetMemberAsync(user.Id);
-                        foreach (DiscordRole role in member.Roles.Where(role => roleToScore.ContainsKey(role.Id)))
+                        try
                         {
-                            if (maxRoleScore < roleToScore[role.Id])
+                            DiscordMember member = await channel.Guild.GetMemberAsync(user.Id);
+                            foreach (DiscordRole role in member.Roles.Where(role => roleToScore.ContainsKey(role.Id)))
                             {
-                                maxRoleScore = roleToScore[role.Id];
+                                if (maxRoleScore < roleToScore[role.Id])
+                                {
+                                    maxRoleScore = roleToScore[role.Id];
+                                }
                             }
                         }
+                        catch (Exception) {}
 
                         score += maxRoleScore;
                     }
