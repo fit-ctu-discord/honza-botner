@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -17,8 +18,8 @@ namespace HonzaBotner.Discord.Services.Commands
 {
     [Group("pin")]
     [Description("Commands to manage pins on server")]
-    [RequireMod]
     [RequireGuild]
+    [RequireMod]
     public class PinCommands : BaseCommandModule
     {
         [Group("delete")]
@@ -43,7 +44,7 @@ namespace HonzaBotner.Discord.Services.Commands
 
             [Command("all")]
             [Description("Unpins all messages in all text channels on this server.")]
-            public async Task DeleteAll(CommandContext ctx)
+            public async Task DeleteAllAsync(CommandContext ctx)
             {
                 var emoji = DiscordEmoji.FromName(ctx.Client, ":ok_hand:");
                 DiscordMessage reactMessage = await ctx.Channel.SendMessageAsync(
@@ -55,10 +56,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 InteractivityResult<MessageReactionAddEventArgs> result =
                     await reactMessage.WaitForReactionAsync(ctx.User, emoji, TimeSpan.FromSeconds(15));
 
-                if (result.TimedOut)
-                {
-                    return;
-                }
+                if (result.TimedOut) return;
 
                 await ctx.TriggerTypingAsync();
 
@@ -74,19 +72,26 @@ namespace HonzaBotner.Discord.Services.Commands
                         continue;
                     }
 
-                    channelTasks.Add(DeletePinsInChannel(channel, permanentPinEmoji, lockPinEmoji, roleToScore));
+                    channelTasks.Add(DeletePinsInChannelAsync(channel, permanentPinEmoji, lockPinEmoji, roleToScore));
                 }
 
                 await Task.WhenAll(channelTasks);
 
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(_discordWrapper.Client, ":+1:"));
-                await ctx.RespondAsync("Removed all temporary pins");
+                try
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(_discordWrapper.Client, ":+1:"));
+                    await ctx.RespondAsync("Removed all temporary pins");
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Could not add reaction or respond to {Message}", ctx.Message);
+                }
             }
 
             [GroupCommand]
             [Command("channel")]
             [Description("Unpins messages in specified text channel.")]
-            public async Task DeleteInChannel(CommandContext ctx, DiscordChannel channel)
+            public async Task DeleteInChannelAsync(CommandContext ctx, DiscordChannel channel)
             {
                 DiscordEmoji emoji = DiscordEmoji.FromName(ctx.Client, ":ok_hand:");
                 DiscordMessage reactMessage = await ctx.Channel.SendMessageAsync(
@@ -98,10 +103,7 @@ namespace HonzaBotner.Discord.Services.Commands
                 InteractivityResult<MessageReactionAddEventArgs> result =
                     await reactMessage.WaitForReactionAsync(ctx.User, emoji, TimeSpan.FromSeconds(15));
 
-                if (result.TimedOut)
-                {
-                    return;
-                }
+                if (result.TimedOut) return;
 
                 if (channel.Type is not ChannelType.Text && channel.Type is not ChannelType.News)
                 {
@@ -113,12 +115,21 @@ namespace HonzaBotner.Discord.Services.Commands
                 var lockPinEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.LockEmojiName);
                 IReadOnlyDictionary<ulong, int> roleToScore = GetRoleToScore();
 
-                await DeletePinsInChannel(channel, permanentPinEmoji, lockPinEmoji, roleToScore);
+                await DeletePinsInChannelAsync(channel, permanentPinEmoji, lockPinEmoji, roleToScore);
 
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(_discordWrapper.Client, ":+1:"));
+
+                try
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(_discordWrapper.Client, ":+1:"));
+                    await ctx.RespondAsync($"Removed temporary pins in the channel");
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Could not add reaction or respond to {Message}", ctx.Message);
+                }
             }
 
-            private async Task DeletePinsInChannel(
+            private async Task DeletePinsInChannelAsync(
                 DiscordChannel channel,
                 DiscordEmoji permanentEmoji,
                 DiscordEmoji lockEmoji,
@@ -129,14 +140,27 @@ namespace HonzaBotner.Discord.Services.Commands
                 foreach (DiscordMessage message in messages)
                 {
                     int score = 0;
-                    IReadOnlyList<DiscordUser> reactions = await message.GetReactionsAsync(permanentEmoji, 10);
+                    IReadOnlyList<DiscordUser> reactions =
+                        await message.GetReactionsAsync(permanentEmoji, _pinOptions.Treshold);
 
-                    if (reactions.Count == 10) continue;
+                    if (reactions.Count == _pinOptions.Treshold) continue;
 
                     foreach (DiscordUser user in reactions)
                     {
                         int maxRoleScore = 1;
-                        DiscordMember member = await channel.Guild.GetMemberAsync(user.Id);
+
+                        DiscordMember? member = null;
+                        try
+                        {
+                            member = await channel.Guild.GetMemberAsync(user.Id);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogInformation(e, "Could not initialize Guild member {MemberId}", user.Id);
+                        }
+
+                        if (member == null) continue;
+
                         foreach (DiscordRole role in member.Roles)
                         {
                             if (!roleToScore.ContainsKey(role.Id))
@@ -153,9 +177,24 @@ namespace HonzaBotner.Discord.Services.Commands
                         score += maxRoleScore;
                     }
 
-                    if (score < _pinOptions.Treshold)
+                    // Do not delete anything.
+                    if (score >= _pinOptions.Treshold)
+                    {
+                        continue;
+                    }
+
+                    try
                     {
                         await message.CreateReactionAsync(lockEmoji);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e,
+                            "Could not create a lock emoji reaction for message {Message} in channel {Channel}",
+                            message.Id,
+                            channel.Id
+                        );
+                        await message.UnpinAsync();
                     }
                 }
             }
