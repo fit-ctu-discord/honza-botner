@@ -12,6 +12,7 @@ public abstract class Poll
 {
     public abstract List<string> OptionsEmoji { get; }
     public abstract string PollType { get; }
+
     public virtual List<string> ActiveEmojis
     {
         get => OptionsEmoji.GetRange(0, _choices.Count);
@@ -22,13 +23,11 @@ public abstract class Poll
     private readonly DiscordMessage? _existingPollMessage;
     private readonly string _question;
 
-
     protected Poll(string authorMention, string question, List<string>? options = null)
     {
         AuthorMention = authorMention;
         _question = question;
         _choices = options ?? new List<string>();
-
     }
 
     protected Poll(DiscordMessage originalMessage)
@@ -36,9 +35,10 @@ public abstract class Poll
         _existingPollMessage = originalMessage;
         DiscordEmbed originalPoll = _existingPollMessage.Embeds[0];
 
-        // Extract original author Mention via discord's mention format <@!123456789>
+        // Extract original author Mention via discord's mention format <@!123456789>.
         AuthorMention = originalPoll.Description.Substring(
-            originalPoll.Description.LastIndexOf("<", StringComparison.Ordinal));
+            originalPoll.Description.LastIndexOf("<", StringComparison.Ordinal)
+        );
 
         _choices = originalPoll.Fields?
             .Select(ef => ef.Value)
@@ -54,7 +54,7 @@ public abstract class Poll
         Task _ = Task.Run(async () => { await AddReactionsAsync(client, pollMessage); });
     }
 
-    public virtual async Task AddOptionsAsync(DiscordClient client, List<string> newOptions)
+    public virtual async Task AddOptionsAsync(DiscordClient client, IEnumerable<string> newOptions)
     {
         if (_existingPollMessage == null)
         {
@@ -63,14 +63,14 @@ public abstract class Poll
 
         _choices.AddRange(newOptions);
 
-        await _existingPollMessage.ModifyAsync( Build(client, _existingPollMessage.Channel.Guild));
+        await _existingPollMessage.ModifyAsync(Build(client, _existingPollMessage.Channel.Guild));
 
         Task _ = Task.Run(async () => { await AddReactionsAsync(client, _existingPollMessage); });
     }
 
     protected async Task AddReactionsAsync(DiscordClient client, DiscordMessage message)
     {
-        foreach (var reaction in ActiveEmojis)
+        foreach (string reaction in ActiveEmojis)
         {
             await message.CreateReactionAsync(DiscordEmoji.FromName(client, reaction));
         }

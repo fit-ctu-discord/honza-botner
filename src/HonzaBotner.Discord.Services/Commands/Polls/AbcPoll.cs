@@ -6,7 +6,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls
     public class AbcPoll : Poll
     {
         public override string PollType => "AbcPoll";
-        public override List<string> OptionsEmoji => new List<string>
+        public override List<string> OptionsEmoji => new()
         {
             ":regional_indicator_a:",
             ":regional_indicator_b:",

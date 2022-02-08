@@ -32,8 +32,10 @@ namespace HonzaBotner.Discord.Services.Commands
         [GroupCommand]
         [Description("Creates either yes/no or ABC poll.")]
         [Priority(1)]
-        public async Task PollCommandAsync(CommandContext ctx,
-            [Description("Options for the pool.")] params string[] options)
+        public async Task PollCommandAsync(
+            CommandContext ctx,
+            [Description("Options for the pool.")] params string[] options
+        )
         {
             switch (options.Length)
             {
@@ -52,9 +54,11 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("yesno")]
         [Description("Creates a yesno pool.")]
         [Priority(2)]
-        public async Task YesNoPollCommandAsync(CommandContext ctx,
+        public async Task YesNoPollCommandAsync(
+            CommandContext ctx,
             [RemainingText, Description("Poll's question.")]
-            string question)
+            string question
+        )
         {
             await CreateDefaultPollAsync(ctx, question);
         }
@@ -62,18 +66,26 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("abc")]
         [Description("Creates an abc pool.")]
         [Priority(2)]
-        public async Task AbcPollCommandAsync(CommandContext ctx,
+        public async Task AbcPollCommandAsync(
+            CommandContext ctx,
             [Description("Poll's question.")] string question,
-            [Description("Poll's options.")] params string[] answers)
+            [Description("Poll's options.")] params string[] answers
+        )
         {
-            await CreateDefaultPollAsync(ctx, question, answers.ToList());
+            if (answers.Length > 0)
+            {
+                await CreateDefaultPollAsync(ctx, question, answers.ToList());
+                return;
+            }
+
+            await ctx.RespondAsync("You must add answers to the ABC poll.");
         }
 
         private async Task CreateDefaultPollAsync(CommandContext ctx, string question, List<string>? answers = null)
         {
-            Poll poll;
-            if (answers is null) poll = new YesNoPoll(ctx.Member.Mention, question);
-            else poll = new AbcPoll(ctx.Member.Mention, question, answers);
+            Poll poll = answers is null
+                ? new YesNoPoll(ctx.Member.Mention, question)
+                : new AbcPoll(ctx.Member.Mention, question, answers);
 
             try
             {
@@ -87,7 +99,7 @@ namespace HonzaBotner.Discord.Services.Commands
             catch (Exception e)
             {
                 await ctx.RespondAsync(PollErrorMessage);
-                _logger.LogWarning(e, $"Failed to create new {poll.PollType}");
+                _logger.LogWarning(e, "Failed to create new {PollType}", poll.PollType);
             }
         }
 
@@ -95,20 +107,20 @@ namespace HonzaBotner.Discord.Services.Commands
         {
             DiscordEmbed embed = new DiscordEmbedBuilder()
                 .WithTitle("Polls")
-                .WithDescription("Create unique polls using `poll` command." +
-                                 " You can also add options to existing polls using `poll add`." +
+                .WithDescription("Create unique polls using `::poll` command." +
+                                 " You can also add options to existing polls using `::poll add`." +
                                  "\n\nBot currently supports following formats:")
                 .AddField("YesNo Poll :+1:",
                     "Ask simple questions with binary answers. Bot will add :+1: and :-1: as answer options." +
-                    "\nUsage: `poll yesno Is this feature cool?`")
+                    "\nUsage: `::poll yesno Is this feature cool?`")
                 .AddField("Abc Poll :regional_indicator_a:",
                     "Basic options not enough? You can include your own answers." +
-                    "\nUsage: `poll abc \"Which is the best?\" \"Dogs\" \"Cats\" \"Progtest\"`" +
+                    "\nUsage: `::poll abc \"Which is the best?\" \"Dogs\" \"Cats\" \"Progtest\"`" +
                     "\nQuotation marks (\") are required in this command")
                 .AddField("Editing existing poll",
                     "To add additional options to already existing **abc** poll that you've created, " +
                     "use subcommand 'add'. You have to send this command as a reply to the original poll." +
-                    "\nUsage: `poll add \"Marast!\" \"Moodle\"`\n`\"`'s are again necessary")
+                    "\nUsage: `::poll add \"Marast!\" \"Moodle\"`\n`\"`'s are again necessary")
                 .WithColor(DiscordColor.Yellow)
                 .Build();
             await ctx.RespondAsync(embed);
@@ -117,9 +129,10 @@ namespace HonzaBotner.Discord.Services.Commands
         [Command("add")]
         [Description("Adds options to an existing abc poll. You need to reference it via reply.")]
         [Priority(2)]
-        public async Task AddPollOptionAsync(CommandContext ctx,
-            [Description("Additional options.")]
-            params string[] options)
+        public async Task AddPollOptionAsync(
+            CommandContext ctx,
+            [Description("Additional options.")] params string[] options
+        )
         {
             DiscordMessage? originalMessage = ctx.Message.ReferencedMessage;
 
@@ -134,7 +147,7 @@ namespace HonzaBotner.Discord.Services.Commands
             }
 
             DiscordRole modRole = (await ctx.Client.GetGuildAsync(ctx.Guild.Id)).GetRole(_options.ModRoleId);
-            AbcPoll poll = new (originalMessage);
+            AbcPoll poll = new(originalMessage);
 
             if (poll.AuthorMention != ctx.Member.Mention && !ctx.Member.Roles.Contains(modRole))
             {
