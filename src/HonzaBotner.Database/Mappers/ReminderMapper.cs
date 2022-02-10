@@ -1,13 +1,12 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HonzaBotner.Database.Mappers
+namespace HonzaBotner.Database.Mappers;
+
+internal sealed class ReminderMapper : IEntityMapper<Reminder>
 {
-    internal sealed class ReminderMapper : IEntityMapper<Reminder>
+    public void Map(EntityTypeBuilder<Reminder> builder)
     {
-        public void Map(EntityTypeBuilder<Reminder> builder)
-        {
-            builder.HasKey(reminder => reminder.Id);
-            builder.HasIndex(reminder => reminder.DateTime);
-        }
+        builder.HasKey(reminder => reminder.Id);
+        builder.HasIndex(reminder => reminder.DateTime);
     }
 }

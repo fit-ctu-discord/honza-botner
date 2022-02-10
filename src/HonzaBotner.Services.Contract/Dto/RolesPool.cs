@@ -1,7 +1,7 @@
-﻿namespace HonzaBotner.Services.Contract.Dto
+﻿namespace HonzaBotner.Services.Contract.Dto;
+
+public enum RolesPool
 {
-    public enum RolesPool
-    {
-        Auth, Staff
-    }
+    Auth,
+    Staff
 }

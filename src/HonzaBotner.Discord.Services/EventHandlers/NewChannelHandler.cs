@@ -8,48 +8,47 @@ using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace HonzaBotner.Discord.Services.EventHandlers
+namespace HonzaBotner.Discord.Services.EventHandlers;
+
+public class NewChannelHandler : IEventHandler<ChannelCreateEventArgs>
 {
-    public class NewChannelHandler : IEventHandler<ChannelCreateEventArgs>
+    private readonly ILogger<NewChannelHandler> _logger;
+    private readonly CommonCommandOptions _commonOptions;
+
+    public NewChannelHandler(ILogger<NewChannelHandler> logger, IOptions<CommonCommandOptions> commonOptions)
     {
-        private readonly ILogger<NewChannelHandler> _logger;
-        private readonly CommonCommandOptions _commonOptions;
+        _logger = logger;
+        _commonOptions = commonOptions.Value;
+    }
 
-        public NewChannelHandler(ILogger<NewChannelHandler> logger, IOptions<CommonCommandOptions> commonOptions)
+    public async Task<EventHandlerResult> Handle(ChannelCreateEventArgs eventArgs)
+    {
+        try
         {
-            _logger = logger;
-            _commonOptions = commonOptions.Value;
+            DiscordRole muteRole = eventArgs.Guild.GetRole(_commonOptions.MuteRoleId);
+            await eventArgs.Channel.AddOverwriteAsync(
+                muteRole,
+                deny: Permissions.SendMessages | Permissions.AddReactions | Permissions.SendTtsMessages
+            );
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Couldn't add mute role override");
         }
 
-        public async Task<EventHandlerResult> Handle(ChannelCreateEventArgs eventArgs)
+        try
         {
-            try
-            {
-                DiscordRole muteRole = eventArgs.Guild.GetRole(_commonOptions.MuteRoleId);
-                await eventArgs.Channel.AddOverwriteAsync(
-                    muteRole,
-                    deny: Permissions.SendMessages | Permissions.AddReactions | Permissions.SendTtsMessages
-                );
-            }
-            catch (Exception e)
-            {
-                _logger.LogWarning(e, "Couldn't add mute role override");
-            }
-
-            try
-            {
-                DiscordRole botRole = eventArgs.Guild.GetRole(_commonOptions.BotRoleId);
-                await eventArgs.Channel.AddOverwriteAsync(
-                    botRole,
-                    Permissions.AccessChannels | Permissions.SendMessages | Permissions.UseVoice
-                );
-            }
-            catch (Exception e)
-            {
-                _logger.LogWarning(e, "Couldn't add mod role override");
-            }
-
-            return EventHandlerResult.Continue;
+            DiscordRole botRole = eventArgs.Guild.GetRole(_commonOptions.BotRoleId);
+            await eventArgs.Channel.AddOverwriteAsync(
+                botRole,
+                Permissions.AccessChannels | Permissions.SendMessages | Permissions.UseVoice
+            );
         }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Couldn't add mod role override");
+        }
+
+        return EventHandlerResult.Continue;
     }
 }

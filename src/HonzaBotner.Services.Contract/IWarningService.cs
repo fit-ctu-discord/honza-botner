@@ -2,20 +2,19 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HonzaBotner.Services.Contract.Dto;
 
-namespace HonzaBotner.Services.Contract
+namespace HonzaBotner.Services.Contract;
+
+public interface IWarningService
 {
-    public interface IWarningService
-    {
-        Task<List<Warning>> GetAllWarningsAsync();
+    Task<List<Warning>> GetAllWarningsAsync();
 
-        Task<List<Warning>> GetWarningsAsync(ulong userId);
+    Task<List<Warning>> GetWarningsAsync(ulong userId);
 
-        Task<Warning?> GetWarningAsync(int id);
+    Task<Warning?> GetWarningAsync(int id);
 
-        Task<bool> DeleteWarningAsync(int id);
+    Task<bool> DeleteWarningAsync(int id);
 
-        Task<int?> AddWarningAsync(ulong userId, string reason, ulong issuerId);
+    Task<int?> AddWarningAsync(ulong userId, string reason, ulong issuerId);
 
-        Task<int> GetNumberOfWarnings(ulong userId);
-    }
+    Task<int> GetNumberOfWarnings(ulong userId);
 }

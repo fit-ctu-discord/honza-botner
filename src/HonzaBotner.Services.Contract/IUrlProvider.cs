@@ -1,9 +1,8 @@
 using HonzaBotner.Services.Contract.Dto;
 
-namespace HonzaBotner.Services.Contract
+namespace HonzaBotner.Services.Contract;
+
+public interface IUrlProvider
 {
-    public interface IUrlProvider
-    {
-        string GetAuthLink(ulong userId, RolesPool pool);
-    }
+    string GetAuthLink(ulong userId, RolesPool pool);
 }

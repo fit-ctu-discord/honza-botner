@@ -6,6 +6,7 @@ namespace HonzaBotner.Discord.Services.Commands.Polls;
 public class AbcPoll : Poll
 {
     public override string PollType => "AbcPoll";
+
     public override List<string> OptionsEmoji => new()
     {
         ":regional_indicator_a:",
@@ -27,7 +28,11 @@ public class AbcPoll : Poll
     };
 
     public AbcPoll(string authorMention, string question, List<string> options)
-        : base(authorMention, question, options) {}
+        : base(authorMention, question, options)
+    {
+    }
 
-    public AbcPoll(DiscordMessage message) : base(message) {}
+    public AbcPoll(DiscordMessage message) : base(message)
+    {
+    }
 }

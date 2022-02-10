@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using HonzaBotner.Services.Contract.Dto;
 
-namespace HonzaBotner.Services.Contract
+namespace HonzaBotner.Services.Contract;
+
+public interface IUsermapInfoService
 {
-    public interface IUsermapInfoService
-    {
-        Task<UsermapPerson?> GetUserInfoAsync(string accessToken, string userName);
-    }
+    Task<UsermapPerson?> GetUserInfoAsync(string accessToken, string userName);
 }
