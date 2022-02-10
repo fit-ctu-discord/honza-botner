@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace HonzaBotner.Database
+namespace HonzaBotner.Database;
+
+public class CountedEmoji
 {
-    public class CountedEmoji
-    {
-        public ulong Id { get; set; }
-        public ulong Times { get; set; }
-        public DateTime FirstUsedAt { get; set; } = DateTime.UtcNow;
-    }
+    public ulong Id { get; set; }
+    public ulong Times { get; set; }
+    public DateTime FirstUsedAt { get; set; } = DateTime.UtcNow;
 }

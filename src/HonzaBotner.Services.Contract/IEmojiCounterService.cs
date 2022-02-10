@@ -2,12 +2,11 @@
 using System.Threading.Tasks;
 using HonzaBotner.Services.Contract.Dto;
 
-namespace HonzaBotner.Services.Contract
+namespace HonzaBotner.Services.Contract;
+
+public interface IEmojiCounterService
 {
-    public interface IEmojiCounterService
-    {
-        Task<IEnumerable<CountedEmoji>> ListAsync();
-        Task IncrementAsync(ulong emojiId);
-        Task DecrementAsync(ulong emojiId);
-    }
+    Task<IEnumerable<CountedEmoji>> ListAsync();
+    Task IncrementAsync(ulong emojiId);
+    Task DecrementAsync(ulong emojiId);
 }

@@ -1,7 +1,6 @@
-namespace HonzaBotner.Services.Contract
+namespace HonzaBotner.Services.Contract;
+
+public interface IHashService
 {
-    public interface IHashService
-    {
-        string Hash(string input);
-    }
+    string Hash(string input);
 }

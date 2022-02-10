@@ -1,10 +1,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HonzaBotner.Discord
+namespace HonzaBotner.Discord;
+
+public interface IDiscordBot
 {
-    public interface IDiscordBot
-    {
-        Task Run(CancellationToken cancellationToken);
-    }
+    Task Run(CancellationToken cancellationToken);
 }

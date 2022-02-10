@@ -1,25 +1,24 @@
-﻿namespace HonzaBotner.Discord.Services.Options
+﻿namespace HonzaBotner.Discord.Services.Options;
+
+public class CommonCommandOptions
 {
-    public class CommonCommandOptions
-    {
-        public static string ConfigName => "CommonCommandOptions";
+    public static string ConfigName => "CommonCommandOptions";
 
-        public ulong ModRoleId { get; set; }
-        public ulong AuthenticatedRoleId { get; set; }
+    public ulong ModRoleId { get; set; }
+    public ulong AuthenticatedRoleId { get; set; }
 
-        public ulong MuteRoleId { get; set; }
-        public ulong BotRoleId { get; set; }
-        public string? HugEmoteName { get; set; }
+    public ulong MuteRoleId { get; set; }
+    public ulong BotRoleId { get; set; }
+    public string? HugEmoteName { get; set; }
 
-        public ulong GentlemenChannelId { get; set; }
-        public string GentlemenFilePath { get; set; } = "";
+    public ulong GentlemenChannelId { get; set; }
+    public string GentlemenFilePath { get; set; } = "";
 
-        public ulong HornyJailRoleId { get; set; }
-        public ulong HornyJailChannelId { get; set; }
-        public string HornyJailFilePath { get; set; } = "";
+    public ulong HornyJailRoleId { get; set; }
+    public ulong HornyJailChannelId { get; set; }
+    public string HornyJailFilePath { get; set; } = "";
 
-        public ulong BoosterRoleId { get; set; }
+    public ulong BoosterRoleId { get; set; }
 
-        public ulong[]? ReactionIgnoreChannels { get; set; }
-    }
+    public ulong[]? ReactionIgnoreChannels { get; set; }
 }

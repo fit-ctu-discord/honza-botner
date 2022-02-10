@@ -3,27 +3,26 @@ using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Options;
 
-namespace HonzaBotner.Services
+namespace HonzaBotner.Services;
+
+public class AppUrlProvider : IUrlProvider
 {
-    public class AppUrlProvider : IUrlProvider
+    private readonly CvutConfig _cvutConfig;
+
+    public AppUrlProvider(IOptions<CvutConfig> config)
     {
-        private readonly CvutConfig _cvutConfig;
+        _cvutConfig = config.Value;
+    }
 
-        public AppUrlProvider(IOptions<CvutConfig> config)
+    public string GetAuthLink(ulong userId, RolesPool pool)
+    {
+        const string authPath = "/Auth/Authenticate/";
+
+        if (_cvutConfig.AppBaseUrl == null)
         {
-            _cvutConfig = config.Value;
+            throw new InvalidOperationException("Invalid CVUT config");
         }
 
-        public string GetAuthLink(ulong userId, RolesPool pool)
-        {
-            const string authPath = "/Auth/Authenticate/";
-
-            if (_cvutConfig.AppBaseUrl == null)
-            {
-                throw new InvalidOperationException("Invalid CVUT config");
-            }
-
-            return $"{_cvutConfig.AppBaseUrl}{authPath}{userId}/{pool.ToString().ToLowerInvariant()}";
-        }
+        return $"{_cvutConfig.AppBaseUrl}{authPath}{userId}/{pool.ToString().ToLowerInvariant()}";
     }
 }

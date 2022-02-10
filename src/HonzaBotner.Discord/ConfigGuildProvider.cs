@@ -4,28 +4,27 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Options;
 
-namespace HonzaBotner.Discord
+namespace HonzaBotner.Discord;
+
+public class ConfigGuildProvider : IGuildProvider
 {
-    public class ConfigGuildProvider : IGuildProvider
+    private readonly IOptions<DiscordConfig> _config;
+    private readonly DiscordClient _client;
+
+    public ConfigGuildProvider(DiscordWrapper wrapper, IOptions<DiscordConfig> config)
     {
-        private readonly IOptions<DiscordConfig> _config;
-        private readonly DiscordClient _client;
+        _config = config;
+        _client = wrapper.Client;
+    }
 
-        public ConfigGuildProvider(DiscordWrapper wrapper, IOptions<DiscordConfig> config)
+    public Task<DiscordGuild> GetCurrentGuildAsync()
+    {
+        ulong? guildId = _config.Value?.GuildId;
+        if (guildId == null)
         {
-            _config = config;
-            _client = wrapper.Client;
+            throw new InvalidOperationException("GuildId not configured");
         }
 
-        public Task<DiscordGuild> GetCurrentGuildAsync()
-        {
-            ulong? guildId = _config.Value?.GuildId;
-            if (guildId == null)
-            {
-                throw new InvalidOperationException("GuildId not configured");
-            }
-
-            return _client.GetGuildAsync(guildId.Value);
-        }
+        return _client.GetGuildAsync(guildId.Value);
     }
 }

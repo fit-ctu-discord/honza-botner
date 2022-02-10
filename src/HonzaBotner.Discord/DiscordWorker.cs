@@ -2,20 +2,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 
-namespace HonzaBotner.Discord
+namespace HonzaBotner.Discord;
+
+public class DiscordWorker : BackgroundService
 {
-    public class DiscordWorker : BackgroundService
+    private readonly IDiscordBot _discordBot;
+
+    public DiscordWorker(IDiscordBot discordBot)
     {
-        private readonly IDiscordBot _discordBot;
+        _discordBot = discordBot;
+    }
 
-        public DiscordWorker(IDiscordBot discordBot)
-        {
-            _discordBot = discordBot;
-        }
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            await _discordBot.Run(stoppingToken);
-        }
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        await _discordBot.Run(stoppingToken);
     }
 }
