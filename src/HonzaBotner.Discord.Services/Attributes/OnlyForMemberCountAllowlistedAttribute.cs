@@ -11,9 +11,11 @@ using Microsoft.Extensions.Options;
 namespace HonzaBotner.Discord.Services.Attributes;
 
 /// <summary>
-/// Defines that usage of this command is only allowed to moderators.
+/// Defines that usage of this command is only allowed to:
+/// - moderators
+/// - or members that are allow-listed (in config) to do so.
 /// </summary>
-public class OnlyForModsAttribute : CheckBaseAttribute, IOnlyForModsAttribute
+public class OnlyForMemberCountAllowlistedAttribute : CheckBaseAttribute, IOnlyForMemberCountAllowlistedAttribute
 {
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {
@@ -24,6 +26,9 @@ public class OnlyForModsAttribute : CheckBaseAttribute, IOnlyForModsAttribute
         DiscordGuild guild = await guildProvider.GetCurrentGuildAsync();
         DiscordMember member = await guild.GetMemberAsync(ctx.User.Id);
 
-        return member.Roles.Contains(guild.GetRole(options.ModRoleId));
+        return member.Roles.Contains(guild.GetRole(options.ModRoleId))
+               || options.MemberCountAllowlistIds.Any(
+                   role => member.Roles.Select(r => r.Id).Contains(role)
+               );
     }
 }

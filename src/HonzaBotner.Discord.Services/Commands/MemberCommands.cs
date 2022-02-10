@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -10,7 +9,6 @@ using DSharpPlus.Exceptions;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using HonzaBotner.Database;
-using HonzaBotner.Discord.Attributes;
 using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
@@ -28,8 +26,8 @@ public class MemberCommands : BaseCommandModule
 {
     [Group("info")]
     [Aliases("about", "whois")]
-    [OnlyForMods]
     [Description("Provides info about a member.")]
+    [OnlyForMods]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class MemberCommandsInfo : BaseCommandModule
     {
@@ -79,11 +77,10 @@ public class MemberCommands : BaseCommandModule
         }
     }
 
-
     [Group("delete")]
     [Aliases("erase", "remove")]
-    [OnlyForMods]
     [Description("Erases database record of the member.")]
+    [OnlyForMods]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class MemberCommandsDelete : BaseCommandModule
     {
@@ -181,6 +178,7 @@ public class MemberCommands : BaseCommandModule
 
     [Group("count")]
     [Description("Counts members by provided roles.")]
+    [OnlyForMemberCountAllowlisted]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class MemberRoleCount : BaseCommandModule
     {
@@ -195,12 +193,10 @@ public class MemberCommands : BaseCommandModule
         [Description("Counts all members and all authenticated members.")]
         public async Task CountAll(CommandContext ctx)
         {
-            HandleMembersAccessToMemberCount(ctx);
-
-            int authenticatedCount = 0;
             DiscordGuild guild = ctx.Guild;
             DiscordRole authenticatedRole = guild.GetRole(_commonCommandOptions.AuthenticatedRoleId);
 
+            int authenticatedCount = 0;
             foreach ((_, DiscordMember member) in guild.Members)
             {
                 if (member.Roles.Contains(authenticatedRole))
@@ -222,8 +218,6 @@ public class MemberCommands : BaseCommandModule
             [Description("Roles to check.")] params DiscordRole[] roles
         )
         {
-            HandleMembersAccessToMemberCount(ctx);
-
             int count = 0;
             DiscordGuild guild = ctx.Guild;
 
@@ -246,8 +240,6 @@ public class MemberCommands : BaseCommandModule
             [Description("Roles to check.")] params DiscordRole[] roles
         )
         {
-            HandleMembersAccessToMemberCount(ctx);
-
             int count = 0;
             DiscordGuild guild = ctx.Guild;
 
@@ -262,28 +254,6 @@ public class MemberCommands : BaseCommandModule
             }
 
             await ctx.Channel.SendMessageAsync(count.ToString());
-        }
-
-        private class NotModOrTeacherException : Exception, IOnlyForModsAttribute
-        {
-            public Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help) => throw new NotImplementedException();
-        }
-
-        private bool CanMemberUseCount(DiscordMember member)
-        {
-            IReadOnlyCollection<ulong> memberCountRoleAllowlist = new List<ulong>
-            {
-                _commonCommandOptions.ModRoleId, _commonCommandOptions.TeacherRoleId
-            };
-
-            return memberCountRoleAllowlist.Any(role => member.Roles.Select(r => r.Id).Contains(role));
-        }
-
-        private void HandleMembersAccessToMemberCount(CommandContext ctx)
-        {
-            if (CanMemberUseCount(ctx.Member)) return;
-
-            throw new NotModOrTeacherException();
         }
     }
 }

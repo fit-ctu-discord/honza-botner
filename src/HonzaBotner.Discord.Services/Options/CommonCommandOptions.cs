@@ -22,5 +22,5 @@ public class CommonCommandOptions
 
     public ulong[]? ReactionIgnoreChannels { get; set; }
 
-    public ulong TeacherRoleId { get; set; }
+    public ulong[] MemberCountAllowlistIds { get; set; } = System.Array.Empty<ulong>();
 }
