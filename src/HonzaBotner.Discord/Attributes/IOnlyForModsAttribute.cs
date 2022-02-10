@@ -3,7 +3,7 @@ using DSharpPlus.CommandsNext;
 
 namespace HonzaBotner.Discord.Attributes;
 
-public interface IRequireModAttribute
+public interface IOnlyForModsAttribute
 {
     /// <summary>
     /// Executes check on CommandContext whether the User is a Mod

@@ -32,7 +32,7 @@ public class BotCommands : BaseCommandModule
 
     [Command("activity")]
     [Description("Changes bot's activity status.")]
-    [RequireMod]
+    [OnlyForMods]
     [RequireGuild]
     public async Task Activity(CommandContext ctx,
         [Description("Type of the activity. Allowed values: competing, playing, watching or listeningTo.")]

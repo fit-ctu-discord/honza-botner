@@ -152,7 +152,7 @@ internal class DiscordBot : IDiscordBot
                                 .WithDescription($"{permissionEmoji} Příkaz lze použít jen na discord serveru.")
                                 .WithColor(DiscordColor.Red)
                                 .Build(),
-                            IRequireModAttribute => new DiscordEmbedBuilder()
+                            IOnlyForModsAttribute => new DiscordEmbedBuilder()
                                 .WithTitle("Přístup zakázán")
                                 .WithDescription("Tento příkaz může používat pouze Moderátor.")
                                 .WithColor(DiscordColor.Violet)

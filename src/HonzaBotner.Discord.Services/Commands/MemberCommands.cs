@@ -28,7 +28,7 @@ public class MemberCommands : BaseCommandModule
 {
     [Group("info")]
     [Aliases("about", "whois")]
-    [RequireMod]
+    [OnlyForMods]
     [Description("Provides info about a member.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class MemberCommandsInfo : BaseCommandModule
@@ -82,7 +82,7 @@ public class MemberCommands : BaseCommandModule
 
     [Group("delete")]
     [Aliases("erase", "remove")]
-    [RequireMod]
+    [OnlyForMods]
     [Description("Erases database record of the member.")]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class MemberCommandsDelete : BaseCommandModule
@@ -264,7 +264,7 @@ public class MemberCommands : BaseCommandModule
             await ctx.Channel.SendMessageAsync(count.ToString());
         }
 
-        private class NotModOrTeacherException : Exception, IRequireModAttribute
+        private class NotModOrTeacherException : Exception, IOnlyForModsAttribute
         {
             public Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help) => throw new NotImplementedException();
         }

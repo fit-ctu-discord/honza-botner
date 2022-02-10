@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Attributes;
 
-public class RequireModAttribute : CheckBaseAttribute, IRequireModAttribute
+public class OnlyForModsAttribute : CheckBaseAttribute, IOnlyForModsAttribute
 {
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
     {

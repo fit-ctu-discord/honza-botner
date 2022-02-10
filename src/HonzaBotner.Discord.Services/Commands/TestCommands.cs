@@ -7,7 +7,7 @@ namespace HonzaBotner.Discord.Services.Commands;
 
 [Group("test")]
 [Description("Testing commands")]
-[RequireMod]
+[OnlyForMods]
 [RequireGuild]
 public class TestCommands : BaseCommandModule
 {

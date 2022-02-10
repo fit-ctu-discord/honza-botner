@@ -18,7 +18,7 @@ namespace HonzaBotner.Discord.Services.Commands;
 [Group("pin")]
 [Description("Commands to manage pins on server")]
 [RequireGuild]
-[RequireMod]
+[OnlyForMods]
 public class PinCommands : BaseCommandModule
 {
     [Group("delete")]
