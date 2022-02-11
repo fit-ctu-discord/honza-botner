@@ -6,14 +6,15 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Attributes;
 
 /// <summary>
-///
+/// Determines strategy of allowlist to use.
 /// </summary>
-public enum RoleLogic
+public enum AllowlistStrategy
 {
     All,
     Any
@@ -27,17 +28,18 @@ public enum RoleLogic
 public class RequireAllowlistAttribute : CustomBaseAttribute
 {
     private readonly AllowlistsTypes _allowlist;
-    private readonly RoleLogic _roleLogic;
+    private readonly AllowlistStrategy _strategy;
     private IGuildProvider? _guildProvider;
     private IList<ulong>? _roleIds;
+    private ILogger<RequireAllowlistAttribute>? _logger;
 
     public RequireAllowlistAttribute(
         AllowlistsTypes allowlist,
-        RoleLogic roleLogic = RoleLogic.Any
+        AllowlistStrategy strategy = AllowlistStrategy.Any
     )
     {
         _allowlist = allowlist;
-        _roleLogic = roleLogic;
+        _strategy = strategy;
     }
 
     public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
@@ -47,17 +49,20 @@ public class RequireAllowlistAttribute : CustomBaseAttribute
             ctx.CommandsNext.Services.GetService<IOptions<CommandAllowlistsOptions>>()?.Value;
         IGuildProvider? guildProvider = ctx.Services.GetService<IGuildProvider>();
         if (options is null || allowlistOptions is null || guildProvider is null) return false;
+
         _guildProvider = guildProvider;
+        _logger = ctx.CommandsNext.Services.GetService<ILogger<RequireAllowlistAttribute>>();
+
         DiscordGuild guild = await guildProvider.GetCurrentGuildAsync();
         DiscordMember member = await guild.GetMemberAsync(ctx.User.Id);
 
         _roleIds = allowlistOptions.GetAllowlistFromItsType(_allowlist);
-        return member.Roles.Contains(guild.GetRole(options.ModRoleId)) || _roleLogic switch
+        return member.Roles.Contains(guild.GetRole(options.ModRoleId)) || _strategy switch
         {
-            RoleLogic.All => _roleIds.All(
+            AllowlistStrategy.All => _roleIds.All(
                 role => member.Roles.Select(r => r.Id).Contains(role)
             ),
-            RoleLogic.Any => _roleIds.Any(
+            AllowlistStrategy.Any => _roleIds.Any(
                 role => member.Roles.Select(r => r.Id).Contains(role)
             ),
             _ => throw new ArgumentOutOfRangeException()
@@ -66,10 +71,10 @@ public class RequireAllowlistAttribute : CustomBaseAttribute
 
     public override async Task<DiscordEmbed> BuildFailedCheckDiscordEmbed()
     {
-        string logicString = _roleLogic switch
+        string logicString = _strategy switch
         {
-            RoleLogic.All => "s právě všemi rolemi",
-            RoleLogic.Any => "s alespoň jednou rolí",
+            AllowlistStrategy.All => "s právě všemi rolemi",
+            AllowlistStrategy.Any => "s alespoň jednou rolí",
             _ => throw new ArgumentOutOfRangeException()
         };
 
@@ -94,9 +99,13 @@ public class RequireAllowlistAttribute : CustomBaseAttribute
                 DiscordRole role = guild.GetRole(roleId);
                 roles.Add(role.Name);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // TODO: how to add logger here?
+                _logger?.LogWarning(
+                    e,
+                    "Unknown role {RoleId} used in allowlist {Allowlist}",
+                    roleId, _allowlist
+                );
             }
         }
 

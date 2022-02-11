@@ -178,7 +178,7 @@ public class MemberCommands : BaseCommandModule
 
     [Group("count")]
     [Description("Counts members by provided roles.")]
-    [RequireAllowlist(AllowlistsTypes.MemberCount, RoleLogic.All)]
+    [RequireAllowlist(AllowlistsTypes.MemberCount)]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class MemberRoleCount : BaseCommandModule
     {
