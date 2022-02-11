@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace HonzaBotner.Discord.EventHandler
+namespace HonzaBotner.Discord.EventHandler;
+
+internal sealed class OrderedEventHandlersList : List<Type>
 {
-    internal sealed class OrderedEventHandlersList : List<Type>
+    public OrderedEventHandlersList(IEnumerable<Type> types) : base(types)
     {
-        public OrderedEventHandlersList(IEnumerable<Type> types) : base(types)
-        {
-        }
     }
 }

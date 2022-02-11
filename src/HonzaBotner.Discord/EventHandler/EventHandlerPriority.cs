@@ -1,10 +1,9 @@
-﻿namespace HonzaBotner.Discord.EventHandler
+﻿namespace HonzaBotner.Discord.EventHandler;
+
+public enum EventHandlerPriority
 {
-    public enum EventHandlerPriority
-    {
-        Low,
-        Medium,
-        High,
-        Urgent
-    }
+    Low,
+    Medium,
+    High,
+    Urgent
 }

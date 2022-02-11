@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using HonzaBotner.Services.Contract.Dto;
 
-namespace HonzaBotner.Services.Contract
+namespace HonzaBotner.Services.Contract;
+
+public interface INewsService
 {
-    public interface INewsService
-    {
-        IAsyncEnumerable<News> FetchDataAsync(string source, DateTime since);
-    }
+    IAsyncEnumerable<News> FetchDataAsync(string source, DateTime since);
 }

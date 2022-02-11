@@ -9,63 +9,66 @@ using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace HonzaBotner.Discord.Services.Jobs
+namespace HonzaBotner.Discord.Services.Jobs;
+
+[Cron("0 */10 * * * *")]
+public class NewsJobProvider : IJob
 {
-    [Cron("0 */10 * * * *")]
-    public class NewsJobProvider : IJob
+    public string Name { get; } = "news-publisher";
+
+    private readonly ILogger<NewsJobProvider> _logger;
+    private readonly INewsConfigService _configService;
+    private readonly IServiceProvider _serviceProvider;
+
+    private static readonly ConcurrentDictionary<string, Type> s_typesCache = new();
+
+    public NewsJobProvider(ILogger<NewsJobProvider> logger, INewsConfigService configService,
+        IServiceProvider serviceProvider)
     {
-        public string Name { get; } = "news-publisher";
+        _logger = logger;
+        _configService = configService;
+        _serviceProvider = serviceProvider;
+    }
 
-        private readonly ILogger<NewsJobProvider> _logger;
-        private readonly INewsConfigService _configService;
-        private readonly IServiceProvider _serviceProvider;
+    public async Task ExecuteAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Starting news fetching");
 
-        private static readonly ConcurrentDictionary<string, Type> s_typesCache = new();
+        IList<NewsConfig> sources = await _configService.ListConfigsAsync();
 
-        public NewsJobProvider(ILogger<NewsJobProvider> logger, INewsConfigService configService, IServiceProvider serviceProvider)
+        using IServiceScope scope = _serviceProvider.CreateAsyncScope();
+
+        foreach (NewsConfig newsSource in sources)
         {
-            _logger = logger;
-            _configService = configService;
-            _serviceProvider = serviceProvider;
-        }
+            INewsService newsService =
+                scope.ServiceProvider.GetRequiredService(GetType(newsSource.NewsProvider.ToType())) as INewsService
+                ?? throw new InvalidCastException("Type must be INewsService");
+            IPublisherService publisherService =
+                scope.ServiceProvider.GetRequiredService(GetType(newsSource.Publisher.ToType())) as IPublisherService
+                ?? throw new InvalidCastException("Type must be IPublisherService");
 
-        public async Task ExecuteAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Starting news fetching");
+            DateTime now = DateTime.Now;
+            IAsyncEnumerable<News> news = newsService.FetchDataAsync(newsSource.Source, newsSource.LastFetched);
 
-            IList<NewsConfig> sources = await _configService.ListConfigsAsync();
-
-            using IServiceScope scope = _serviceProvider.CreateAsyncScope();
-
-            foreach (NewsConfig newsSource in sources)
+            await foreach (News item in news.WithCancellation(cancellationToken))
             {
-                INewsService newsService = scope.ServiceProvider.GetRequiredService(GetType(newsSource.NewsProvider.ToType())) as INewsService
-                    ?? throw new InvalidCastException("Type must be INewsService");
-                IPublisherService publisherService = scope.ServiceProvider.GetRequiredService(GetType(newsSource.Publisher.ToType())) as IPublisherService
-                    ?? throw new InvalidCastException("Type must be IPublisherService");
-
-                DateTime now = DateTime.Now;
-                IAsyncEnumerable<News> news = newsService.FetchDataAsync(newsSource.Source, newsSource.LastFetched);
-
-                await foreach (News item in news.WithCancellation(cancellationToken))
-                {
-                    await publisherService.Publish(item, newsSource.Channels);
-                }
-
-                await _configService.UpdateFetchDateAsync(newsSource.Id, now);
-            }
-        }
-
-        private static Type GetType(string typeName)
-        {
-            if (s_typesCache.TryGetValue(typeName, out Type? type))
-            {
-                return type;
+                await publisherService.Publish(item, newsSource.Channels);
             }
 
-            type = Type.GetType(typeName) ?? throw new ArgumentOutOfRangeException(nameof(typeName), $"Invalid type: {typeName}");
-
-            return s_typesCache[typeName] = type;
+            await _configService.UpdateFetchDateAsync(newsSource.Id, now);
         }
+    }
+
+    private static Type GetType(string typeName)
+    {
+        if (s_typesCache.TryGetValue(typeName, out Type? type))
+        {
+            return type;
+        }
+
+        type = Type.GetType(typeName) ??
+               throw new ArgumentOutOfRangeException(nameof(typeName), $"Invalid type: {typeName}");
+
+        return s_typesCache[typeName] = type;
     }
 }

@@ -80,6 +80,7 @@ namespace HonzaBotner
                             .AddEventHandler<NewChannelHandler>()
                             .AddEventHandler<PinHandler>()
                             .AddEventHandler<ReminderReactionsHandler>()
+                            .AddEventHandler<PollReactionsHandler>(EventHandlerPriority.Low)
                             .AddEventHandler<RoleBindingsHandler>(EventHandlerPriority.High)
                             .AddEventHandler<StaffVerificationEventHandler>(EventHandlerPriority.Urgent)
                             .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
@@ -99,7 +100,8 @@ namespace HonzaBotner
 
             services.AddScheduler(5000)
                 .AddScopedCronJob<TriggerRemindersJobProvider>()
-                .AddScopedCronJob<NewsJobProvider>();
+                .AddScopedCronJob<NewsJobProvider>()
+                ;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

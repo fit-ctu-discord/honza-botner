@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using HonzaBotner.Services.Contract.Dto;
 
-namespace HonzaBotner.Services.Contract
+namespace HonzaBotner.Services.Contract;
+
+public interface IPublisherService
 {
-    public interface IPublisherService
-    {
-        Task Publish(News news, params ulong[] channels);
-    }
+    Task Publish(News news, params ulong[] channels);
 }

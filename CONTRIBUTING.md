@@ -39,7 +39,7 @@ After making a Pull Request:
 - choose a descriptive name: we use it in release notes
 - provide as much information as needed to understand the changes
 
-[code-of-conduct]: https://github.com/fit-ctu-discord/honza-botnerblob/master/CODE_OF_CONDUCT.md
+[code-of-conduct]: https://github.com/fit-ctu-discord/honza-botner/blob/master/CODE_OF_CONDUCT.md
 [docs]: https://github.com/fit-ctu-discord/honza-botner/tree/master/docs
 [issues]: https://github.com/fit-ctu-discord/honza-botner/issues
 [new-issue]: https://github.com/fit-ctu-discord/honza-botner/issues/new

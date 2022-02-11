@@ -2,18 +2,17 @@
 using System.Threading.Tasks;
 using HonzaBotner.Services.Contract.Dto;
 
-namespace HonzaBotner.Services.Contract
+namespace HonzaBotner.Services.Contract;
+
+public interface IDiscordRoleManager
 {
-    public interface IDiscordRoleManager
-    {
-        HashSet<DiscordRole> MapUsermapRoles(IReadOnlyCollection<string> kosRoles, RolesPool rolesPool);
+    HashSet<DiscordRole> MapUsermapRoles(IReadOnlyCollection<string> kosRoles, RolesPool rolesPool);
 
-        Task<bool> GrantRolesAsync(ulong userId, IReadOnlySet<DiscordRole> discordRoles);
+    Task<bool> GrantRolesAsync(ulong userId, IReadOnlySet<DiscordRole> discordRoles);
 
-        Task<bool> RevokeRolesPoolAsync(ulong userId, RolesPool rolesPool);
+    Task<bool> RevokeRolesPoolAsync(ulong userId, RolesPool rolesPool);
 
-        Task RevokeHostRolesAsync(ulong userId);
+    Task RevokeHostRolesAsync(ulong userId);
 
-        Task<bool> IsUserDiscordAuthenticated(ulong userId);
-    }
+    Task<bool> IsUserDiscordAuthenticated(ulong userId);
 }

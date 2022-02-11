@@ -4,50 +4,49 @@ using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Xunit;
 
-namespace HonzaBotner.Services.Test
+namespace HonzaBotner.Services.Test;
+
+public class NewsConfigEnumsTest
 {
-    public class NewsConfigEnumsTest
+    public static IEnumerable GetNewsProviderEnums()
     {
-        public static IEnumerable GetNewsProviderEnums()
+        foreach (NewsProviderType providerType in Enum.GetValues<NewsProviderType>())
         {
-            foreach (NewsProviderType providerType in Enum.GetValues<NewsProviderType>())
-            {
-                yield return new object[] { providerType };
-            }
+            yield return new object[] { providerType };
         }
+    }
 
-        [Theory]
-        [MemberData(nameof(GetNewsProviderEnums))]
-        public void NewsProviderToTypeTest(NewsProviderType newsProviderType)
+    [Theory]
+    [MemberData(nameof(GetNewsProviderEnums))]
+    public void NewsProviderToTypeTest(NewsProviderType newsProviderType)
+    {
+        Type interfaceType = typeof(INewsService);
+        string type = newsProviderType.ToType();
+
+        Type? t = Type.GetType(type);
+
+        Assert.NotNull(t);
+        Assert.True(t!.IsAssignableTo(interfaceType));
+    }
+
+    public static IEnumerable GetPublisherEnums()
+    {
+        foreach (PublisherType publisherType in Enum.GetValues<PublisherType>())
         {
-            Type interfaceType = typeof(INewsService);
-            string type = newsProviderType.ToType();
-
-            Type? t = Type.GetType(type);
-
-            Assert.NotNull(t);
-            Assert.True(t!.IsAssignableTo(interfaceType));
+            yield return new object[] { publisherType };
         }
+    }
 
-        public static IEnumerable GetPublisherEnums()
-        {
-            foreach (PublisherType publisherType in Enum.GetValues<PublisherType>())
-            {
-                yield return new object[] { publisherType };
-            }
-        }
+    [Theory]
+    [MemberData(nameof(GetPublisherEnums))]
+    public void PublisherToTypeTest(PublisherType publisherType)
+    {
+        Type interfaceType = typeof(IPublisherService);
+        string type = publisherType.ToType();
 
-        [Theory]
-        [MemberData(nameof(GetPublisherEnums))]
-        public void PublisherToTypeTest(PublisherType publisherType)
-        {
-            Type interfaceType = typeof(IPublisherService);
-            string type = publisherType.ToType();
+        Type? t = Type.GetType(type);
 
-            Type? t = Type.GetType(type);
-
-            Assert.NotNull(t);
-            Assert.True(t!.IsAssignableTo(interfaceType));
-        }
+        Assert.NotNull(t);
+        Assert.True(t!.IsAssignableTo(interfaceType));
     }
 }

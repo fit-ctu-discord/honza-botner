@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HonzaBotner.Database.Mappers
+namespace HonzaBotner.Database.Mappers;
+
+internal interface IEntityMapper<TEntity> where TEntity : class
 {
-    internal interface IEntityMapper<TEntity> where TEntity : class
-    {
-        void Map(EntityTypeBuilder<TEntity> builder);
-    }
+    void Map(EntityTypeBuilder<TEntity> builder);
 }
