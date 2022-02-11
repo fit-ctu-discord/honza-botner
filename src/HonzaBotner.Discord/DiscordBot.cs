@@ -147,15 +147,11 @@ internal class DiscordBot : IDiscordBot
 
                         DiscordEmbed embed = failedCheck switch
                         {
+                            ICustomAttribute attribute => await attribute.BuildFailedCheckDiscordEmbed(),
                             RequireGuildAttribute => new DiscordEmbedBuilder()
                                 .WithTitle("Příkaz nelze použít mimo server")
                                 .WithDescription($"{permissionEmoji} Příkaz lze použít jen na discord serveru.")
                                 .WithColor(DiscordColor.Red)
-                                .Build(),
-                            IRequireModAttribute => new DiscordEmbedBuilder()
-                                .WithTitle("Přístup zakázán")
-                                .WithDescription("Tento příkaz může používat pouze Moderátor.")
-                                .WithColor(DiscordColor.Violet)
                                 .Build(),
                             CooldownAttribute check => new DiscordEmbedBuilder()
                                 .WithTitle("Příkaz používáš příliš často")

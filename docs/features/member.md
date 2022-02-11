@@ -14,7 +14,8 @@ Deletes the member record by providing CTU nickname or Discord mention.
 
 #### `::member count`
 ![](https://img.shields.io/static/v1?label=role&message=mod&color=red)
+![](https://img.shields.io/static/v1?label=role&message=teacher&color=red)
 
-Count's number of people having specific role(s).
+Counts number of people having specific role(s).
 Using sub commands also use `and` and `or` operators.
 All authenticated members can be counted using `all` subcommand.

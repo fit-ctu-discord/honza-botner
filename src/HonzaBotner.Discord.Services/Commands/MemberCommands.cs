@@ -21,13 +21,13 @@ namespace HonzaBotner.Discord.Services.Commands;
 [Group("member")]
 [Description("Commands to interact with members.")]
 [ModuleLifespan(ModuleLifespan.Transient)]
-[RequireMod]
 [RequireGuild]
 public class MemberCommands : BaseCommandModule
 {
     [Group("info")]
     [Aliases("about", "whois")]
     [Description("Provides info about a member.")]
+    [RequireMod]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class MemberCommandsInfo : BaseCommandModule
     {
@@ -77,10 +77,10 @@ public class MemberCommands : BaseCommandModule
         }
     }
 
-
     [Group("delete")]
     [Aliases("erase", "remove")]
     [Description("Erases database record of the member.")]
+    [RequireMod]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class MemberCommandsDelete : BaseCommandModule
     {
@@ -178,14 +178,13 @@ public class MemberCommands : BaseCommandModule
 
     [Group("count")]
     [Description("Counts members by provided roles.")]
+    [RequireAllowlist(AllowlistsTypes.MemberCount)]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class MemberRoleCount : BaseCommandModule
     {
         private readonly CommonCommandOptions _commonCommandOptions;
 
-        public MemberRoleCount(
-            IOptions<CommonCommandOptions> commonCommandOptions
-        )
+        public MemberRoleCount(IOptions<CommonCommandOptions> commonCommandOptions)
         {
             _commonCommandOptions = commonCommandOptions.Value;
         }
@@ -194,10 +193,10 @@ public class MemberCommands : BaseCommandModule
         [Description("Counts all members and all authenticated members.")]
         public async Task CountAll(CommandContext ctx)
         {
-            int authenticatedCount = 0;
             DiscordGuild guild = ctx.Guild;
             DiscordRole authenticatedRole = guild.GetRole(_commonCommandOptions.AuthenticatedRoleId);
 
+            int authenticatedCount = 0;
             foreach ((_, DiscordMember member) in guild.Members)
             {
                 if (member.Roles.Contains(authenticatedRole))
@@ -224,13 +223,9 @@ public class MemberCommands : BaseCommandModule
 
             foreach ((_, DiscordMember member) in guild.Members)
             {
-                foreach (DiscordRole role in roles)
+                if (roles.Any(role => member.Roles.Contains(role)))
                 {
-                    if (member.Roles.Contains(role))
-                    {
-                        count++;
-                        break;
-                    }
+                    count++;
                 }
             }
 
@@ -240,23 +235,17 @@ public class MemberCommands : BaseCommandModule
         [Command("roleAnd")]
         [Aliases("and")]
         [Description("Counts all members which have ALL of the provided roles.")]
-        public async Task CountRoleAnd(CommandContext ctx,
-            [Description("Roles to check.")] params DiscordRole[] roles)
+        public async Task CountRoleAnd(
+            CommandContext ctx,
+            [Description("Roles to check.")] params DiscordRole[] roles
+        )
         {
             int count = 0;
             DiscordGuild guild = ctx.Guild;
 
             foreach ((_, DiscordMember member) in guild.Members)
             {
-                bool hasAllRoles = true;
-                foreach (DiscordRole role in roles)
-                {
-                    if (!member.Roles.Contains(role))
-                    {
-                        hasAllRoles = false;
-                        break;
-                    }
-                }
+                bool hasAllRoles = roles.All(role => member.Roles.Contains(role));
 
                 if (hasAllRoles)
                 {

@@ -21,4 +21,6 @@ public class CommonCommandOptions
     public ulong BoosterRoleId { get; set; }
 
     public ulong[]? ReactionIgnoreChannels { get; set; }
+
+    public ulong[] MemberCountAllowlistIds { get; set; } = System.Array.Empty<ulong>();
 }
