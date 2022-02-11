@@ -18,7 +18,7 @@ namespace HonzaBotner.Discord.Services.Commands;
 [Aliases("warn", "takheledebilku")]
 [Description("Commands to warn and list warnings.")]
 [ModuleLifespan(ModuleLifespan.Transient)]
-[OnlyForMods]
+[RequireMod]
 [RequireGuild]
 public class WarningCommands : BaseCommandModule
 {

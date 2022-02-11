@@ -147,8 +147,7 @@ internal class DiscordBot : IDiscordBot
 
                         DiscordEmbed embed = failedCheck switch
                         {
-                            IOnlyForMemberCountAllowlistedAttribute attribute => attribute.GetFailedCheckDiscordEmbed(),
-                            IOnlyForModsAttribute attribute => attribute.GetFailedCheckDiscordEmbed(),
+                            ICustomAttribute attribute => await attribute.BuildFailedCheckDiscordEmbed(),
                             RequireGuildAttribute => new DiscordEmbedBuilder()
                                 .WithTitle("Příkaz nelze použít mimo server")
                                 .WithDescription($"{permissionEmoji} Příkaz lze použít jen na discord serveru.")

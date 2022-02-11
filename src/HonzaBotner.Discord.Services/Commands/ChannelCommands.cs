@@ -11,7 +11,7 @@ namespace HonzaBotner.Discord.Services.Commands;
 
 [Group("channel")]
 [Description("Commands to interact with channels.")]
-[OnlyForMods]
+[RequireMod]
 [RequireGuild]
 public class ChannelCommands : BaseCommandModule
 {

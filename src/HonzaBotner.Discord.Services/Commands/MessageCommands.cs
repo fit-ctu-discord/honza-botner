@@ -18,7 +18,7 @@ namespace HonzaBotner.Discord.Services.Commands;
 
 [Group("message")]
 [Description("Commands to interact with messages.")]
-[OnlyForMods]
+[RequireMod]
 [RequireGuild]
 public class MessageCommands : BaseCommandModule
 {

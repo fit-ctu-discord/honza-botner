@@ -27,7 +27,7 @@ public class MemberCommands : BaseCommandModule
     [Group("info")]
     [Aliases("about", "whois")]
     [Description("Provides info about a member.")]
-    [OnlyForMods]
+    [RequireMod]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class MemberCommandsInfo : BaseCommandModule
     {
@@ -80,7 +80,7 @@ public class MemberCommands : BaseCommandModule
     [Group("delete")]
     [Aliases("erase", "remove")]
     [Description("Erases database record of the member.")]
-    [OnlyForMods]
+    [RequireMod]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class MemberCommandsDelete : BaseCommandModule
     {
@@ -178,7 +178,7 @@ public class MemberCommands : BaseCommandModule
 
     [Group("count")]
     [Description("Counts members by provided roles.")]
-    [OnlyForMemberCountAllowlisted]
+    [RequireAllowlist(AllowlistsTypes.MemberCount, RoleLogic.All)]
     [ModuleLifespan(ModuleLifespan.Transient)]
     public class MemberRoleCount : BaseCommandModule
     {
