@@ -37,7 +37,7 @@ internal class DiscordBot : IDiscordBot
         _voiceManager = voiceManager;
         _discordOptions = discordOptions.Value;
     }
-
+    
     public async Task Run(CancellationToken cancellationToken)
     {
         Client.Ready += Client_Ready;
@@ -54,6 +54,8 @@ internal class DiscordBot : IDiscordBot
         Client.VoiceStateUpdated += Client_VoiceStateUpdated;
         Client.GuildMemberUpdated += Client_GuildMemberUpdated;
         Client.ChannelCreated += Client_ChannelCreated;
+        
+        Client.ThreadCreated += Client_ThreadCreated;
 
         _configurator.Config(Commands);
         Commands.RegisterConverter(new EnumConverter<ActivityType>());
@@ -215,6 +217,11 @@ internal class DiscordBot : IDiscordBot
     }
 
     private Task Client_GuildMemberUpdated(DiscordClient client, GuildMemberUpdateEventArgs args)
+    {
+        return _eventHandler.Handle(args);
+    }
+
+    private Task Client_ThreadCreated(DiscordClient client, ThreadCreateEventArgs args)
     {
         return _eventHandler.Handle(args);
     }
