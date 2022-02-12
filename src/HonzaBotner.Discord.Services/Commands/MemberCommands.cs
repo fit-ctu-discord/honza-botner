@@ -89,9 +89,19 @@ public class MemberCommands : BaseCommandModule
                     $"Member {ctx.Member.DisplayName} requested information about your account on the FIT CTU Discord server."
                 );
             }
+            catch (UnauthorizedException e)
+            {
+                _logger.LogWarning(
+                    e,
+                    "Couldn't send message to user {UserId} because" +
+                    " the member is no longer in the guild" +
+                    " or the member has Allow DM from server members off",
+                    databaseRecord.UserId
+                );
+            }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "Couldn't get member {MemberId} or send message to them", databaseRecord.UserId);
+                _logger.LogWarning(e, "Couldn't get member {MemberId}", databaseRecord.UserId);
             }
 
             await ctx.Channel.SendMessageAsync(databaseRecord.ToString());
