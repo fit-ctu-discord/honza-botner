@@ -24,15 +24,16 @@ public class BadgeRoleHandler
     public async Task<EventHandlerResult> Handle(GuildMemberUpdateEventArgs args)
     {
         await Task.Delay(0); // Avoid warning that there is no "await" in async method
-        if (args.RolesAfter.Count > args.RolesBefore.Count) await CheckAddedRoles(args);
-        else if (args.RolesAfter.Count < args.RolesBefore.Count) await CheckRemovedRoles(args);
+        if (args.RolesAfter.Count > args.RolesBefore.Count) _ = Task.Run(() => CheckAddedRoles(args));
+        else if (args.RolesAfter.Count < args.RolesBefore.Count) _ = Task.Run(() => CheckRemovedRoles(args));
         return EventHandlerResult.Continue;
     }
 
     private async Task CheckAddedRoles(GuildMemberUpdateEventArgs args)
     {
         DiscordRole addedRole = args.RolesAfter.First(role => !args.RolesBefore.Contains(role));
-        if (_options.PairedRoles.ContainsKey(addedRole.Id))
+        if (_options.PairedRoles.ContainsKey(addedRole.Id)
+            && args.RolesBefore.Select(role => role.Id).Any(roleId => _options.TriggerRoles.Contains(roleId)))
         {
             DiscordRole grantedRole = args.Guild.GetRole(_options.PairedRoles[addedRole.Id]);
             await args.Member.GrantRoleAsync(grantedRole);
@@ -59,7 +60,7 @@ public class BadgeRoleHandler
             await args.Member.RevokeRoleAsync(revokedRole);
         }
         else if (_options.TriggerRoles.Contains(removedRole.Id) &&
-                 args.RolesAfter.Any(role => _options.TriggerRoles.Contains(role.Id)))
+                 !args.RolesAfter.Any(role => _options.TriggerRoles.Contains(role.Id)))
         {
             IEnumerable<ulong> pendingRoleIds =
                 _options.PairedRoles.Keys.Where(id => args.RolesBefore.Select(role => role.Id).Contains(id));
