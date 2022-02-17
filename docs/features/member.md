@@ -22,13 +22,12 @@ All authenticated members can be counted using `all` subcommand.
 
 ### Automatic assignment of badge roles
 
-This feature is useful when we want to visually distinguish different member
-roles, but using only colors is no longer sufficient enough. Bot checks if
-a given user has any of the `TriggerRoles` (generally roles that use color to
-differentiate) and if so, it checks for a presence of other configured
-`PairedRoles`. If any such role is found, bot then assigns corresponding
-paired role too. These roles have generally badges, as a mean of other
-differentiation.
+This feature is useful when we want to visually distinguish different member roles,
+but using only colors is no longer sufficient enough.
+Bot checks if a given user has any of the `TriggerRoles`
+(generally roles that use color to differentiate)
+and if so, it checks for a presence of other configured `PairedRoles`.
+If any such role is found, bot then assigns corresponding paired role too.
+These roles have generally badges, as a mean of other differentiation.
 
-Bot is capable of automatically keeping them up to date
-if any of the assigned roles change.
+Bot is capable of automatically keeping them up to date if any of the assigned roles change.
