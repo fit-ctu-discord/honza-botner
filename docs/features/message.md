@@ -24,4 +24,4 @@ Adds a reaction by the bot to the provided message.
 ![](https://img.shields.io/static/v1?label=role&message=mod&color=red)
 
 Adds a binding between a reaction and Discord role for a specific message,
-that is used to [granting roles](granting-roles.md).
+that is used to [grant roles](granting-roles.md).
