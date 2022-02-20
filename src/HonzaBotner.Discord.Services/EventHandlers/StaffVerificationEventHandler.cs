@@ -11,150 +11,139 @@ using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace HonzaBotner.Discord.Services.EventHandlers
-{
-    public class StaffVerificationEventHandler : IEventHandler<ComponentInteractionCreateEventArgs>
-    {
-        private readonly IUrlProvider _urlProvider;
-        private readonly ButtonOptions _buttonOptions;
-        private readonly DiscordRoleConfig _discordRoleConfig;
-        private readonly IDiscordRoleManager _roleManager;
-        private readonly ILogger<StaffVerificationEventHandler> _logger;
-        private readonly ITranslation _translation;
+namespace HonzaBotner.Discord.Services.EventHandlers;
 
-        public StaffVerificationEventHandler(IUrlProvider urlProvider,
-            IOptions<DiscordRoleConfig> discordRoleConfig,
-            IDiscordRoleManager roleManager,
-            ILogger<StaffVerificationEventHandler> logger,
-            IOptions<ButtonOptions> buttonConfig,
-            ITranslation translation
-        )
+public class StaffVerificationEventHandler : IEventHandler<ComponentInteractionCreateEventArgs>
+{
+    private readonly IUrlProvider _urlProvider;
+    private readonly ButtonOptions _buttonOptions;
+    private readonly DiscordRoleConfig _discordRoleConfig;
+    private readonly IDiscordRoleManager _roleManager;
+    private readonly ILogger<StaffVerificationEventHandler> _logger;
+    private readonly ITranslation _translation;
+
+    public StaffVerificationEventHandler(IUrlProvider urlProvider,
+        IOptions<DiscordRoleConfig> discordRoleConfig,
+        IDiscordRoleManager roleManager,
+        ILogger<StaffVerificationEventHandler> logger,
+        IOptions<ButtonOptions> buttonConfig,
+        ITranslation translation
+    )
+    {
+        _urlProvider = urlProvider;
+        _buttonOptions = buttonConfig.Value;
+        _discordRoleConfig = discordRoleConfig.Value;
+        _roleManager = roleManager;
+        _logger = logger;
+        _translation = translation;
+    }
+
+    public async Task<EventHandlerResult> Handle(ComponentInteractionCreateEventArgs eventArgs)
+    {
+        if (eventArgs.Id != _buttonOptions.StaffVerificationId && eventArgs.Id != _buttonOptions.StaffRemoveRoleId)
         {
-            _urlProvider = urlProvider;
-            _buttonOptions = buttonConfig.Value;
-            _discordRoleConfig = discordRoleConfig.Value;
-            _roleManager = roleManager;
-            _logger = logger;
-            _translation = translation;
+            return EventHandlerResult.Continue;
         }
 
-        public async Task<EventHandlerResult> Handle(ComponentInteractionCreateEventArgs eventArgs)
+        if (_buttonOptions.CzechChannelsIds?.Contains(eventArgs.Channel.Id) ?? false)
         {
-            if (eventArgs.Id != _buttonOptions.StaffVerificationId && eventArgs.Id != _buttonOptions.StaffRemoveRoleId)
+            _translation.SetLanguage(ITranslation.Language.Czech);
+        }
+
+        DiscordUser user = eventArgs.User;
+        DiscordMember member = await eventArgs.Guild.GetMemberAsync(user.Id);
+        var builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
+
+        // Check if the button to remove staff roles was pressed.
+        if (eventArgs.Id == _buttonOptions.StaffRemoveRoleId)
+        {
+            bool revoked = await _roleManager.RevokeRolesPoolAsync(eventArgs.User.Id, RolesPool.Staff);
+            builder.Content = _translation["RolesSuccessfullyDeleted"];
+
+            if (!revoked)
             {
-                return EventHandlerResult.Continue;
-            }
-
-            if (_buttonOptions.CzechChannelsIds?.Contains(eventArgs.Channel.Id) ?? false)
-            {
-                _translation.SetLanguage(ITranslation.Language.Czech);
-            }
-
-            DiscordUser user = eventArgs.User;
-            DiscordMember member = await eventArgs.Guild.GetMemberAsync(user.Id);
-            var builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
-
-            // Check if the button to remove staff roles was pressed.
-            if (eventArgs.Id == _buttonOptions.StaffRemoveRoleId)
-            {
-                bool revoked = await _roleManager.RevokeRolesPoolAsync(eventArgs.User.Id, RolesPool.Staff);
-                builder.Content = _translation["RolesSuccessfullyDeleted"];
-
-                if (!revoked)
-                {
-                    _logger.LogInformation(
-                        "Ungranting roles for user {Username} (id {Id}) failed",
-                        eventArgs.User.Username,
-                        eventArgs.User.Id
-                    );
-                    builder.Content = "Staff roles failed to remove. Please contact the moderators.";
-                }
-
-                await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, builder);
-                return EventHandlerResult.Stop;
-            }
-
-            // Check if the user is authenticated.
-            bool isAuthenticated = false;
-            foreach (ulong roleId in _discordRoleConfig.AuthenticatedRoleIds)
-            {
-                if (member.Roles.Select(role => role.Id).Contains(roleId))
-                {
-                    isAuthenticated = true;
-                    break;
-                }
-            }
-
-            if (!isAuthenticated)
-            {
-                string verificationLink = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
-                builder.Content = _translation["UserNotVerified"];
-                builder.AddComponents(
-                    new DiscordLinkButtonComponent(
-                        verificationLink,
-                        _translation["VerifyRolesButton"],
-                        false,
-                        new DiscordComponentEmoji("✅")
-                    )
+                _logger.LogInformation(
+                    "Ungranting roles for user {Username} (id {Id}) failed",
+                    eventArgs.User.Username,
+                    eventArgs.User.Id
                 );
-                await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                    builder);
-
-                return EventHandlerResult.Stop;
+                builder.Content = "Staff roles failed to remove. Please contact the moderators.";
             }
 
-            // Check if the user already has some staff roles
-            bool isStaffAuthenticated = false;
-            foreach (ulong[] roleIds in _discordRoleConfig.StaffRoleMapping.Values)
-            {
-                foreach (ulong roleId in roleIds)
-                {
-                    if (member.Roles.Select(role => role.Id).Contains(roleId))
-                    {
-                        isStaffAuthenticated = true;
-                        break;
-                    }
-                }
-            }
+            await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, builder);
+            return EventHandlerResult.Stop;
+        }
 
-            string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Staff);
+        // Check if the user is authenticated.
+        bool isAuthenticated = _discordRoleConfig.AuthenticatedRoleIds.Any(
+            roleId => member.Roles.Select(role => role.Id).Contains(roleId)
+        );
 
-            if (isStaffAuthenticated && _buttonOptions.StaffRemoveRoleId is not null)
-            {
-                builder.Content = _translation["AlreadyVerified"];
-                builder.AddComponents(
-                    new DiscordLinkButtonComponent(
-                        link,
-                        _translation["UpdateStaffRolesButton"],
-                        false,
-                        new DiscordComponentEmoji("👑")
-                    ),
-                    new DiscordButtonComponent(
-                        ButtonStyle.Danger,
-                        _buttonOptions.StaffRemoveRoleId,
-                        _translation["RemoveRolesButton"],
-                        false,
-                        new DiscordComponentEmoji("🗑️")
-                    )
-                );
-            }
-            else
-            {
-                builder.Content = _translation["VerifyStaff"];
-                builder.AddComponents(new DiscordLinkButtonComponent(
-                    link,
-                    _translation["VerifyStaffRolesButton"],
+        if (!isAuthenticated)
+        {
+            string verificationLink = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
+            builder.Content = _translation["UserNotVerified"];
+            builder.AddComponents(
+                new DiscordLinkButtonComponent(
+                    verificationLink,
+                    _translation["VerifyRolesButton"],
                     false,
-                    new DiscordComponentEmoji("👑"))
-                );
-            }
-
-            await eventArgs.Interaction.CreateResponseAsync(
-                InteractionResponseType.ChannelMessageWithSource,
-                builder
+                    new DiscordComponentEmoji("✅")
+                )
             );
+            await eventArgs.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                builder);
 
             return EventHandlerResult.Stop;
         }
+
+        // Check if the user already has some staff roles
+        bool isStaffAuthenticated = false;
+        foreach (ulong[] roleIds in _discordRoleConfig.StaffRoleMapping.Values)
+        {
+            if (roleIds.Any(roleId => member.Roles.Select(role => role.Id).Contains(roleId)))
+            {
+                isStaffAuthenticated = true;
+            }
+        }
+
+        string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Staff);
+
+        if (isStaffAuthenticated && _buttonOptions.StaffRemoveRoleId is not null)
+        {
+            builder.Content = _translation["AlreadyVerified"];
+            builder.AddComponents(
+                new DiscordLinkButtonComponent(
+                    link,
+                    _translation["UpdateStaffRolesButton"],
+                    false,
+                    new DiscordComponentEmoji("👑")
+                ),
+                new DiscordButtonComponent(
+                    ButtonStyle.Danger,
+                    _buttonOptions.StaffRemoveRoleId,
+                    _translation["RemoveRolesButton"],
+                    false,
+                    new DiscordComponentEmoji("🗑️")
+                )
+            );
+        }
+        else
+        {
+            builder.Content = _translation["VerifyStaff"];
+            builder.AddComponents(new DiscordLinkButtonComponent(
+                link,
+                _translation["VerifyStaffRolesButton"],
+                false,
+                new DiscordComponentEmoji("👑"))
+            );
+        }
+
+        await eventArgs.Interaction.CreateResponseAsync(
+            InteractionResponseType.ChannelMessageWithSource,
+            builder
+        );
+
+        return EventHandlerResult.Stop;
     }
 }

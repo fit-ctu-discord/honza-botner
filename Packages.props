@@ -5,17 +5,17 @@
         <PackageReference Update="DSharpPlus" Version="4.1.0" />
         <PackageReference Update="DSharpPlus.CommandsNext" Version="4.1.0" />
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.1.0" />
-        <PackageReference Update="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.1" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.1" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="6.0.1" />
+        <PackageReference Update="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.2" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.2" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="6.0.2" />
         <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
         <PackageReference Update="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-        <PackageReference Update="Microsoft.Extensions.Hosting" Version="6.0.0" />
+        <PackageReference Update="Microsoft.Extensions.Hosting" Version="6.0.1" />
         <PackageReference Update="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
         <PackageReference Update="Microsoft.Extensions.Http" Version="6.0.0" />
         <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
         <PackageReference Update="Microsoft.Extensions.Options" Version="6.0.0" />
-        <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+        <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.1.0" />
         <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.3" />
         <PackageReference Update="Swashbuckle.AspNetCore" Version="6.2.3" />
         <PackageReference Update="System.Collections.Immutable" Version="6.0.0" />

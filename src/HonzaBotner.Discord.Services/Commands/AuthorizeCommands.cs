@@ -5,40 +5,39 @@ using DSharpPlus.Entities;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 
-namespace HonzaBotner.Discord.Services.Commands
+namespace HonzaBotner.Discord.Services.Commands;
+
+[Description("Příkazy sloužící k ověření totožnosti")]
+[ModuleLifespan(ModuleLifespan.Transient)]
+[RequireGuild]
+public class AuthorizeCommands : BaseCommandModule
 {
-    [Description("Příkazy sloužící k ověření totožnosti")]
-    [ModuleLifespan(ModuleLifespan.Transient)]
-    [RequireGuild]
-    public class AuthorizeCommands : BaseCommandModule
+    private readonly IUrlProvider _urlProvider;
+    private readonly IAuthorizationService _authorizationService;
+
+    public AuthorizeCommands(IUrlProvider urlProvider, IAuthorizationService authorizationService)
     {
-        private readonly IUrlProvider _urlProvider;
-        private readonly IAuthorizationService _authorizationService;
+        _urlProvider = urlProvider;
+        _authorizationService = authorizationService;
+    }
 
-        public AuthorizeCommands(IUrlProvider urlProvider, IAuthorizationService authorizationService)
+    [Command("authorize"), Aliases("auth")]
+    public async Task AuthorizeCommand(CommandContext ctx)
+    {
+        DiscordUser user = ctx.User;
+
+        DiscordDmChannel channel = await ctx.Member.CreateDmChannelAsync();
+
+        string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
+
+        if (await _authorizationService.IsUserVerified(user.Id))
         {
-            _urlProvider = urlProvider;
-            _authorizationService = authorizationService;
+            await channel.SendMessageAsync(
+                $"You are already authorized.\nTo update roles follow this link: {link}");
         }
-
-        [Command("authorize"), Aliases("auth")]
-        public async Task AuthorizeCommand(CommandContext ctx)
+        else
         {
-            DiscordUser user = ctx.User;
-
-            DiscordDmChannel channel = await ctx.Member.CreateDmChannelAsync();
-
-            string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);
-
-            if (await _authorizationService.IsUserVerified(user.Id))
-            {
-                await channel.SendMessageAsync(
-                    $"You are already authorized.\nTo update roles follow this link: {link}");
-            }
-            else
-            {
-                await channel.SendMessageAsync($"Hi, authorize by following this link: {link}");
-            }
+            await channel.SendMessageAsync($"Hi, authorize by following this link: {link}");
         }
     }
 }

@@ -1,17 +1,21 @@
 ﻿using System.Threading.Tasks;
 using DSharpPlus.Entities;
 
-namespace HonzaBotner.Discord.Managers
+namespace HonzaBotner.Discord.Managers;
+
+public interface IVoiceManager
 {
-    public interface IVoiceManager
-    {
-        Task AddNewVoiceChannelAsync(DiscordChannel channelToCloneFrom, DiscordMember user,
-            string? name = null, int? limit = null, bool? isPublic = null);
+    Task AddNewVoiceChannelAsync(
+        DiscordChannel channelToCloneFrom,
+        DiscordMember user,
+        string? name = null,
+        int? limit = null,
+        bool? isPublic = null
+    );
 
-        Task<bool> EditVoiceChannelAsync(DiscordMember user, string? name, int? limit, bool? isPublic);
+    Task<bool> EditVoiceChannelAsync(DiscordMember user, string? name, int? limit, bool? isPublic);
 
-        Task DeleteUnusedVoiceChannelAsync(DiscordChannel channel);
+    Task DeleteUnusedVoiceChannelAsync(DiscordChannel channel);
 
-        Task DeleteAllUnusedVoiceChannelsAsync();
-    }
+    Task DeleteAllUnusedVoiceChannelsAsync();
 }
