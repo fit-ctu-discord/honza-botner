@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
         services.Configure<InfoOptions>(configuration.GetSection(InfoOptions.ConfigName));
         services.Configure<ReminderOptions>(configuration.GetSection(ReminderOptions.ConfigName));
         services.Configure<ButtonOptions>(configuration.GetSection(ButtonOptions.ConfigName));
+        services.Configure<BadgeRoleOptions>(configuration.GetSection(BadgeRoleOptions.ConfigName));
 
         return services;
     }

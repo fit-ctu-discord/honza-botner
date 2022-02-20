@@ -9,7 +9,7 @@ they get a warning.
 ![](https://img.shields.io/static/v1?label=role&message=mod&color=red)
 
 Adds a new warning to a member.
-The reason why the member was reported is also send in DMs.
+The reason why the member was reported is also sent in DMs.
 
 #### `::warn list`
 ![](https://img.shields.io/static/v1?label=role&message=mod&color=red)

@@ -84,6 +84,7 @@ public class Startup
                         .AddEventHandler<StaffVerificationEventHandler>(EventHandlerPriority.Urgent)
                         .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
                         .AddEventHandler<VoiceHandler>()
+                        .AddEventHandler<BadgeRoleHandler>()
                         ;
                 }
             )

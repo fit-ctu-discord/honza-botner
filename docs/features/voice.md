@@ -8,8 +8,8 @@ After somebody joins, it stays in the server until somebody is in it.
 
 #### `::voice edit`
 
-In a custom voice channel,
-the name and/or limitations of such a channel,
+In a custom voice channel
+the name and/or limitations of such a channel
 can also be edited.
 Be aware that Discord has rate limits
 that prevent editing multiple times in a row.
