@@ -33,14 +33,17 @@ public class MemberCommands : BaseCommandModule
     {
         private readonly HonzaBotnerDbContext _dbContext;
         private readonly IHashService _hashService;
+        private readonly ILogger<MemberCommandsInfo> _logger;
 
         public MemberCommandsInfo(
             HonzaBotnerDbContext dbContext,
-            IHashService hashService
+            IHashService hashService,
+            ILogger<MemberCommandsInfo> logger
         )
         {
             _dbContext = dbContext;
             _hashService = hashService;
+            _logger = logger;
         }
 
         [GroupCommand]
@@ -54,7 +57,7 @@ public class MemberCommands : BaseCommandModule
         {
             Verification? databaseRecord = await _dbContext.Verifications
                 .FirstOrDefaultAsync(v => v.UserId == member.Id);
-            await MemberInfoAsync(ctx, databaseRecord);
+            await AnnounceMemberInfoAsync(ctx, databaseRecord);
         }
 
         [Command("ctu")]
@@ -68,12 +71,40 @@ public class MemberCommands : BaseCommandModule
             string authId = _hashService.Hash(cvutUsername);
             Verification? databaseRecord =
                 await _dbContext.Verifications.FirstOrDefaultAsync(v => v.AuthId == authId);
-            await MemberInfoAsync(ctx, databaseRecord);
+            await AnnounceMemberInfoAsync(ctx, databaseRecord);
         }
 
-        private async Task MemberInfoAsync(CommandContext ctx, Verification? databaseRecord)
+        private async Task AnnounceMemberInfoAsync(CommandContext ctx, Verification? databaseRecord)
         {
-            await ctx.Channel.SendMessageAsync(databaseRecord?.ToString() ?? "No member record.");
+            if (databaseRecord == null)
+            {
+                await ctx.Channel.SendMessageAsync("No member record.");
+                return;
+            }
+
+            try
+            {
+                DiscordMember? member = await ctx.Guild.GetMemberAsync(databaseRecord.UserId);
+                await member.SendMessageAsync(
+                    $"Member {ctx.Member.DisplayName} requested information about your account on the FIT CTU Discord server."
+                );
+            }
+            catch (UnauthorizedException e)
+            {
+                _logger.LogWarning(
+                    e,
+                    "Couldn't send message to user {UserId} because" +
+                    " the member is no longer in the guild" +
+                    " or the member has Allow DM from server members off",
+                    databaseRecord.UserId
+                );
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "Couldn't get member {MemberId}", databaseRecord.UserId);
+            }
+
+            await ctx.Channel.SendMessageAsync(databaseRecord.ToString());
         }
     }
 
