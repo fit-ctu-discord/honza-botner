@@ -8,19 +8,16 @@ namespace HonzaBotner.Discord.Services.EventHandlers;
 
 public class PollReactionsHandler : IEventHandler<MessageReactionAddEventArgs>
 {
-    public async Task<EventHandlerResult> Handle(MessageReactionAddEventArgs args)
+    public Task<EventHandlerResult> Handle(MessageReactionAddEventArgs args)
     {
-        if (args.User.IsBot) return EventHandlerResult.Continue;
+        if (args.User.IsBot) return Task.FromResult(EventHandlerResult.Continue);
         _ = Task.Run(() => HandleAsync(args));
-        await Task.Delay(0);
-        return EventHandlerResult.Continue;
+        return Task.FromResult(EventHandlerResult.Continue);
     }
 
     private async Task HandleAsync(MessageReactionAddEventArgs args)
     {
-        DiscordMessage message = args.Message.Content is null
-            ? await args.Channel.GetMessageAsync(args.Message.Id)
-            : args.Message;
+        DiscordMessage message = await args.Channel.GetMessageAsync(args.Message.Id);
         if (!message.Author.IsCurrent
             || (message.Embeds?.Count.Equals(0) ?? true)
             || !(message.Embeds[0].Footer?.Text.EndsWith("Poll") ?? false))
@@ -28,7 +25,7 @@ public class PollReactionsHandler : IEventHandler<MessageReactionAddEventArgs>
             return;
         }
 
-        if (message.Reactions.Any(x => x.Emoji == args.Emoji && x.Count > 1)) return;
+        if (message.Reactions.First(x => x.Emoji == args.Emoji).IsMe) return;
 
         await args.Message.DeleteReactionAsync(args.Emoji, args.User);
     }
