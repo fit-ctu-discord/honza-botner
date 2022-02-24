@@ -75,6 +75,7 @@ public class TriggerRemindersJobProvider : IJob
             // DM all users.
             foreach (ulong user in receivers)
             {
+                remindedUsers.Append("<@" + user + ">, ");
                 try
                 {
                     DiscordMember? member = await message.Channel.Guild.GetMemberAsync(user);
@@ -91,8 +92,6 @@ public class TriggerRemindersJobProvider : IJob
                             e.Message);
                     }
                 }
-
-                remindedUsers.Append("<@" + user + ">, ");
             }
 
             remindedUsers = remindedUsers.Remove(remindedUsers.Length - 2, 2);

@@ -53,7 +53,7 @@ public class VerificationEventHandler : IEventHandler<ComponentInteractionCreate
 
         if (isAuthenticated)
         {
-            builder.Content = _translation["UserAlreadyVerified"];
+            builder.Content = _translation["AlreadyVerified"];
             builder.AddComponents(
                 new DiscordLinkButtonComponent(
                     link,
