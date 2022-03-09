@@ -6,7 +6,7 @@
         <PackageReference Update="DSharpPlus.CommandsNext" Version="4.1.0" />
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.1.0" />
         <PackageReference Update="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.2" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.2" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.3" />
         <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="6.0.2" />
         <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
         <PackageReference Update="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
