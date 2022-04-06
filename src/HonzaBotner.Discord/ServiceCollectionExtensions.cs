@@ -1,5 +1,6 @@
 using System;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.SlashCommands;
 using HonzaBotner.Discord.EventHandler;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,8 +16,11 @@ public static class ServiceCollectionExtensions
         return serviceCollection;
     }
 
-    public static IServiceCollection AddDiscordBot(this IServiceCollection serviceCollection,
-        Action<CommandsNextExtension> commandConfig, Action<EventHandlersListBuilder> reactionConfig)
+    public static IServiceCollection AddDiscordBot(
+        this IServiceCollection serviceCollection,
+        Action<CommandsNextExtension> commandConfig,
+        Action<EventHandlersListBuilder> reactionConfig,
+        Action<SlashCommandsExtension> slashConfig)
     {
         serviceCollection.AddHostedService<DiscordWorker>();
         serviceCollection.AddSingleton<IDiscordBot, DiscordBot>();
@@ -25,6 +29,7 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddTransient<EventHandler.EventHandler>();
 
         serviceCollection.AddSingleton(new CommandConfigurator(commandConfig));
+        serviceCollection.AddSingleton(new SlashCommandsConfigurator(slashConfig));
 
         EventHandlersListBuilder builder = new(serviceCollection);
         reactionConfig(builder);

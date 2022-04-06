@@ -38,6 +38,7 @@ public class Startup
         services.AddControllers();
 
         string connectionString = PsqlConnectionStringParser.GetEFConnectionString(Configuration["DATABASE_URL"]);
+        ulong? guildId = Configuration.GetSection("Discord").GetValue<ulong>("GuildId");
 
         services
             .AddDbContext<HonzaBotnerDbContext>(options =>
@@ -86,6 +87,9 @@ public class Startup
                         .AddEventHandler<VoiceHandler>()
                         .AddEventHandler<BadgeRoleHandler>()
                         ;
+                }, slash =>
+                {
+
                 }
             )
 

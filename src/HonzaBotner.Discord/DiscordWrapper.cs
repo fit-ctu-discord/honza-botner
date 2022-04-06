@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
+using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -14,6 +15,7 @@ public class DiscordWrapper
     public DiscordClient Client { get; }
     public CommandsNextExtension Commands { get; }
     public InteractivityExtension Interactivity { get; }
+    public SlashCommandsExtension SlashCommands { get; }
 
     public DiscordWrapper(IOptions<DiscordConfig> options, IServiceProvider services, ILoggerFactory loggerFactory)
     {
@@ -39,6 +41,12 @@ public class DiscordWrapper
             PollBehaviour = PollBehaviour.KeepEmojis, Timeout = TimeSpan.FromSeconds(30)
         };
         Interactivity = Client.UseInteractivity(iConfig);
+
+        SlashCommandsConfiguration sConfig = new()
+        {
+            Services = services
+        };
+        SlashCommands = Client.UseSlashCommands(sConfig);
 
         Client.Logger.LogInformation("Starting with secret: {Token}", options.Value.Token);
     }

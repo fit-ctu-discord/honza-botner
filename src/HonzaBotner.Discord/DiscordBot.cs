@@ -9,6 +9,7 @@ using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.SlashCommands;
 using HonzaBotner.Discord.Attributes;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Managers;
@@ -23,18 +24,22 @@ internal class DiscordBot : IDiscordBot
     private readonly EventHandler.EventHandler _eventHandler;
     private readonly CommandConfigurator _configurator;
     private readonly IVoiceManager _voiceManager;
+    private readonly ISlashManager _slashManager;
     private readonly DiscordConfig _discordOptions;
 
     private DiscordClient Client => _discordWrapper.Client;
     private CommandsNextExtension Commands => _discordWrapper.Commands;
+    private SlashCommandsExtension SCommands => _discordWrapper.SlashCommands;
 
     public DiscordBot(DiscordWrapper discordWrapper, EventHandler.EventHandler eventHandler,
-        CommandConfigurator configurator, IVoiceManager voiceManager, IOptions<DiscordConfig> discordOptions)
+        CommandConfigurator configurator, IVoiceManager voiceManager, IOptions<DiscordConfig> discordOptions,
+        ISlashManager slashManager)
     {
         _discordWrapper = discordWrapper;
         _eventHandler = eventHandler;
         _configurator = configurator;
         _voiceManager = voiceManager;
+        _slashManager = slashManager;
         _discordOptions = discordOptions.Value;
     }
 
@@ -80,6 +85,7 @@ internal class DiscordBot : IDiscordBot
 
         // Run managers' init processes.
         await _voiceManager.DeleteAllUnusedVoiceChannelsAsync();
+        await _slashManager.UpdateStartupPermissions();
     }
 
     private async Task Client_ClientError(DiscordClient sender, ClientErrorEventArgs e)
