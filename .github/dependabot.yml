@@ -8,5 +8,9 @@ updates:
   - package-ecosystem: "nuget" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    commit-message:
+      prefix: "⬆️"
     target-branch: "develop"
+    labels:
+      - "release: dependencies"
