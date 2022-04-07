@@ -89,7 +89,8 @@ public class Startup
                         ;
                 }, slash =>
                 {
-
+                    slash
+                        .RegisterCommands<Discord.Services.SCommands.BotCommands>(guildId);
                 }
             )
 
@@ -98,6 +99,7 @@ public class Startup
 
             // Managers
             .AddTransient<IVoiceManager, VoiceManager>()
+            .AddTransient<ISlashManager, SlashManager>()
             .AddTransient<IReminderManager, ReminderManager>()
             .AddTransient<IButtonManager, ButtonManager>()
             ;
