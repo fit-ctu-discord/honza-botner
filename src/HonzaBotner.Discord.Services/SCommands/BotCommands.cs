@@ -18,7 +18,7 @@ public class BotCommands : ApplicationCommandModule
         _guildProvider = guildProvider;
     }
 
-    [SlashCommand("bot", "Get info about bot. Version, source code, etc", false)]
+    [SlashCommand("bot", "Get info about bot. Version, source code, etc")]
     public async Task InfoCommandAsync(InteractionContext ctx)
     {
         const string content = "This bot is developed by the community.\n" +
@@ -74,5 +74,11 @@ public class BotCommands : ApplicationCommandModule
             .AsEphemeral(false);
 
         await ctx.CreateResponseAsync(message);
+    }
+
+    [SlashCommand("ping", "pong?")]
+    public async Task PingCommandAsync(InteractionContext ctx)
+    {
+        await ctx.CreateResponseAsync($"Pong! Latency: {ctx.Client.Ping} ms");
     }
 }

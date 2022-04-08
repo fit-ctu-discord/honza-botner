@@ -11,6 +11,7 @@ using HonzaBotner.Discord.Services.Utils;
 using HonzaBotner.Discord.Utils;
 using HonzaBotner.Scheduler;
 using HonzaBotner.Services;
+using HonzaBotner.Services.Contract;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -89,8 +90,8 @@ public class Startup
                         ;
                 }, slash =>
                 {
-                    slash
-                        .RegisterCommands<Discord.Services.SCommands.BotCommands>(guildId);
+                    slash.RegisterCommands<Discord.Services.SCommands.BotCommands>(guildId);
+                    slash.RegisterCommands<Discord.Services.SCommands.EmoteCommands>(guildId);
                 }
             )
 
