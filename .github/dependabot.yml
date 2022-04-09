@@ -12,5 +12,3 @@ updates:
     commit-message:
       prefix: "⬆️"
     target-branch: "develop"
-    labels:
-      - "release: dependencies"
