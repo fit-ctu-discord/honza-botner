@@ -140,9 +140,9 @@ public class PinCommands : BaseCommandModule
             {
                 int score = 0;
                 IReadOnlyList<DiscordUser> reactions =
-                    await message.GetReactionsAsync(permanentEmoji, _pinOptions.Treshold);
+                    await message.GetReactionsAsync(permanentEmoji, _pinOptions.Threshold);
 
-                if (reactions.Count == _pinOptions.Treshold) continue;
+                if (reactions.Count == _pinOptions.Threshold) continue;
 
                 foreach (DiscordUser user in reactions)
                 {
@@ -177,7 +177,7 @@ public class PinCommands : BaseCommandModule
                 }
 
                 // Do not delete anything.
-                if (score >= _pinOptions.Treshold)
+                if (score >= _pinOptions.Threshold)
                 {
                     continue;
                 }
