@@ -9,10 +9,9 @@ public class Sha256HashService : IHashService
     public string Hash(string input)
     {
         byte[] toBeHashed = Encoding.UTF8.GetBytes(input);
-        using SHA256 sha256 = SHA256.Create();
-        byte[] bytes = sha256.ComputeHash(toBeHashed);
+        byte[] bytes = SHA256.HashData(toBeHashed);
 
-        StringBuilder strB = new();
+        StringBuilder strB = new(64);
         foreach (byte b in bytes)
         {
             strB.Append(b.ToString("x2"));
