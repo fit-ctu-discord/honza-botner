@@ -14,7 +14,7 @@ public class Sha256HashService : IHashService
         byte[] bytes = SHA256.HashData(toBeHashed);
 
         var c = new char[bytes.Length * 2];
-        for (int i = 0, j = 0; i < bytes.Length; ++i)
+        for (int i = 0, j = 0; i < bytes.Length; ++i, ++j)
         {
             c[j] = HexAlphabet[bytes[i] >> 4];
             c[++j] = HexAlphabet[bytes[i] & 0xF];
