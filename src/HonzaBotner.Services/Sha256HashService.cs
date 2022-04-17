@@ -9,7 +9,7 @@ public class Sha256HashService : IHashService
 {
     private const int HashBytesSize = 256 / 8;
     
-    private static ReadOnlySpan<byte> HexAlphabetSpan => new[]
+    private static ReadOnlySpan<byte> HexAlphabet => new[]
     {
         (byte)'0',
         (byte)'1',
