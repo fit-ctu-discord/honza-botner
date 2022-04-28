@@ -33,7 +33,7 @@ public class FunCommands : BaseCommandModule
         await ctx.TriggerTypingAsync();
 
         SecureRandom random = new();
-        string selected = choices[random.Next(choices.Length)].RemoveDiscordMentions(ctx.Guild, _logger);
+        string selected = choices[random.Next(choices.Length)].RemoveDiscordMentions(ctx.Guild);
 
         try
         {
