@@ -16,7 +16,7 @@ public class Sha256HashService : IHashService
         var len = Encoding.UTF8.GetBytes(input, enc);
         SHA256.HashData(enc[..len], bytes);
 
-        return Convert.ToHexString(bytes);
+        return Convert.ToHexString(bytes).ToLower();
     }
 }
 
