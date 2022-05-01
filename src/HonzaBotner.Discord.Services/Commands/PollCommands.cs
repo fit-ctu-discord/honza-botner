@@ -22,11 +22,14 @@ public class PollCommands : BaseCommandModule
 
     private readonly CommonCommandOptions _options;
     private readonly ILogger<PollCommands> _logger;
+    private readonly IGuildProvider _guildProvider;
 
-    public PollCommands(IOptions<CommonCommandOptions> options, ILogger<PollCommands> logger)
+    public PollCommands(IOptions<CommonCommandOptions> options, ILogger<PollCommands> logger,
+        IGuildProvider guildProvider)
     {
         _options = options.Value;
         _logger = logger;
+        _guildProvider = guildProvider;
     }
 
     [GroupCommand]
@@ -95,6 +98,7 @@ public class PollCommands : BaseCommandModule
         catch (ArgumentException e)
         {
             await ctx.RespondAsync(e.Message);
+            _logger.LogError(e, "");
         }
         catch (Exception e)
         {
@@ -146,10 +150,20 @@ public class PollCommands : BaseCommandModule
             return;
         }
 
-        DiscordRole modRole = (await ctx.Client.GetGuildAsync(ctx.Guild.Id)).GetRole(_options.ModRoleId);
-        AbcPoll poll = new(originalMessage);
+        DiscordRole modRole = (await _guildProvider.GetCurrentGuildAsync()).GetRole(_options.ModRoleId);
+        AbcPoll poll;
+        try
+        {
+            poll = new AbcPoll(await (await ctx.Client.GetChannelAsync(ctx.Channel.Id)).GetMessageAsync(ctx.Message.ReferencedMessage.Id));
+        }
+        catch (Exception e)
+        {
+            await PollHelpAsync(ctx);
+            _logger.LogError(e, "");
+            return;
+        }
 
-        if (poll.AuthorMention != ctx.Member.Mention && !ctx.Member.Roles.Contains(modRole))
+        if (poll.AuthorMention != ctx.Member?.Mention && !(ctx.Member?.Roles.Contains(modRole) ?? false))
         {
             await ctx.RespondAsync("You are not authorized to edit this poll");
             return;
@@ -157,7 +171,7 @@ public class PollCommands : BaseCommandModule
 
         try
         {
-            await new AbcPoll(originalMessage).AddOptionsAsync(ctx.Client, options.ToList());
+            await poll.AddOptionsAsync(ctx.Client, options);
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
         }
         catch (ArgumentException e)
