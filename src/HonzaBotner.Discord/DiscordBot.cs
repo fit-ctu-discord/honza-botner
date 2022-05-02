@@ -26,7 +26,6 @@ internal class DiscordBot : IDiscordBot
     private readonly CommandConfigurator _configurator;
     private readonly SlashCommandsConfigurator _slashConfigurator;
     private readonly IVoiceManager _voiceManager;
-    private readonly ISlashManager _slashManager;
     private readonly DiscordConfig _discordOptions;
 
     private DiscordClient Client => _discordWrapper.Client;
@@ -38,15 +37,13 @@ internal class DiscordBot : IDiscordBot
         CommandConfigurator configurator,
         SlashCommandsConfigurator slashConfigurator,
         IVoiceManager voiceManager,
-        IOptions<DiscordConfig> discordOptions,
-        ISlashManager slashManager)
+        IOptions<DiscordConfig> discordOptions)
     {
         _discordWrapper = discordWrapper;
         _eventHandler = eventHandler;
         _configurator = configurator;
         _slashConfigurator = slashConfigurator;
         _voiceManager = voiceManager;
-        _slashManager = slashManager;
         _discordOptions = discordOptions.Value;
     }
 
@@ -99,7 +96,6 @@ internal class DiscordBot : IDiscordBot
 
         // Run managers' init processes.
         await _voiceManager.DeleteAllUnusedVoiceChannelsAsync();
-        _ = Task.Run(() => _slashManager.UpdateStartupPermissions());
     }
 
     private async Task Client_ClientError(DiscordClient sender, ClientErrorEventArgs e)

@@ -101,7 +101,6 @@ public class Startup
 
             // Managers
             .AddTransient<IVoiceManager, VoiceManager>()
-            .AddTransient<ISlashManager, SlashManager>()
             .AddTransient<IReminderManager, ReminderManager>()
             .AddTransient<IButtonManager, ButtonManager>()
             ;
