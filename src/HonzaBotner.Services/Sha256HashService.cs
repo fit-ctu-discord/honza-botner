@@ -1,3 +1,4 @@
+using System;
 using System.Security.Cryptography;
 using System.Text;
 using HonzaBotner.Services.Contract;
@@ -8,16 +9,14 @@ public class Sha256HashService : IHashService
 {
     public string Hash(string input)
     {
-        byte[] toBeHashed = Encoding.UTF8.GetBytes(input);
-        using SHA256 sha256 = SHA256.Create();
-        byte[] bytes = sha256.ComputeHash(toBeHashed);
+        var encLen = (input.Length + 1) * 3;
+        var enc = encLen <= 1024 ? stackalloc byte[encLen] : new byte[encLen];
+        Span<byte> bytes = stackalloc byte[256 / 8];
 
-        StringBuilder strB = new();
-        foreach (byte b in bytes)
-        {
-            strB.Append(b.ToString("x2"));
-        }
+        var len = Encoding.UTF8.GetBytes(input, enc);
+        SHA256.HashData(enc[..len], bytes);
 
-        return strB.ToString();
+        return Convert.ToHexString(bytes).ToLower();
     }
 }
+

@@ -1,58 +1,65 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
-using Microsoft.Extensions.Logging;
+using DSharpPlus.Exceptions;
 
 namespace HonzaBotner.Discord.Services.Extensions;
 
 public static class StringExtension
 {
-    /// <summary>
-    /// Sanitizes string of Discord mentions. If method fails, empty string is returned.
-    /// </summary>
-    /// <param name="stringObject">String to process.</param>
-    /// <param name="guild">Discord guild to search name content of the mentioned user or group.</param>
-    /// <param name="logger">Logger to log to.</param>
-    /// <returns>Sanitized string of Discord mentions.</returns>
-    public static string RemoveDiscordMentions(this string stringObject, DiscordGuild guild,
-        ILogger? logger = null)
+
+    private static readonly Regex s_regex;
+
+    static StringExtension()
     {
-        string value = stringObject;
+        // Group 1 (Type) - optional - either ! or &
+        // Group 2 (Id) - optional - 17-20 digits long userID
+        // Match - Either literal @everyone or @here, alternatively <@12345678...9> with optional ! or & behind @
+        s_regex = new Regex(@"(?:@(?:everyone|here))|(?:<@([!&])?(\d{17,20})>)");
+    }
 
-        // Replace all user and group mentions by their name from.
-        value = Regex.Replace(value, @"<@(.)(.*?)>", match =>
+    /// <summary>
+    /// Sanitizes all Discord mentions, except channel ones. If <paramref name="guild"/> is provided,
+    /// mentioned users and roles are transcribed to their corresponding plain name. Dangerous names are sanitized too.
+    /// </summary>
+    /// <param name="value">String to process.</param>
+    /// <param name="guild">Discord guild to search plain name of the mentioned user or role.</param>
+    /// <returns>Sanitized string of Discord mentions.</returns>
+    public static string RemoveDiscordMentions(
+        this string value,
+        DiscordGuild? guild = null)
+    {
+        return s_regex.Replace(value, match => MentionEvaluateAsync(match, guild).Result);
+    }
+
+    private static async Task<string> MentionEvaluateAsync(Match match, DiscordGuild? guild)
+    {
+        // Invalidate ID pings, replacing them with their name (only in guilds)
+        if (guild is not null && match.Groups.TryGetValue("2", out Group? idMention) && idMention.Value != "")
+        {
+            ulong snowflakeId = ulong.Parse(idMention.Value);
+
+            if (match.Groups.TryGetValue("1", out Group? idType) && idType.Value == "&")
             {
-                if (!match.Groups.TryGetValue("1", out Group? mentionTypeGroup)) return "";
-                if (!match.Groups.TryGetValue("2", out Group? idValueGroup)) return "";
-                if (!ulong.TryParse(idValueGroup.Value, out ulong id)) return "";
-
+                DiscordRole mentionedRole = guild.GetRole(snowflakeId);
+                if (mentionedRole is not null)
+                    return mentionedRole.Name.RemoveDiscordMentions();
+            }
+            else
+            {
                 try
                 {
-                    // Make this better async? https://stackoverflow.com/questions/33014011/how-to-rewrite-regex-replace-due-to-async-api
-                    switch (mentionTypeGroup.Value)
-                    {
-                        case "!":
-                            DiscordMember member = guild.GetMemberAsync(id).Result;
-                            return member.DisplayName;
-                        case "&":
-                            DiscordRole role = guild.GetRole(id);
-                            return role.Name;
-                        default:
-                            // This is not a mention, no sanitation needed.
-                            return match.Value;
-                    }
+                    DiscordMember mentionedMember = await guild.GetMemberAsync(snowflakeId);
+                    return mentionedMember.DisplayName.RemoveDiscordMentions();
                 }
-                catch (Exception e)
-                {
-                    logger?.LogWarning(e, "Removing mention failed");
-                    return "";
-                }
+                catch (NotFoundException)
+                {}
             }
-        );
+        }
 
-        // Replace all remaining @ characters.
-        value = Regex.Replace(value, @"@", string.Empty);
-
-        return value;
+        // Invalidate @everyone, @here, or pings which have correct ID format, but no name was found for them
+        return match.Value.Replace("@",
+            "@" + char.ConvertFromUtf32(int.Parse("200b", System.Globalization.NumberStyles.HexNumber)));
     }
 }
