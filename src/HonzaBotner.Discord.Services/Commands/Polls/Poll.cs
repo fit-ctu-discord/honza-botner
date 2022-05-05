@@ -84,18 +84,3 @@ public abstract class Poll
         return builder.WithFooter(PollType).Build();
     }
 }
-
-[Serializable]
-public class PollException : Exception
-{
-    public PollException ()
-    {}
-
-    public PollException (string message)
-        : base(message)
-    {}
-
-    public PollException (string message, Exception innerException)
-        : base (message, innerException)
-    {}
-}
