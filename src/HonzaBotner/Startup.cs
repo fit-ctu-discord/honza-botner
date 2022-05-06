@@ -79,7 +79,6 @@ public class Startup
                         .AddEventHandler<NewChannelHandler>()
                         .AddEventHandler<PinHandler>()
                         .AddEventHandler<ReminderReactionsHandler>()
-                        .AddEventHandler<PollReactionsHandler>(EventHandlerPriority.Low)
                         .AddEventHandler<RoleBindingsHandler>(EventHandlerPriority.High)
                         .AddEventHandler<StaffVerificationEventHandler>(EventHandlerPriority.Urgent)
                         .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
@@ -99,7 +98,8 @@ public class Startup
             ;
 
         services.AddScheduler(5000)
-            .AddScopedCronJob<TriggerRemindersJobProvider>();
+            .AddScopedCronJob<TriggerRemindersJobProvider>()
+            .AddScopedCronJob<StandUpJobProvider>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -79,7 +79,7 @@ public class ReminderManager : IReminderManager
             .WithAuthor(
                 author?.DisplayName ?? "Unknown user",
                 iconUrl: author?.AvatarUrl)
-            .WithDescription(reminder.Content.RemoveDiscordMentions(guild, _logger) + datetime)
+            .WithDescription(reminder.Content.RemoveDiscordMentions(guild) + datetime)
             .WithColor(color);
 
         return embedBuilder.Build();

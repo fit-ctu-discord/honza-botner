@@ -22,11 +22,14 @@ public class PollCommands : BaseCommandModule
 
     private readonly CommonCommandOptions _options;
     private readonly ILogger<PollCommands> _logger;
+    private readonly IGuildProvider _guildProvider;
 
-    public PollCommands(IOptions<CommonCommandOptions> options, ILogger<PollCommands> logger)
+    public PollCommands(IOptions<CommonCommandOptions> options, ILogger<PollCommands> logger,
+        IGuildProvider guildProvider)
     {
         _options = options.Value;
         _logger = logger;
+        _guildProvider = guildProvider;
     }
 
     [GroupCommand]
@@ -83,27 +86,27 @@ public class PollCommands : BaseCommandModule
 
     private async Task CreateDefaultPollAsync(CommandContext ctx, string question, List<string>? answers = null)
     {
-        Poll poll = answers is null
-            ? new YesNoPoll(ctx.Member.Mention, question)
-            : new AbcPoll(ctx.Member.Mention, question, answers);
-
         try
         {
+            Poll poll = answers is null
+                ? new YesNoPoll(ctx.Member.Mention, question)
+                : new AbcPoll(ctx.Member.Mention, question, answers);
+
             await poll.PostAsync(ctx.Client, ctx.Channel);
             await ctx.Message.DeleteAsync();
         }
-        catch (ArgumentException e)
+        catch (PollException e)
         {
             await ctx.RespondAsync(e.Message);
         }
         catch (Exception e)
         {
             await ctx.RespondAsync(PollErrorMessage);
-            _logger.LogWarning(e, "Failed to create new {PollType}", poll.PollType);
+            _logger.LogWarning(e, "Failed to create new Poll");
         }
     }
 
-    private async Task PollHelpAsync(CommandContext ctx)
+    private static async Task PollHelpAsync(CommandContext ctx)
     {
         DiscordEmbed embed = new DiscordEmbedBuilder()
             .WithTitle("Polls")
@@ -146,21 +149,23 @@ public class PollCommands : BaseCommandModule
             return;
         }
 
-        DiscordRole modRole = (await ctx.Client.GetGuildAsync(ctx.Guild.Id)).GetRole(_options.ModRoleId);
-        AbcPoll poll = new(originalMessage);
-
-        if (poll.AuthorMention != ctx.Member.Mention && !ctx.Member.Roles.Contains(modRole))
-        {
-            await ctx.RespondAsync("You are not authorized to edit this poll");
-            return;
-        }
-
         try
         {
-            await new AbcPoll(originalMessage).AddOptionsAsync(ctx.Client, options.ToList());
+            DiscordRole modRole = (await _guildProvider.GetCurrentGuildAsync()).GetRole(_options.ModRoleId);
+
+            // I am sorry, due to DSharpPlus' caching logic, this mess is necessary
+            AbcPoll poll = new (await (await ctx.Client.GetChannelAsync(ctx.Channel.Id)).GetMessageAsync(ctx.Message.ReferencedMessage.Id));
+
+            if (poll.AuthorMention != ctx.Member?.Mention && !(ctx.Member?.Roles.Contains(modRole) ?? false))
+            {
+                await ctx.RespondAsync("You are not authorized to edit this poll");
+                return;
+            }
+
+            await poll.AddOptionsAsync(ctx.Client, options);
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
         }
-        catch (ArgumentException e)
+        catch (PollException e)
         {
             await ctx.RespondAsync(e.Message);
         }
