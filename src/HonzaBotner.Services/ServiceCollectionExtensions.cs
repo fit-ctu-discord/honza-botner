@@ -31,6 +31,7 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddScoped<IRoleBindingsService, RoleBindingsService>();
         serviceCollection.AddScoped<IWarningService, WarningService>();
         serviceCollection.AddScoped<IRemindersService, RemindersService>();
+        serviceCollection.AddScoped<IStandUpStreakService, StandUpStreakService>();
 
         return serviceCollection;
     }

@@ -8,6 +8,7 @@ using DSharpPlus.Entities;
 using HonzaBotner.Discord.Services.Helpers;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Scheduler.Contract;
+using HonzaBotner.Services.Contract;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -22,15 +23,19 @@ public class StandUpJobProvider : IJob
 
     private readonly CommonCommandOptions _commonOptions;
 
+    private readonly IStandUpStreakService _streakService;
+
     public StandUpJobProvider(
         ILogger<StandUpJobProvider> logger,
         DiscordWrapper discord,
-        IOptions<CommonCommandOptions> commonOptions
+        IOptions<CommonCommandOptions> commonOptions,
+        IStandUpStreakService streakService
     )
     {
         _logger = logger;
         _discord = discord;
         _commonOptions = commonOptions.Value;
+        _streakService = streakService;
     }
 
     /// <summary>
@@ -94,6 +99,8 @@ public class StandUpJobProvider : IJob
                     {
                         fail.Increment(priority);
                     }
+
+                    await _streakService.UpdateStreak(msg.Author.Id);
                 }
             }
 
