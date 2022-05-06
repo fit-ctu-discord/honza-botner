@@ -45,10 +45,9 @@ public class StandUpJobProvider : IJob
     /// []? - optional
     /// []! - must
     /// </summary>
-    private static readonly Regex s_regex = new(@"\s*\[\s*(?<State>\S*)\s*\]\s*(?<Priority>.)");
+    private static readonly Regex s_regex = new(@"\[\s*(?<State>\S*)\s*\]\s*(?<Priority>[!?])?");
 
-    private static readonly List<string> s_okList = new() { "check", "ok", "✅" };
-    private static readonly List<string> s_failList = new() { "fail", "no", "❌" };
+    private static readonly List<string> s_okList = new() { "check", "done", "ok", "✅" };
 
     public string Name { get; } = "standup";
 
@@ -66,13 +65,16 @@ public class StandUpJobProvider : IJob
         {
             DiscordChannel channel = await _discord.Client.GetChannelAsync(_commonOptions.StandUpChannelId);
 
+            var ok = new StandUpStats();
+            var fail = new StandUpStats();
+
             List<DiscordMessage> messageList = new();
             messageList.AddRange(
                 (await channel.GetMessagesAsync())
                 .Where(msg => msg.Timestamp.Date == yesterday)
             );
 
-            while (true)
+            while (messageList.Count > 0)
             {
                 int messagesCount = messageList.Count;
                 messageList.AddRange(
@@ -86,10 +88,6 @@ public class StandUpJobProvider : IJob
                     break;
                 }
             }
-
-            var ok = new StandUpStats();
-            var fail = new StandUpStats();
-            var inProgress = new StandUpStats();
 
             foreach (DiscordMessage msg in messageList)
             {
@@ -108,26 +106,21 @@ public class StandUpJobProvider : IJob
                     {
                         ok.Increment(priority);
                     }
-                    else if (s_failList.Any(s => state.Contains(s)))
-                    {
-                        fail.Increment(priority);
-                    }
                     else
                     {
-                        inProgress.Increment(priority);
+                        fail.Increment(priority);
                     }
                 }
             }
 
             await channel.SendMessageAsync($@"
-Stand-up time, <@{_commonOptions.StandUpRoleId}>!
+Stand-up time, <@&{_commonOptions.StandUpRoleId}>!
 
 Results from <t:{((DateTimeOffset)today.AddDays(-1)).ToUnixTimeSeconds()}:D>:
 ```
-all:            {ok.Sum + fail.Sum + inProgress.Sum}
-completed:      {ok}
-failed:         {fail}
-in-progress:    {inProgress}
+all:        {ok.Sum + fail.Sum}
+completed:  {ok}
+failed:     {fail}
 ```
 ");
         }
