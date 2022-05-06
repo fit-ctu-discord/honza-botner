@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Jobs;
 
-[Cron("0 35 14 * * ?")]
+[Cron("0 0 8 * * ?")]
 public class StandUpJobProvider : IJob
 {
     private readonly ILogger<StandUpJobProvider> _logger;
@@ -50,7 +50,7 @@ public class StandUpJobProvider : IJob
     private static readonly List<string> s_okList = new() { "check", "ok", "✅" };
     private static readonly List<string> s_failList = new() { "fail", "no", "❌" };
 
-    public string Name { get; } = "standup-trigger";
+    public string Name { get; } = "standup";
 
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
@@ -60,7 +60,8 @@ public class StandUpJobProvider : IJob
 
     private async Task SendStandUpNotification(DateTime today)
     {
-        DateTime yesterday = today; //.AddDays(-1); TODO
+        DateTime yesterday = today.AddDays(-1);
+
         try
         {
             DiscordChannel channel = await _discord.Client.GetChannelAsync(_commonOptions.StandUpChannelId);

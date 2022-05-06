@@ -22,7 +22,12 @@ public class SchedulerHostedService : BackgroundService
         _delay = delay;
         _logger = logger;
         _cronJobs = cronJobs
-            .Select(j => new CronJobWrapper(j, j.CronExpression, now))
+            .Select(job =>
+            {
+                var cronJobWrapper = new CronJobWrapper(job, job.CronExpression, now);
+                cronJobWrapper.Next(); // Run Crons based on their expressions.
+                return cronJobWrapper;
+            })
             .ToList();
     }
 
