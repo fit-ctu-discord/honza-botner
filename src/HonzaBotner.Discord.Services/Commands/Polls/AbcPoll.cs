@@ -73,8 +73,6 @@ public class AbcPoll : Poll
         {
             throw new PollException($"Total number of reactions on a message can't be greater than {reactionCap}");
         }
-
-
         await ExistingPollMessage
             .ModifyAsync(Modify(client, ExistingPollMessage.Channel.Guild, ExistingPollMessage.Embeds[0], emojisToAdd));
 
