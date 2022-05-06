@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
+using HonzaBotner.Discord.Services.Helpers;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Scheduler.Contract;
 using Microsoft.Extensions.Logging;
@@ -12,7 +13,7 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Jobs;
 
-[Cron("0 35 18 * * ?")]
+[Cron("0 0 8 * * ?")]
 public class StandUpJobProvider : IJob
 {
     private readonly ILogger<StandUpJobProvider> _logger;
@@ -43,21 +44,16 @@ public class StandUpJobProvider : IJob
     /// [] - normal
     /// []! - critical
     /// </summary>
-    private static readonly Regex s_regex = new(@"^\s*\[\s*(?<State>\S*)\s*\]\s*(?<Priority>[!])?");
+    private static readonly Regex Regex = new(@"^\s*\[\s*(?<State>\S*)\s*\]\s*(?<Priority>[!])?");
 
-    private static readonly List<string> s_okList = new() { "check", "done", "ok", "✅" };
+    private static readonly List<string> OkList = new() { "check", "done", "ok", "✅" };
 
-    public string Name { get; } = "standup";
+    public string Name => "standup";
 
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         var today = DateTime.Today; // Fix one point in time.
-        await SendStandUpNotification(today);
-    }
-
-    private async Task SendStandUpNotification(DateTime today)
-    {
-        DateTime yesterday = today.AddDays(-0);
+        DateTime yesterday = today.AddDays(-1);
 
         try
         {
@@ -87,7 +83,7 @@ public class StandUpJobProvider : IJob
             {
                 foreach (string line in msg.Content.Split('\n'))
                 {
-                    var match = s_regex.Match(line);
+                    var match = Regex.Match(line);
                     if (!match.Success)
                     {
                         continue;
@@ -96,7 +92,7 @@ public class StandUpJobProvider : IJob
                     string state = match.Groups["State"].ToString();
                     string priority = match.Groups["Priority"].ToString();
 
-                    if (s_okList.Any(s => state.Contains(s)))
+                    if (OkList.Any(s => state.Contains(s)))
                     {
                         ok.Increment(priority);
                     }
@@ -122,37 +118,5 @@ failed:     {fail}
         {
             _logger.LogError(e, "Exception during standup trigger: {Message}", e.Message);
         }
-    }
-}
-
-internal class StandUpStats
-{
-    private int _normal;
-    private int _must;
-
-    private const string Must = "!";
-
-    public void Increment(string priority)
-    {
-        if (priority.Contains(Must))
-        {
-            _must++;
-        }
-        else
-        {
-            _normal++;
-        }
-    }
-
-    public int Sum => _normal + _must;
-
-    public override string ToString()
-    {
-        return $"{Sum} ({_normal} + {_must}!)";
-    }
-
-    public StandUpStats Add(StandUpStats other)
-    {
-        return new StandUpStats { _normal = _normal + other._normal, _must = _must + other._must };
     }
 }
