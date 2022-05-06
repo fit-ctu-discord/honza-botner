@@ -36,16 +36,14 @@ public class StandUpJobProvider : IJob
     /// Stand-up task regex.
     ///
     /// state:
-    /// [] - in progress
+    /// [] - in progress during the day, failed later
     /// [:white_check_mark:] - completed
-    /// [:x:] - failed
     ///
     /// priority:
     /// [] - normal
-    /// []? - optional
-    /// []! - must
+    /// []! - critical
     /// </summary>
-    private static readonly Regex s_regex = new(@"\[\s*(?<State>\S*)\s*\]\s*(?<Priority>[!?])?");
+    private static readonly Regex s_regex = new(@"^\s*\[\s*(?<State>\S*)\s*\]\s*(?<Priority>[!])?");
 
     private static readonly List<string> s_okList = new() { "check", "done", "ok", "✅" };
 
@@ -118,7 +116,7 @@ Stand-up time, <@&{_commonOptions.StandUpRoleId}>!
 
 Results from <t:{((DateTimeOffset)today.AddDays(-1)).ToUnixTimeSeconds()}:D>:
 ```
-all:        {ok.Sum + fail.Sum}
+all:        {ok.Add(fail)}
 completed:  {ok}
 failed:     {fail}
 ```
@@ -134,10 +132,8 @@ failed:     {fail}
 internal class StandUpStats
 {
     private int _normal;
-    private int _optional;
     private int _must;
 
-    private const string Optional = "?";
     private const string Must = "!";
 
     public void Increment(string priority)
@@ -146,20 +142,21 @@ internal class StandUpStats
         {
             _must++;
         }
-        else if (priority.Contains(Optional))
-        {
-            _optional++;
-        }
         else
         {
             _normal++;
         }
     }
 
-    public int Sum => _normal + _optional + _must;
+    public int Sum => _normal + _must;
 
     public override string ToString()
     {
-        return $"{Sum} ({_normal} + {_optional}? + {_must}!)";
+        return $"{Sum} ({_normal} + {_must}!)";
+    }
+
+    public StandUpStats Add(StandUpStats other)
+    {
+        return new StandUpStats { _normal = _normal + other._normal, _must = _must + other._must };
     }
 }
