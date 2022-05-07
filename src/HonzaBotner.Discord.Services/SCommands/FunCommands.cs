@@ -6,6 +6,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
+using HonzaBotner.Discord.Services.Extensions;
 
 namespace HonzaBotner.Discord.Services.SCommands;
 
@@ -42,7 +43,7 @@ public class FunCommands : ApplicationCommandModule
                 }
             }
             await response.Result.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder().WithContent(text.ToString()));
+                new DiscordInteractionResponseBuilder().WithContent(text.ToString().RemoveDiscordMentions(ctx.Guild)));
         }
     }
 
