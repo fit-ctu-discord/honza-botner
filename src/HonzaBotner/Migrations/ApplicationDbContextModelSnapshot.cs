@@ -88,7 +88,7 @@ namespace HonzaBotner.Migrations
                     b.ToTable("RoleBindings");
                 });
 
-            modelBuilder.Entity("HonzaBotner.Database.StandUpStreak", b =>
+            modelBuilder.Entity("HonzaBotner.Database.StandUpStat", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -99,8 +99,14 @@ namespace HonzaBotner.Migrations
                     b.Property<int>("Freezes")
                         .HasColumnType("integer");
 
+                    b.Property<int>("LastDayCompleted")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("LastDayOfStreak")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("LastDayTasks")
+                        .HasColumnType("integer");
 
                     b.Property<int>("LongestStreak")
                         .HasColumnType("integer");
@@ -108,12 +114,18 @@ namespace HonzaBotner.Migrations
                     b.Property<int>("Streak")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TotalCompleted")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalTasks")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("UserId")
                         .HasColumnType("numeric(20,0)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("StandUpStreaks");
+                    b.ToTable("StandUpStats");
                 });
 
             modelBuilder.Entity("HonzaBotner.Database.Verification", b =>

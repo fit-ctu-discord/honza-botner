@@ -6,12 +6,12 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace HonzaBotner.Migrations
 {
-    public partial class StandUpStreak : Migration
+    public partial class StandUpStats : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "StandUpStreaks",
+                name: "StandUpStats",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -20,18 +20,22 @@ namespace HonzaBotner.Migrations
                     Streak = table.Column<int>(type: "integer", nullable: false),
                     LongestStreak = table.Column<int>(type: "integer", nullable: false),
                     Freezes = table.Column<int>(type: "integer", nullable: false),
-                    LastDayOfStreak = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    LastDayOfStreak = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastDayCompleted = table.Column<int>(type: "integer", nullable: false),
+                    LastDayTasks = table.Column<int>(type: "integer", nullable: false),
+                    TotalCompleted = table.Column<int>(type: "integer", nullable: false),
+                    TotalTasks = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StandUpStreaks", x => x.Id);
+                    table.PrimaryKey("PK_StandUpStats", x => x.Id);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "StandUpStreaks");
+                name: "StandUpStats");
         }
     }
 }

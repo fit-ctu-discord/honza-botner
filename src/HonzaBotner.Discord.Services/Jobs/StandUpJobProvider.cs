@@ -23,19 +23,19 @@ public class StandUpJobProvider : IJob
 
     private readonly CommonCommandOptions _commonOptions;
 
-    private readonly IStandUpStreakService _streakService;
+    private readonly IStandUpStatsService _statsService;
 
     public StandUpJobProvider(
         ILogger<StandUpJobProvider> logger,
         DiscordWrapper discord,
         IOptions<CommonCommandOptions> commonOptions,
-        IStandUpStreakService streakService
+        IStandUpStatsService statsService
     )
     {
         _logger = logger;
         _discord = discord;
         _commonOptions = commonOptions.Value;
-        _streakService = streakService;
+        _statsService = statsService;
     }
 
     /// <summary>
@@ -87,15 +87,19 @@ public class StandUpJobProvider : IJob
             foreach (DiscordMessage msg in messageList.Where(msg => msg.Timestamp.Date == yesterday))
             {
                 bool streakMaintained = false;
+                int total = 0;
+                int completed = 0;
                 foreach (Match match in Regex.Matches(msg.Content))
                 {
                     string state = match.Groups["State"].ToString();
                     string priority = match.Groups["Priority"].ToString();
+                    total++;
 
                     if (OkList.Any(s => state.Contains(s)))
                     {
                         ok.Increment(priority);
                         streakMaintained = true;
+                        completed++;
                     }
                     else
                     {
@@ -103,9 +107,11 @@ public class StandUpJobProvider : IJob
                     }
                 }
 
+                await _statsService.UpdateStats(msg.Author.Id, completed, total);
+
                 if (streakMaintained)
                 {
-                    await _streakService.UpdateStreak(msg.Author.Id);
+                    await _statsService.UpdateStreak(msg.Author.Id);
                 }
             }
 

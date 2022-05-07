@@ -2,7 +2,7 @@
 
 namespace HonzaBotner.Services.Contract.Dto;
 
-public class StandUpStreak{
+public class StandUpStat{
 
     public int Id { get; set; }
     public ulong UserId { get; set; }
