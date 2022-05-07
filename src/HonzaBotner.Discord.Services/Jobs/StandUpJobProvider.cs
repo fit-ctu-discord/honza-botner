@@ -86,6 +86,7 @@ public class StandUpJobProvider : IJob
 
             foreach (DiscordMessage msg in messageList.Where(msg => msg.Timestamp.Date == yesterday))
             {
+                bool streakMaintained = false;
                 foreach (Match match in Regex.Matches(msg.Content))
                 {
                     string state = match.Groups["State"].ToString();
@@ -94,12 +95,16 @@ public class StandUpJobProvider : IJob
                     if (OkList.Any(s => state.Contains(s)))
                     {
                         ok.Increment(priority);
+                        streakMaintained = true;
                     }
                     else
                     {
                         fail.Increment(priority);
                     }
+                }
 
+                if (streakMaintained)
+                {
                     await _streakService.UpdateStreak(msg.Author.Id);
                 }
             }

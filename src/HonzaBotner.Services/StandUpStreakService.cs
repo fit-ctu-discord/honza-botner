@@ -11,9 +11,10 @@ namespace HonzaBotner.Services;
 public class StandUpStreakService : IStandUpStreakService
 {
     private readonly HonzaBotnerDbContext _dbContext;
-    private readonly ILogger<WarningService> _logger;
+    private readonly ILogger<StandUpStreakService> _logger;
+    private const int DaysToAcquireFreeze = 6;
 
-    public StandUpStreakService(HonzaBotnerDbContext dbContext, ILogger<WarningService> logger)
+    public StandUpStreakService(HonzaBotnerDbContext dbContext, ILogger<StandUpStreakService> logger)
     {
         _dbContext = dbContext;
         _logger = logger;
@@ -31,7 +32,6 @@ public class StandUpStreakService : IStandUpStreakService
     {
         Database.StandUpStreak? streak = await _dbContext.StandUpStreaks
             .FirstOrDefaultAsync(streak => streak.UserId == userId);
-        ;
 
         // Create new streak for a new user
         if (streak is null)
@@ -61,6 +61,11 @@ public class StandUpStreakService : IStandUpStreakService
 
         int days = (DateTime.Today.AddDays(-2) - streak.LastDayOfStreak).Days;
 
+        if (days == -1) //Streak was already restored today
+        {
+            return;
+        }
+
         if (days > streak.Freezes) //Streak broken
         {
             streak.Freezes = 0;
@@ -78,7 +83,7 @@ public class StandUpStreakService : IStandUpStreakService
                 streak.LongestStreak = streak.Streak;
             }
 
-            if (streak.Streak % 6 == 0) // freeze acquired
+            if (streak.Streak % DaysToAcquireFreeze == 0) // freeze acquired
             {
                 streak.Freezes++;
             }
