@@ -17,7 +17,7 @@ namespace HonzaBotner.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "6.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -86,6 +86,34 @@ namespace HonzaBotner.Migrations
                     b.HasKey("Emoji", "ChannelId", "MessageId", "RoleId");
 
                     b.ToTable("RoleBindings");
+                });
+
+            modelBuilder.Entity("HonzaBotner.Database.StandUpStreak", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Freezes")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("LastDayOfStreak")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("LongestStreak")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Streak")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("UserId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StandUpStreaks");
                 });
 
             modelBuilder.Entity("HonzaBotner.Database.Verification", b =>
