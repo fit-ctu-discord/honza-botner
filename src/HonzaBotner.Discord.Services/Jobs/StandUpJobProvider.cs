@@ -107,12 +107,9 @@ public class StandUpJobProvider : IJob
                     }
                 }
 
-                await _statsService.UpdateStats(msg.Author.Id, completed, total);
+                await _statsService.UpdateStats(msg.Author.Id, completed, total, streakMaintained);
 
-                if (streakMaintained)
-                {
-                    await _statsService.UpdateStreak(msg.Author.Id);
-                }
+
             }
 
             await channel.SendMessageAsync($@"
