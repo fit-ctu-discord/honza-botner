@@ -28,5 +28,4 @@ public class HonzaBotnerDbContext : DbContext
     public DbSet<Warning> Warnings { get; set; }
     public DbSet<Reminder> Reminders { get; set; }
     public DbSet<StandUpStat> StandUpStats { get; set; }
-
 }
