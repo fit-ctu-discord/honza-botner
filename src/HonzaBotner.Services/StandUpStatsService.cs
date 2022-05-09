@@ -91,7 +91,7 @@ public class StandUpStatsService : IStandUpStatsService
         return await IsValidStreak(userId, stats);
     }
 
-    private async Task<bool> IsValidStreak(ulong userId, StandUpStat? streak = null)
+    private async Task<bool> IsValidStreak(ulong userId, StandUpStat? streak)
     {
         streak ??= await GetStats(userId);
 
