@@ -22,7 +22,7 @@ public class StandUpJobProvider : IJob
 
     private readonly DiscordWrapper _discord;
 
-    private readonly CommonCommandOptions _commonOptions;
+    private readonly StandUpOptions _standUpOptions;
 
     private readonly IStandUpStatsService _statsService;
 
@@ -31,14 +31,14 @@ public class StandUpJobProvider : IJob
     public StandUpJobProvider(
         ILogger<StandUpJobProvider> logger,
         DiscordWrapper discord,
-        IOptions<CommonCommandOptions> commonOptions,
+        IOptions<StandUpOptions> standUpOptions,
         IStandUpStatsService statsService,
         IGuildProvider guildProvider
     )
     {
         _logger = logger;
         _discord = discord;
-        _commonOptions = commonOptions.Value;
+        _standUpOptions = standUpOptions.Value;
         _statsService = statsService;
         _guildProvider = guildProvider;
     }
@@ -68,7 +68,7 @@ public class StandUpJobProvider : IJob
 
         try
         {
-            DiscordChannel channel = await _discord.Client.GetChannelAsync(_commonOptions.StandUpChannelId);
+            DiscordChannel channel = await _discord.Client.GetChannelAsync(_standUpOptions.StandUpChannelId);
 
             var ok = new StandUpStats();
             var fail = new StandUpStats();
@@ -155,7 +155,7 @@ Celkově jsi splnil {stats.TotalCompleted} z {stats.TotalTasks} tasků a nejdel�
 
             // Send stats message to channel.
             await channel.SendMessageAsync($@"
-Stand-up time, <@&{_commonOptions.StandUpRoleId}>!
+Stand-up time, <@&{_standUpOptions.StandUpRoleId}>!
 
 Results from <t:{((DateTimeOffset)today.AddDays(-1)).ToUnixTimeSeconds()}:D>:
 ```

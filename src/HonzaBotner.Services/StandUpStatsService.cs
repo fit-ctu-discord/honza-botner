@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using HonzaBotner.Database;
+using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using StandUpStat = HonzaBotner.Services.Contract.Dto.StandUpStat;
 
 namespace HonzaBotner.Services;
@@ -12,15 +14,19 @@ public class StandUpStatsService : IStandUpStatsService
 {
     private readonly HonzaBotnerDbContext _dbContext;
     private readonly ILogger<StandUpStatsService> _logger;
-    private const int DaysToAcquireFreeze = 6;
-    private const int TasksCompletedThreshold = 1;
+    private readonly StandUpOptions _standUpOptions;
 
     private const int ComparedDay = -1;
 
-    public StandUpStatsService(HonzaBotnerDbContext dbContext, ILogger<StandUpStatsService> logger)
+    public StandUpStatsService(
+        HonzaBotnerDbContext dbContext,
+        ILogger<StandUpStatsService> logger,
+        IOptions<StandUpOptions> standUpOptions
+    )
     {
         _dbContext = dbContext;
         _logger = logger;
+        _standUpOptions = standUpOptions.Value;
     }
 
     public async Task<StandUpStat?> GetStats(ulong userId)
@@ -54,7 +60,7 @@ public class StandUpStatsService : IStandUpStatsService
             }
 
             // Freeze acquired.
-            if (streak.Streak % DaysToAcquireFreeze == 0)
+            if (streak.Streak % _standUpOptions.DaysToAcquireFreeze == 0)
             {
                 streak.Freezes++;
             }
@@ -101,7 +107,7 @@ public class StandUpStatsService : IStandUpStatsService
 
     public async Task UpdateStats(ulong userId, int tasksCompleted, int tasksTotal)
     {
-        bool streakMaintained = tasksCompleted >= TasksCompletedThreshold;
+        bool streakMaintained = tasksCompleted >= _standUpOptions.TasksCompletedThreshold;
 
         Database.StandUpStat? stat = await _dbContext.StandUpStats
             .FirstOrDefaultAsync(streak => streak.UserId == userId);
