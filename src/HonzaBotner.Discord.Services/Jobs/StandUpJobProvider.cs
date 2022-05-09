@@ -26,21 +26,17 @@ public class StandUpJobProvider : IJob
 
     private readonly IStandUpStatsService _statsService;
 
-    private IGuildProvider _guildProvider;
-
     public StandUpJobProvider(
         ILogger<StandUpJobProvider> logger,
         DiscordWrapper discord,
         IOptions<StandUpOptions> standUpOptions,
-        IStandUpStatsService statsService,
-        IGuildProvider guildProvider
+        IStandUpStatsService statsService
     )
     {
         _logger = logger;
         _discord = discord;
         _standUpOptions = standUpOptions.Value;
         _statsService = statsService;
-        _guildProvider = guildProvider;
     }
 
     /// <summary>
@@ -90,8 +86,6 @@ public class StandUpJobProvider : IJob
                 }
             }
 
-            HashSet<ulong> membersToDm = new();
-
             foreach (DiscordMessage msg in messageList.Where(msg => msg.Timestamp.Date == yesterday))
             {
                 int total = 0;
@@ -116,41 +110,6 @@ public class StandUpJobProvider : IJob
 
                 // Update DB.
                 await _statsService.UpdateStats(msg.Author.Id, completed, total);
-                StandUpStat? stats = await _statsService.GetStats(msg.Author.Id);
-
-                if (stats is null)
-                {
-                    _logger.LogWarning("No stats presented for member {Member}", msg.Author.Mention);
-                    continue;
-                }
-
-                // Send DM to the current member (only once).
-                if (membersToDm.Contains(msg.Author.Id))
-                {
-                    continue;
-                }
-
-                membersToDm.Add(msg.Author.Id);
-
-                try
-                {
-                    DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
-                    DiscordMember member = await guild.GetMemberAsync(msg.Author.Id);
-
-                    // Send DM to the member.
-                    string heading = await _statsService.IsValidStreak(msg.Author.Id)
-                        ? "Skvělá práce!"
-                        : "Nějak ti to nevyšlo...";
-                    await member.SendMessageAsync($@"
-{heading} Včera jsi splnil {completed} z {total} tasků a jsi momentálně na streaku {stats.Streak} s {stats.Freezes} možnými freezes.
-
-Celkově jsi splnil {stats.TotalCompleted} z {stats.TotalTasks} tasků a nejdelší streak jsi měl {stats.LongestStreak} dní.
-");
-                }
-                catch (Exception e)
-                {
-                    _logger.LogInformation(e, "Could not send a message to {Member}", msg.Author.Mention);
-                }
             }
 
             // Send stats message to channel.
