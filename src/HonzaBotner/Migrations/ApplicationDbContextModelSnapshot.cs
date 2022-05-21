@@ -99,8 +99,14 @@ namespace HonzaBotner.Migrations
                     b.Property<int>("Freezes")
                         .HasColumnType("integer");
 
+                    b.Property<int>("LastDayCompleted")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("LastDayOfStreak")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("LastDayTasks")
+                        .HasColumnType("integer");
 
                     b.Property<int>("LongestStreak")
                         .HasColumnType("integer");

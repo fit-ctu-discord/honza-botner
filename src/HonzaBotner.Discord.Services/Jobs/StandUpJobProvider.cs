@@ -110,10 +110,13 @@ public class StandUpJobProvider : IJob
                             fail.Increment(priority);
                         }
                     }
-                }
 
-                // Update DB.
-                if (total != 0) {await _statsService.UpdateStats(authorGrouped.Key, completed, total);}
+                    // Update DB.
+                    if (total != 0)
+                    {
+                        await _statsService.UpdateStats(authorGrouped.Key, completed, total);
+                    }
+                }
             }
 
             // Send stats message to channel.

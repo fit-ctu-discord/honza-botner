@@ -10,6 +10,8 @@ public class StandUpStat
     public int LongestStreak { get; set; }
     public int Freezes { get; set; }
     public DateTime LastDayOfStreak { get; set; }
+    public int LastDayCompleted { get; set; }
+    public int LastDayTasks { get; set; }
     public int TotalCompleted { get; set; }
     public int TotalTasks { get; set; }
 }
