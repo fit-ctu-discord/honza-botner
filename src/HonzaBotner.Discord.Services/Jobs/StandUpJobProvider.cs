@@ -9,7 +9,6 @@ using HonzaBotner.Discord.Services.Helpers;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Scheduler.Contract;
 using HonzaBotner.Services.Contract;
-using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -86,43 +85,48 @@ public class StandUpJobProvider : IJob
                 }
             }
 
-            foreach (DiscordMessage msg in messageList.Where(msg => msg.Timestamp.Date == yesterday))
+            foreach (var authorGrouped in messageList.Where(msg => msg.Timestamp.Date == yesterday)
+                         .GroupBy(msg => msg.Author.Id))
             {
                 int total = 0;
                 int completed = 0;
 
-                foreach (Match match in TaskRegex.Matches(msg.Content))
+                foreach (var msg in authorGrouped)
                 {
-                    total++;
-                    string state = match.Groups["State"].ToString();
-                    string priority = match.Groups["Priority"].ToString();
 
-                    if (OkList.Any(s => state.Contains(s)))
+                    foreach (Match match in TaskRegex.Matches(msg.Content))
                     {
-                        completed++;
-                        ok.Increment(priority);
-                    }
-                    else
-                    {
-                        fail.Increment(priority);
+                        total++;
+                        string state = match.Groups["State"].Value;
+                        string priority = match.Groups["Priority"].Value;
+
+                        if (OkList.Any(s => state.Contains(s)))
+                        {
+                            completed++;
+                            ok.Increment(priority);
+                        }
+                        else
+                        {
+                            fail.Increment(priority);
+                        }
                     }
                 }
 
                 // Update DB.
-                await _statsService.UpdateStats(msg.Author.Id, completed, total);
+                if (total != 0) {await _statsService.UpdateStats(authorGrouped.Key, completed, total);}
             }
 
             // Send stats message to channel.
             await channel.SendMessageAsync($@"
-Stand-up time, <@&{_standUpOptions.StandUpRoleId}>!
+                Stand-up time, <@&{_standUpOptions.StandUpRoleId}>!
 
-Results from <t:{((DateTimeOffset)today.AddDays(-1)).ToUnixTimeSeconds()}:D>:
-```
-all:        {ok.Add(fail)}
-completed:  {ok}
-failed:     {fail}
-```
-");
+                Results from <t:{((DateTimeOffset)yesterday).ToUnixTimeSeconds()}:D>:
+                ```
+                all:        {ok.Add(fail)}
+                completed:  {ok}
+                failed:     {fail}
+                ```
+                ");
         }
         catch (Exception e)
         {
