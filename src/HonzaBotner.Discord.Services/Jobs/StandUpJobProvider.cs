@@ -32,14 +32,14 @@ public class StandUpJobProvider : IJob
         DiscordWrapper discord,
         IOptions<StandUpOptions> standUpOptions,
         IStandUpStatsService statsService,
-        ButtonOptions buttonOptions
+        IOptions<ButtonOptions> buttonOptions
     )
     {
         _logger = logger;
         _discord = discord;
         _standUpOptions = standUpOptions.Value;
         _statsService = statsService;
-        _buttonOptions = buttonOptions;
+        _buttonOptions = buttonOptions.Value;
     }
 
     /// <summary>
