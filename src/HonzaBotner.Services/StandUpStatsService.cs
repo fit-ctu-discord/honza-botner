@@ -16,8 +16,6 @@ public class StandUpStatsService : IStandUpStatsService
     private readonly ILogger<StandUpStatsService> _logger;
     private readonly StandUpOptions _standUpOptions;
 
-    private const int ComparedDay = -1;
-
     public StandUpStatsService(
         HonzaBotnerDbContext dbContext,
         ILogger<StandUpStatsService> logger,
@@ -37,7 +35,7 @@ public class StandUpStatsService : IStandUpStatsService
         return standUpStat == null ? null : GetDto(standUpStat);
     }
 
-    public async Task UpdateStreak(ulong userId, Database.StandUpStat streak)
+    private Database.StandUpStat UpdateStreak(Database.StandUpStat streak)
     {
         int days = (DateTime.Today.AddDays(-2) - streak.LastDayOfStreak).Days;
 
@@ -49,7 +47,7 @@ public class StandUpStatsService : IStandUpStatsService
         }
         else //streak restored
         {
-            streak.Freezes--;
+            streak.Freezes -= days;
             streak.Streak++;
             streak.LastDayOfStreak = DateTime.Today.AddDays(-1).ToUniversalTime();
 
@@ -58,26 +56,19 @@ public class StandUpStatsService : IStandUpStatsService
                 streak.LongestStreak = streak.Streak;
             }
 
-            // Freeze acquired.
-            if (streak.Streak % _standUpOptions.DaysToAcquireFreeze == 0)
+            if (streak.Streak % _standUpOptions.DaysToAcquireFreeze == 0) // freeze acquired
             {
                 streak.Freezes++;
             }
         }
 
-        try
-        {
-            _dbContext.StandUpStats.Update(streak);
-            await _dbContext.SaveChangesAsync();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Couldn't update streak {@Streak}", streak);
-        }
+        return streak;
     }
 
     public async Task UpdateStats(ulong userId, int completed, int total)
     {
+        bool streakMaintained = completed >= _standUpOptions.TasksCompletedThreshold;
+
         Database.StandUpStat? stat = await _dbContext.StandUpStats
             .FirstOrDefaultAsync(streak => streak.UserId == userId);
 
@@ -90,7 +81,7 @@ public class StandUpStatsService : IStandUpStatsService
                 LastDayOfStreak =
                     completed != 0
                         ? DateTime.Today.AddDays(-1).ToUniversalTime()
-                        : DateTime.Today.AddDays(-100).ToUniversalTime(),
+                        : DateTime.UnixEpoch.ToUniversalTime(),
                 Streak = completed != 0 ? 1 : 0,
                 LongestStreak = completed != 0 ? 1 : 0,
                 LastDayCompleted = completed,
@@ -113,10 +104,7 @@ public class StandUpStatsService : IStandUpStatsService
             return;
         }
 
-        if (completed != 0)
-        {
-            await UpdateStreak(userId, stat);
-        }
+        stat = UpdateStreak(stat);
 
         stat.LastDayCompleted = completed;
         stat.LastDayTasks = total;
@@ -143,6 +131,8 @@ public class StandUpStatsService : IStandUpStatsService
             standUpStat.Freezes,
             standUpStat.LastDayOfStreak,
             standUpStat.TotalCompleted,
-            standUpStat.TotalTasks
+            standUpStat.TotalTasks,
+            standUpStat.LastDayCompleted,
+            standUpStat.LastDayTasks
         );
 }

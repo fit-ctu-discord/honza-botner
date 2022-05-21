@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Services.Helpers;
 using HonzaBotner.Discord.Services.Options;
@@ -22,6 +23,7 @@ public class StandUpJobProvider : IJob
     private readonly DiscordWrapper _discord;
 
     private readonly StandUpOptions _standUpOptions;
+    private readonly ButtonOptions _buttonOptions;
 
     private readonly IStandUpStatsService _statsService;
 
@@ -29,13 +31,15 @@ public class StandUpJobProvider : IJob
         ILogger<StandUpJobProvider> logger,
         DiscordWrapper discord,
         IOptions<StandUpOptions> standUpOptions,
-        IStandUpStatsService statsService
+        IStandUpStatsService statsService,
+        ButtonOptions buttonOptions
     )
     {
         _logger = logger;
         _discord = discord;
         _standUpOptions = standUpOptions.Value;
         _statsService = statsService;
+        _buttonOptions = buttonOptions;
     }
 
     /// <summary>
@@ -120,7 +124,7 @@ public class StandUpJobProvider : IJob
             }
 
             // Send stats message to channel.
-            await channel.SendMessageAsync($@"
+            DiscordMessageBuilder message = new DiscordMessageBuilder().WithContent($@"
                 Stand-up time, <@&{_standUpOptions.StandUpRoleId}>!
 
                 Results from <t:{((DateTimeOffset)yesterday).ToUnixTimeSeconds()}:D>:
@@ -130,6 +134,13 @@ public class StandUpJobProvider : IJob
                 failed:     {fail}
                 ```
                 ");
+            if (_buttonOptions.StandUpStatsId is not null)
+            {
+                message.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, _buttonOptions.StandUpStatsId,
+                    "Get your stats", false, new DiscordComponentEmoji(DiscordEmoji.FromUnicode("🐸"))));
+            }
+
+            await message.SendAsync(channel);
         }
         catch (Exception e)
         {
