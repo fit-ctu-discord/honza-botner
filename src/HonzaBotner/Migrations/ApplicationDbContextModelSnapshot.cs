@@ -17,7 +17,7 @@ namespace HonzaBotner.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.4")
+                .HasAnnotation("ProductVersion", "6.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -90,11 +90,9 @@ namespace HonzaBotner.Migrations
 
             modelBuilder.Entity("HonzaBotner.Database.StandUpStat", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<decimal>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<int>("Freezes")
                         .HasColumnType("integer");
@@ -120,10 +118,7 @@ namespace HonzaBotner.Migrations
                     b.Property<int>("TotalTasks")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("UserId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserId");
 
                     b.ToTable("StandUpStats");
                 });

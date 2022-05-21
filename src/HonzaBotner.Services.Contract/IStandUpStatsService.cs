@@ -12,7 +12,7 @@ public interface IStandUpStatsService
     Task<StandUpStat?> GetStreak(ulong userId);
 
     /// <summary>
-    /// Update database record of given user regarding StandUp stats. Should be called just once a day.
+    /// Update database record of given user regarding StandUp stats. Should be called just once per day per user.
     /// </summary>
     /// <param name="userId">Id of the user</param>
     /// <param name="completed">Amount of completed tasks yesterday</param>

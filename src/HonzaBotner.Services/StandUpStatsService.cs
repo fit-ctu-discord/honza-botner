@@ -35,32 +35,37 @@ public class StandUpStatsService : IStandUpStatsService
         return standUpStat == null ? null : GetDto(standUpStat);
     }
 
-    private Database.StandUpStat UpdateStreak(Database.StandUpStat streak)
+    private Database.StandUpStat UpdateStreak(Database.StandUpStat streak, bool streakMaintained)
     {
         int days = (DateTime.Today.AddDays(-2) - streak.LastDayOfStreak).Days;
 
-        if (days > streak.Freezes) //Streak broken
+        // Tasks completed and on time
+        if (streakMaintained && days <= streak.Freezes)
         {
-            streak.Freezes = 0;
-            streak.LastDayOfStreak = DateTime.Today.AddDays(-1).ToUniversalTime();
-            streak.Streak = 1;
-        }
-        else //streak restored
-        {
-            streak.Freezes -= days;
             streak.Streak++;
+            // streak.Streak += days + 1; // Alternative in case we want to count frozen days in streak
             streak.LastDayOfStreak = DateTime.Today.AddDays(-1).ToUniversalTime();
+            streak.Freezes -= days;
 
             if (streak.Streak > streak.LongestStreak)
             {
                 streak.LongestStreak = streak.Streak;
             }
-
-            if (streak.Streak % _standUpOptions.DaysToAcquireFreeze == 0) // freeze acquired
-            {
-                streak.Freezes++;
-            }
         }
+        // Tasks completed, but reset streak
+        else if (streakMaintained)
+        {
+            streak.Streak = 1;
+            streak.LastDayOfStreak = DateTime.Today.AddDays(-1).ToUniversalTime();
+            streak.Freezes = 0;
+        }
+        // Not valid, and lateeeeeeeeeee
+        else if (days >= streak.Freezes)
+        {
+            streak.Streak = 0;
+            streak.Freezes = 0;
+        }
+        // Not valid && on time is ignored, in that case nothing happens
 
         return streak;
     }
@@ -79,11 +84,11 @@ public class StandUpStatsService : IStandUpStatsService
                 UserId = userId,
                 Freezes = 0,
                 LastDayOfStreak =
-                    completed != 0
+                    streakMaintained
                         ? DateTime.Today.AddDays(-1).ToUniversalTime()
                         : DateTime.UnixEpoch.ToUniversalTime(),
-                Streak = completed != 0 ? 1 : 0,
-                LongestStreak = completed != 0 ? 1 : 0,
+                Streak = streakMaintained ? 1 : 0,
+                LongestStreak = streakMaintained ? 1 : 0,
                 LastDayCompleted = completed,
                 LastDayTasks = total,
                 TotalCompleted = completed,
@@ -104,7 +109,7 @@ public class StandUpStatsService : IStandUpStatsService
             return;
         }
 
-        stat = UpdateStreak(stat);
+        stat = UpdateStreak(stat, streakMaintained);
 
         stat.LastDayCompleted = completed;
         stat.LastDayTasks = total;
@@ -124,7 +129,6 @@ public class StandUpStatsService : IStandUpStatsService
 
     static StandUpStat GetDto(Database.StandUpStat standUpStat) =>
         new(
-            standUpStat.Id,
             standUpStat.UserId,
             standUpStat.Streak,
             standUpStat.LongestStreak,

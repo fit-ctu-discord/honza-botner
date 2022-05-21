@@ -1,11 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace HonzaBotner.Database;
 
 public class StandUpStat
 {
-    public int Id { get; set; }
-    public ulong UserId { get; set; }
+    [Key] public ulong UserId { get; set; }
     public int Streak { get; set; }
     public int LongestStreak { get; set; }
     public int Freezes { get; set; }

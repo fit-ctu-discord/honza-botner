@@ -62,8 +62,7 @@ public class StandUpJobProvider : IJob
 
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        var today = DateTime.Today; // Fix one point in time.
-        DateTime yesterday = today.AddDays(-1);
+        DateTime yesterday = DateTime.Today.AddDays(-1);
 
         try
         {
@@ -73,13 +72,13 @@ public class StandUpJobProvider : IJob
             var fail = new StandUpStats();
 
             List<DiscordMessage> messageList = new();
-            messageList.AddRange(await channel.GetMessagesAsync());
+            messageList.AddRange((await channel.GetMessagesAsync()).Where(msg => !msg.Author.IsBot));
 
             while (messageList.LastOrDefault()?.Timestamp.Date == yesterday)
             {
                 int messagesCount = messageList.Count;
                 messageList.AddRange(
-                    await channel.GetMessagesBeforeAsync(messageList.Last().Id)
+                    (await channel.GetMessagesBeforeAsync(messageList.Last().Id)).Where(msg => !msg.Author.IsBot)
                 );
 
                 // No new data.
@@ -114,26 +113,26 @@ public class StandUpJobProvider : IJob
                             fail.Increment(priority);
                         }
                     }
+                }
 
-                    // Update DB.
-                    if (total != 0)
-                    {
-                        await _statsService.UpdateStats(authorGrouped.Key, completed, total);
-                    }
+                // Update DB.
+                if (total != 0)
+                {
+                    await _statsService.UpdateStats(authorGrouped.Key, completed, total);
                 }
             }
 
             // Send stats message to channel.
             DiscordMessageBuilder message = new DiscordMessageBuilder().WithContent($@"
-                Stand-up time, <@&{_standUpOptions.StandUpRoleId}>!
+Stand-up time, <@&{_standUpOptions.StandUpRoleId}>!
 
-                Results from <t:{((DateTimeOffset)yesterday).ToUnixTimeSeconds()}:D>:
-                ```
-                all:        {ok.Add(fail)}
-                completed:  {ok}
-                failed:     {fail}
-                ```
-                ");
+Results from <t:{((DateTimeOffset)yesterday).ToUnixTimeSeconds()}:D>:
+```
+all:        {ok.Add(fail)}
+completed:  {ok}
+failed:     {fail}
+```
+");
             if (_buttonOptions.StandUpStatsId is not null)
             {
                 message.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, _buttonOptions.StandUpStatsId,
