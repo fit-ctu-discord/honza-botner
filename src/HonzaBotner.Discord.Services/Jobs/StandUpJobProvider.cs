@@ -53,7 +53,7 @@ public class StandUpJobProvider : IJob
     private static readonly Regex TaskRegex = new(@"^ *\[ *(?<State>\S*) *\] *(?<Priority>[!])?",
         RegexOptions.Multiline);
 
-    private static readonly List<string> OkList = new() { "check", "done", "ok", "✅" };
+    private static readonly List<string> OkList = new() { "check", "done", "ok", "✅", "x" };
 
     public string Name => "standup";
 
