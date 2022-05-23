@@ -71,8 +71,8 @@ public class StandUpJobProvider : IJob
             var ok = new StandUpStats();
             var fail = new StandUpStats();
 
-            List<DiscordMessage> messageList = new();
-            messageList.AddRange((await channel.GetMessagesAsync()).Where(msg => !msg.Author.IsBot));
+            List<DiscordMessage> messageList = (await channel.GetMessagesAsync())
+                .Where(msg => !msg.Author.IsBot).ToList();
 
             while (messageList.LastOrDefault()?.Timestamp.Date == yesterday)
             {
