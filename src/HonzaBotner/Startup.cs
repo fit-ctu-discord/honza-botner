@@ -98,8 +98,7 @@ public class Startup
             ;
 
         services.AddScheduler(5000)
-            .AddScopedCronJob<TriggerRemindersJobProvider>()
-            .AddScopedCronJob<StandUpJobProvider>();
+            .AddScopedCronJob<TriggerRemindersJobProvider>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

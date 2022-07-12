@@ -11,7 +11,6 @@ public class CommonCommandOptions
     public ulong BotRoleId { get; set; }
     public string? HugEmoteName { get; set; }
 
-    public ulong BoosterRoleId { get; set; }
     public ulong GentlemenChannelId { get; set; }
     public string GentlemenFilePath { get; set; } = "";
 
@@ -19,10 +18,9 @@ public class CommonCommandOptions
     public ulong HornyJailChannelId { get; set; }
     public string HornyJailFilePath { get; set; } = "";
 
-    public ulong[]? ReactionIgnoreChannels { get; set; }
+    public ulong BoosterRoleId { get; set; }
 
-    public ulong StandUpRoleId { get; set; }
-    public ulong StandUpChannelId { get; set; }
+    public ulong[]? ReactionIgnoreChannels { get; set; }
 
     public ulong[] MemberCountAllowlistIds { get; set; } = System.Array.Empty<ulong>();
 }
