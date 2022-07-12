@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HonzaBotner.Discord.Services.Commands.Polls;
+namespace HonzaBotner.Discord.Services.SCommands.Polls;
 
 public class PollException : Exception
 {

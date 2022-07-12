@@ -186,11 +186,10 @@ public class MemberCommands : ApplicationCommandModule
             await ctx.CreateResponseAsync($"Members in this channel: {ctx.Channel.Users.Count}", ephemeral);
         }
 
-        /*
         [SlashCommand("role", "Counts members based on provided roles")]
         public async Task CountRoleCommandAsync(
             InteractionContext ctx,
-            [Option("roles", "Roles to look for")] string roles,
+            [Option("roles", "Roles to look for - write as a mention")] string roles,
             [Choice("and", "and")]
             [Choice("or", "or")]
             [Option("search-type", "Look for members with all those roles/some. Default: and")] string type = "and")
@@ -204,8 +203,8 @@ public class MemberCommands : ApplicationCommandModule
             {
                 switch (type)
                 {
-                    case "or" when roles.Any(role => member.Roles.Contains(role)):
-                    case "and" when roles.All(role => member.Roles.Contains(role)):
+                    case "or" when ctx.ResolvedRoleMentions.Any(role => member.Roles.Contains(role)):
+                    case "and" when ctx.ResolvedRoleMentions.All(role => member.Roles.Contains(role)):
                         count++;
                         break;
                 }
@@ -213,6 +212,5 @@ public class MemberCommands : ApplicationCommandModule
 
             await ctx.Channel.SendMessageAsync(count.ToString());
         }
-        */
     }
 }
