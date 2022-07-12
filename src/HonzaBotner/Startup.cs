@@ -79,6 +79,7 @@ public class Startup
                         .AddEventHandler<NewChannelHandler>()
                         .AddEventHandler<PinHandler>()
                         .AddEventHandler<ReminderReactionsHandler>()
+                        .AddEventHandler<PollReactionsHandler>(EventHandlerPriority.Low)
                         .AddEventHandler<RoleBindingsHandler>(EventHandlerPriority.High)
                         .AddEventHandler<StaffVerificationEventHandler>(EventHandlerPriority.Urgent)
                         .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
