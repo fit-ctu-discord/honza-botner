@@ -6,9 +6,9 @@
         <PackageReference Update="DSharpPlus.CommandsNext" Version="4.3.*-*" />
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.3.*-*" />
         <PackageReference Update="DSharpPlus.SlashCommands" Version="4.3.*-*" />
-        <PackageReference Update="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.4" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.4" />
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="6.0.4" />
+        <PackageReference Update="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.6" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.6" />
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="6.0.6" />
         <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
         <PackageReference Update="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
         <PackageReference Update="Microsoft.Extensions.Hosting" Version="6.0.1" />
@@ -16,13 +16,13 @@
         <PackageReference Update="Microsoft.Extensions.Http" Version="6.0.0" />
         <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
         <PackageReference Update="Microsoft.Extensions.Options" Version="6.0.0" />
-        <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.1.0" />
-        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.4" />
+        <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+        <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.5" />
         <PackageReference Update="Swashbuckle.AspNetCore" Version="6.3.1" />
         <PackageReference Update="System.Collections.Immutable" Version="6.0.0" />
         <PackageReference Update="coverlet.collector" Version="3.1.2" />
         <PackageReference Update="xunit" Version="2.4.1" />
-        <PackageReference Update="xunit.runner.visualstudio" Version="2.4.3" />
+        <PackageReference Update="xunit.runner.visualstudio" Version="2.4.5" />
         <PackageReference Update="Shouldly" Version="4.0.3" />
     </ItemGroup>
 </Project>

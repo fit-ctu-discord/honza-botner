@@ -113,7 +113,6 @@ public class ReminderCommands : BaseCommandModule
             return;
         }
 
-        await context.TriggerTypingAsync();
         DiscordMessage message = await context.Channel.SendMessageAsync("Creating reminder...");
 
         Reminder reminder = await _service.CreateReminderAsync(

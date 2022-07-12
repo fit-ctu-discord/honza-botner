@@ -113,7 +113,7 @@ public class WarningCommands : BaseCommandModule
             DiscordMember warningMember = await ctx.Guild.GetMemberAsync(warning.UserId);
             await ctx.Channel.SendMessageAsync(
                 $"**Varování {warning.Id}** pro uživatele **{warningMember.DisplayName}**:\n" +
-                $"{warning.Reason.RemoveDiscordMentions(ctx.Guild, _logger)}");
+                $"{warning.Reason.RemoveDiscordMentions(ctx.Guild)}");
             await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
         }
         catch (Exception e)
@@ -170,7 +170,7 @@ public class WarningCommands : BaseCommandModule
                 else
                 {
                     await ctx.Channel.SendMessageAsync(
-                        $"**Varování (<@!{member.Id}>)**: {reason.RemoveDiscordMentions(ctx.Guild, _logger)}.");
+                        $"**Varování (<@!{member.Id}>)**: {reason.RemoveDiscordMentions(ctx.Guild)}.");
                 }
 
                 string messageForUser =
@@ -180,7 +180,7 @@ public class WarningCommands : BaseCommandModule
                     "\n\n" +
                     $"Toto je vaše **{numberOfWarnings}. varování**, #beGood.";
 
-                await member.SendMessageAsync(messageForUser.RemoveDiscordMentions(ctx.Guild, _logger));
+                await member.SendMessageAsync(messageForUser.RemoveDiscordMentions(ctx.Guild));
             }
             catch (Exception e)
             {
