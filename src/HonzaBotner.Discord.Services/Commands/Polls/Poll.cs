@@ -10,37 +10,41 @@ namespace HonzaBotner.Discord.Services.Commands.Polls;
 
 public abstract class Poll
 {
-    protected abstract List<string> OptionsEmoji { get; }
+    public abstract List<string> OptionsEmoji { get; }
     public abstract string PollType { get; }
-    protected virtual List<string> UsedEmojis
+
+    public virtual List<string> ActiveEmojis
     {
-        get => OptionsEmoji.GetRange(0, NewChoices.Count);
+        get => OptionsEmoji.GetRange(0, _choices.Count);
     }
 
-    protected List<string> NewChoices;
-
     public readonly string AuthorMention;
-    protected readonly DiscordMessage? ExistingPollMessage;
-    protected readonly string Question;
+    private readonly List<string> _choices;
+    private readonly DiscordMessage? _existingPollMessage;
+    private readonly string _question;
 
     protected Poll(string authorMention, string question, List<string>? options = null)
     {
         AuthorMention = authorMention;
-        Question = question;
-        NewChoices = options ?? new List<string>();
+        _question = question;
+        _choices = options ?? new List<string>();
     }
 
     protected Poll(DiscordMessage originalMessage)
     {
-        ExistingPollMessage = originalMessage;
-        DiscordEmbed originalPoll = ExistingPollMessage.Embeds[0];
+        _existingPollMessage = originalMessage;
+        DiscordEmbed originalPoll = _existingPollMessage.Embeds[0];
 
         // Extract original author Mention via discord's mention format <@!123456789>.
         AuthorMention = originalPoll.Description.Substring(
             originalPoll.Description.LastIndexOf("<", StringComparison.Ordinal)
         );
 
-        Question = originalPoll.Title;
+        _choices = originalPoll.Fields?
+            .Select(ef => ef.Value)
+            .ToList() ?? new List<string>();
+
+        _question = originalPoll.Title;
     }
 
     public async Task PostAsync(DiscordClient client, DiscordChannel channel)
@@ -50,9 +54,23 @@ public abstract class Poll
         Task _ = Task.Run(async () => { await AddReactionsAsync(client, pollMessage); });
     }
 
-    protected async Task AddReactionsAsync(DiscordClient client, DiscordMessage message, List<string>? reactions = null)
+    public virtual async Task AddOptionsAsync(DiscordClient client, IEnumerable<string> newOptions)
     {
-        foreach (string reaction in reactions ?? UsedEmojis)
+        if (_existingPollMessage == null)
+        {
+            throw new InvalidOperationException("You can edit only poll constructed from sent message.");
+        }
+
+        _choices.AddRange(newOptions);
+
+        await _existingPollMessage.ModifyAsync(Build(client, _existingPollMessage.Channel.Guild));
+
+        Task _ = Task.Run(async () => { await AddReactionsAsync(client, _existingPollMessage); });
+    }
+
+    protected async Task AddReactionsAsync(DiscordClient client, DiscordMessage message)
+    {
+        foreach (string reaction in ActiveEmojis)
         {
             await message.CreateReactionAsync(DiscordEmoji.FromName(client, reaction));
         }
@@ -60,18 +78,18 @@ public abstract class Poll
 
     private DiscordEmbed Build(DiscordClient client, DiscordGuild guild)
     {
-        if (NewChoices.Count > OptionsEmoji.Count)
+        if (_choices.Count > OptionsEmoji.Count)
         {
             throw new ArgumentException($"Too many options. Maximum options is {OptionsEmoji.Count}.");
         }
 
         DiscordEmbedBuilder builder = new()
         {
-            Title = Question.RemoveDiscordMentions(guild),
+            Title = _question.RemoveDiscordMentions(guild),
             Description = "By: " + AuthorMention // Author needs to stay as the last argument
         };
 
-        NewChoices.Zip(UsedEmojis).ToList().ForEach(pair =>
+        _choices.Zip(ActiveEmojis).ToList().ForEach(pair =>
         {
             (string? answer, string? emojiName) = pair;
 

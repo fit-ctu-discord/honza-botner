@@ -9,12 +9,8 @@ namespace HonzaBotner.Discord.Services.Commands.Polls;
 public class YesNoPoll : Poll
 {
     public override string PollType => "YesNoPoll";
-    protected override List<string> OptionsEmoji => new() { ":+1:", ":-1:" };
-
-    protected override List<string> UsedEmojis
-    {
-        get => OptionsEmoji;
-    }
+    public override List<string> OptionsEmoji => new() { ":+1:", ":-1:" };
+    public override List<string> ActiveEmojis => OptionsEmoji;
 
     public YesNoPoll(string authorMention, string question) : base(authorMention, question)
     {
@@ -23,4 +19,7 @@ public class YesNoPoll : Poll
     public YesNoPoll(DiscordMessage message) : base(message)
     {
     }
+
+    public override Task AddOptionsAsync(DiscordClient client, IEnumerable<string> newOptions) =>
+        throw new ArgumentException($"Adding options is disabled for {PollType}");
 }

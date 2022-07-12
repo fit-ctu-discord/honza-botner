@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using DSharpPlus;
+﻿using System.Collections.Generic;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord.Services.Extensions;
 
 namespace HonzaBotner.Discord.Services.Commands.Polls;
 
@@ -12,7 +7,7 @@ public class AbcPoll : Poll
 {
     public override string PollType => "AbcPoll";
 
-    protected override List<string> OptionsEmoji => new()
+    public override List<string> OptionsEmoji => new()
     {
         ":regional_indicator_a:",
         ":regional_indicator_b:",
@@ -39,56 +34,5 @@ public class AbcPoll : Poll
 
     public AbcPoll(DiscordMessage message) : base(message)
     {
-    }
-
-    public async Task AddOptionsAsync(DiscordClient client, IEnumerable<string> newOptions)
-    {
-        if (ExistingPollMessage == null)
-        {
-            throw new InvalidOperationException("You can edit only poll constructed from sent message.");
-        }
-
-        NewChoices = newOptions.ToList();
-
-        List<string> emojisToAdd = OptionsEmoji;
-        emojisToAdd.RemoveAll(emoji =>
-            ExistingPollMessage.Reactions.Select(rect => rect.Emoji).Contains(DiscordEmoji.FromName(client, emoji)));
-
-        emojisToAdd = emojisToAdd.GetRange(
-            0, Math.Min(
-                Math.Min(
-                    emojisToAdd.Count,
-                    20 - (ExistingPollMessage.Reactions.Count <= 20 ? ExistingPollMessage.Reactions.Count : 20)),
-                NewChoices.Count));
-        NewChoices = NewChoices.GetRange(0, Math.Min(emojisToAdd.Count, NewChoices.Count));
-
-
-
-        await ExistingPollMessage
-            .ModifyAsync(Modify(client, ExistingPollMessage.Channel.Guild, ExistingPollMessage.Embeds[0], emojisToAdd));
-
-        Task _ = Task.Run(async () => { await AddReactionsAsync(client, ExistingPollMessage, emojisToAdd); });
-    }
-
-    private DiscordEmbed Modify(DiscordClient client, DiscordGuild guild, DiscordEmbed original, List<string> emojisToAdd)
-    {
-        if (NewChoices.Count + original.Fields.Count > OptionsEmoji.Count)
-        {
-            throw new ArgumentException($"Too many options. Maximum options is {OptionsEmoji.Count}.");
-        }
-
-        DiscordEmbedBuilder builder = new (original);
-
-        NewChoices.Zip(emojisToAdd).ToList().ForEach(pair =>
-        {
-            (string? answer, string? emojiName) = pair;
-
-            builder.AddField(
-                DiscordEmoji.FromName(client, emojiName).ToString(),
-                answer.RemoveDiscordMentions(guild),
-                true);
-        });
-
-        return builder.WithFooter(PollType).Build();
     }
 }
