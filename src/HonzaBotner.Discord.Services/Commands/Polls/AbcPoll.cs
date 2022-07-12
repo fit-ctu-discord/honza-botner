@@ -43,7 +43,6 @@ public class AbcPoll : Poll
 
     public async Task AddOptionsAsync(DiscordClient client, IEnumerable<string> newOptions)
     {
-        const int reactionCap = 20; // Max amount of reactions present on a message, lower than Discord provided, in case some trolls block bot's reactions
         if (ExistingPollMessage is null)
         {
             throw new InvalidOperationException("You can edit only poll constructed from sent message.");
@@ -51,28 +50,23 @@ public class AbcPoll : Poll
 
         NewChoices = newOptions.ToList();
 
-        List<string> emojisToAdd = OptionsEmoji;
+        if (NewChoices.Count + ExistingPollMessage.Embeds[0].Fields.Count > OptionsEmoji.Count)
+        {
+            throw new PollException($"Too many options. Maximum options is {OptionsEmoji.Count}.");
+        }
 
-        // Look at existing message and allow only emojis which are not yet present on that message.
+        List<string> emojisToAdd = OptionsEmoji;
         emojisToAdd.RemoveAll(emoji =>
             ExistingPollMessage.Reactions.Select(rect => rect.Emoji).Contains(DiscordEmoji.FromName(client, emoji)));
 
         emojisToAdd = emojisToAdd.GetRange(
-            0,
-            // Allow only so many reactions, that we don't cross 20 reactions on existing message
-            Math.Min(Math.Min(reactionCap - Math.Min(ExistingPollMessage.Reactions.Count, reactionCap),
-                    // Take above reaction capacity, and lower it optionally to number of emojis which we are able to react with
-                    emojisToAdd.Count),
-                // Take the above number and cap it at total new choices we want to add (can be lower or equal to real choices number)
+            0, Math.Min(
+                Math.Min(
+                    emojisToAdd.Count,
+                    20 - (ExistingPollMessage.Reactions.Count <= 20 ? ExistingPollMessage.Reactions.Count : 20)),
                 NewChoices.Count));
-
-        // The new options count will be equal or lower than total options added, based on available emojis
         NewChoices = NewChoices.GetRange(0, emojisToAdd.Count);
 
-        if (NewChoices.Count == 0)
-        {
-            throw new PollException($"Total number of reactions on a message can't be greater than {reactionCap}");
-        }
 
 
         await ExistingPollMessage
@@ -81,7 +75,7 @@ public class AbcPoll : Poll
         Task _ = Task.Run(async () => { await AddReactionsAsync(client, ExistingPollMessage, emojisToAdd); });
     }
 
-    private DiscordEmbed Modify(DiscordClient client, DiscordGuild guild, DiscordEmbed original, IEnumerable<string> emojisToAdd)
+    private DiscordEmbed Modify(DiscordClient client, DiscordGuild guild, DiscordEmbed original, List<string> emojisToAdd)
     {
         DiscordEmbedBuilder builder = new (original);
 
