@@ -43,17 +43,12 @@ public class AbcPoll : Poll
 
     public async Task AddOptionsAsync(DiscordClient client, IEnumerable<string> newOptions)
     {
-        if (ExistingPollMessage is null)
+        if (ExistingPollMessage == null)
         {
             throw new InvalidOperationException("You can edit only poll constructed from sent message.");
         }
 
         NewChoices = newOptions.ToList();
-
-        if (NewChoices.Count + ExistingPollMessage.Embeds[0].Fields.Count > OptionsEmoji.Count)
-        {
-            throw new PollException($"Too many options. Maximum options is {OptionsEmoji.Count}.");
-        }
 
         List<string> emojisToAdd = OptionsEmoji;
         emojisToAdd.RemoveAll(emoji =>
@@ -65,7 +60,7 @@ public class AbcPoll : Poll
                     emojisToAdd.Count,
                     20 - (ExistingPollMessage.Reactions.Count <= 20 ? ExistingPollMessage.Reactions.Count : 20)),
                 NewChoices.Count));
-        NewChoices = NewChoices.GetRange(0, emojisToAdd.Count);
+        NewChoices = NewChoices.GetRange(0, Math.Min(emojisToAdd.Count, NewChoices.Count));
 
 
 
@@ -77,6 +72,11 @@ public class AbcPoll : Poll
 
     private DiscordEmbed Modify(DiscordClient client, DiscordGuild guild, DiscordEmbed original, List<string> emojisToAdd)
     {
+        if (NewChoices.Count + original.Fields.Count > OptionsEmoji.Count)
+        {
+            throw new ArgumentException($"Too many options. Maximum options is {OptionsEmoji.Count}.");
+        }
+
         DiscordEmbedBuilder builder = new (original);
 
         NewChoices.Zip(emojisToAdd).ToList().ForEach(pair =>
