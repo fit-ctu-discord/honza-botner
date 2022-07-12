@@ -92,6 +92,8 @@ public class Startup
                     slash.RegisterCommands<Discord.Services.SCommands.BotCommands>(guildId);
                     slash.RegisterCommands<Discord.Services.SCommands.EmoteCommands>(guildId);
                     slash.RegisterCommands<Discord.Services.SCommands.FunCommands>(guildId);
+                    slash.RegisterCommands<Discord.Services.SCommands.MemberCommands>(guildId);
+                    slash.RegisterCommands<Discord.Services.SCommands.MessageCommands>(guildId);
                 }
             )
 

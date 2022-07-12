@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
@@ -189,40 +190,24 @@ public class MemberCommands : ApplicationCommandModule
         [SlashCommand("role", "Counts members based on provided roles")]
         public async Task CountRoleCommandAsync(
             InteractionContext ctx,
-            [Description("Roles to check.")] params DiscordRole[] roles)
+            [Option("roles", "Roles to look for")] string roles,
+            [Choice("and", "and")]
+            [Choice("or", "or")]
+            [Option("search-type", "Look for members with all those roles/some. Default: and")] string type = "and")
         {
             int count = 0;
             DiscordGuild guild = ctx.Guild;
 
-            foreach ((_, DiscordMember member) in guild.Members)
-            {
-                if (roles.Any(role => member.Roles.Contains(role)))
-                {
-                    count++;
-                }
-            }
-
-            await ctx.Channel.SendMessageAsync(count.ToString());
-        }
-
-        [Command("roleAnd")]
-        [Aliases("and")]
-        [Description("Counts all members which have ALL of the provided roles.")]
-        public async Task CountRoleAnd(
-            CommandContext ctx,
-            [Description("Roles to check.")] params DiscordRole[] roles
-        )
-        {
-            int count = 0;
-            DiscordGuild guild = ctx.Guild;
+            await ctx.DeferAsync();
 
             foreach ((_, DiscordMember member) in guild.Members)
             {
-                bool hasAllRoles = roles.All(role => member.Roles.Contains(role));
-
-                if (hasAllRoles)
+                switch (type)
                 {
-                    count++;
+                    case "or" when roles.Any(role => member.Roles.Contains(role)):
+                    case "and" when roles.All(role => member.Roles.Contains(role)):
+                        count++;
+                        break;
                 }
             }
 

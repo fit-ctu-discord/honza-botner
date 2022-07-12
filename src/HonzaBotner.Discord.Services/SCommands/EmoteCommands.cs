@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
@@ -22,7 +23,8 @@ public class EmoteCommands : ApplicationCommandModule
         _emojiCounterService = emojiCounterService;
     }
 
-    [SlashCommand("emotes", "Display statistics about emotes on server", false)]
+    [SlashCommand("emotes", "Display statistics about emotes on server")]
+    [SlashCommandPermissions(Permissions.ManageEmojis)]
     public async Task EmoteStatsCommandAsync(
         InteractionContext ctx,
         [Choice("perDay", 0)]

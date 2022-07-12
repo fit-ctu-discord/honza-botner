@@ -59,12 +59,6 @@ public class BotCommands : ApplicationCommandModule
                     new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":bug:"))
                 ),
                 new DiscordLinkButtonComponent(
-                    _infoOptions.RepositoryUrl + "/tree/main/docs",
-                    "Documentation",
-                    false,
-                    new DiscordComponentEmoji(DiscordEmoji.FromName(ctx.Client, ":book:"))
-                ),
-                new DiscordLinkButtonComponent(
                     _infoOptions.ChangelogUrl,
                     "News",
                     false,
