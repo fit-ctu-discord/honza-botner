@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Jobs;
 
-[Cron("0 35 18 * * ?")]
+[Cron("0 0 8 * * ?")]
 public class StandUpJobProvider : IJob
 {
     private readonly ILogger<StandUpJobProvider> _logger;
@@ -57,7 +57,7 @@ public class StandUpJobProvider : IJob
 
     private async Task SendStandUpNotification(DateTime today)
     {
-        DateTime yesterday = today.AddDays(-0);
+        DateTime yesterday = today.AddDays(-1);
 
         try
         {
@@ -67,13 +67,17 @@ public class StandUpJobProvider : IJob
             var fail = new StandUpStats();
 
             List<DiscordMessage> messageList = new();
-            messageList.AddRange(await channel.GetMessagesAsync());
+            messageList.AddRange(
+                (await channel.GetMessagesAsync())
+                .Where(msg => msg.Timestamp.Date == yesterday)
+            );
 
-            while (messageList.LastOrDefault()?.Timestamp.Date == yesterday)
+            while (messageList.Count > 0)
             {
                 int messagesCount = messageList.Count;
                 messageList.AddRange(
-                    await channel.GetMessagesBeforeAsync(messageList.Last().Id)
+                    (await channel.GetMessagesBeforeAsync(messageList.Last().Id))
+                    .Where(msg => msg.Timestamp.Date == yesterday)
                 );
 
                 // No new data.
@@ -83,7 +87,7 @@ public class StandUpJobProvider : IJob
                 }
             }
 
-            foreach (DiscordMessage msg in messageList.Where(msg => msg.Timestamp.Date == yesterday))
+            foreach (DiscordMessage msg in messageList)
             {
                 foreach (string line in msg.Content.Split('\n'))
                 {
