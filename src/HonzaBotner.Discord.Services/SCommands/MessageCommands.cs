@@ -17,13 +17,16 @@ namespace HonzaBotner.Discord.Services.SCommands;
 [SlashCommandGroup("message", "Commands to interact with messages.")]
 [GuildOnly]
 [SlashCommandPermissions(Permissions.ManageMessages)]
+[SlashModuleLifespan(SlashModuleLifespan.Singleton)]
 public class MessageCommands : ApplicationCommandModule
 {
     private readonly ILogger<MessageCommands> _logger;
+    private readonly IRoleBindingsService _roleBindingsService;
 
-    public MessageCommands(ILogger<MessageCommands> logger)
+    public MessageCommands(ILogger<MessageCommands> logger, IRoleBindingsService roleBindingsService)
     {
         _logger = logger;
+        _roleBindingsService = roleBindingsService;
     }
 
     [SlashCommand("send", "Sends a text message to the specified channel.")]
@@ -75,7 +78,7 @@ public class MessageCommands : ApplicationCommandModule
             return;
         }
 
-        if (oldMessage.Author != ctx.Client.CurrentUser)
+        if (!oldMessage.Author.IsCurrent)
         {
             await ctx.CreateResponseAsync("Can not edit messages which were not sent by this bot (duh)");
             return;
@@ -142,92 +145,67 @@ public class MessageCommands : ApplicationCommandModule
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("No more reactions added"));
     }
 
-    /* TODO
-    [Group("bind")]
-    [Description("Module used for binding roles to emoji reaction")]
-    [ModuleLifespan(ModuleLifespan.Transient)]
-    public class RoleBindingsCommands : BaseCommandModule
+    [SlashCommand("bind", "Bind or unbind roles to specified message and reaction")]
+    public async Task BindCommandAsync(
+        InteractionContext ctx,
+        [Option("message", "Link to modified message")] string url,
+        [Option("roles", "Mention roles you want to (un)bind")] string roles,
+        [Choice("add", "Create new binding")]
+        [Choice("remove", "Remove existing binding")]
+        [Option("action", "add new binding or remove existing?")] string action)
     {
-        private readonly IRoleBindingsService _roleBindingsService;
-        private readonly ILogger<RoleBindingsCommands> _logger;
-
-        public RoleBindingsCommands(IRoleBindingsService roleBindingsService, ILogger<RoleBindingsCommands> logger)
+        DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
+        if (message == null)
         {
-            _roleBindingsService = roleBindingsService;
-            _logger = logger;
+            await ctx.CreateResponseAsync("Unable to find message with provided link", true);
+            return;
         }
 
-        [GroupCommand]
-        [Description("Adds binding to message")]
-        [Command("add")]
-        public async Task AddBinding(CommandContext ctx, [Description("URL of the message.")] string url,
-            [Description("Emoji to react with.")] DiscordEmoji emoji,
-            [Description("Roles which will be toggled after reaction.")]
-            params DiscordRole[] roles)
+        ulong channelId = message.ChannelId;
+        ulong messageId = message.Id;
+
+        await ctx.CreateResponseAsync("React to this message with emoji you want to (un)bind");
+        var interactivity = ctx.Client.GetInteractivity();
+        var response =
+            await interactivity.WaitForReactionAsync(ctx.GetOriginalResponseAsync().Result, ctx.User,
+                TimeSpan.FromMinutes(2));
+
+        if (response.TimedOut)
         {
-            DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
-            if (message == null)
-            {
-                throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
-            }
-
-            ulong channelId = message.ChannelId;
-            ulong messageId = message.Id;
-
-
-            await _roleBindingsService.AddBindingsAsync(channelId, messageId, emoji.Name,
-                roles.Select(r => r.Id).ToHashSet());
-            try
-            {
-                await message.CreateReactionAsync(emoji);
-                DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client, ":+1:");
-                await ctx.Message.CreateReactionAsync(thumbsUp);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Couldn't add reaction for emoji: {EmojiName} on {Url}",
-                    emoji.Name, url);
-                DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client, ":-1:");
-                await ctx.Message.CreateReactionAsync(thumbsUp);
-            }
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Timed out, write command again"));
+            return;
         }
 
-        [Command("remove")]
-        [Description("Removes binding from message")]
-        public async Task RemoveBinding(CommandContext ctx, [Description("URL of the message.")] string url,
-            [Description("Emoji to react with.")] DiscordEmoji emoji,
-            [Description("Roles which will be toggled after reaction")]
-            params DiscordRole[] roles)
+        try
         {
-            DiscordGuild guild = ctx.Guild;
-            DiscordMessage? message = await DiscordHelper.FindMessageFromLink(guild, url);
-            if (message == null)
+            switch (action)
             {
-                throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
+                case "add":
+                    await message.CreateReactionAsync(response.Result.Emoji);
+                    await _roleBindingsService.AddBindingsAsync(channelId, messageId, response.Result.Emoji.Name,
+                        ctx.ResolvedRoleMentions.Select(r => r.Id).ToHashSet());
+                    break;
+                case "remove":
+                    bool someRemained = await _roleBindingsService.RemoveBindingsAsync(channelId, messageId,
+                        response.Result.Emoji.Name,
+                        ctx.ResolvedRoleMentions.Select(r => r.Id).ToHashSet());
+                    if (!someRemained) await message.DeleteReactionsEmojiAsync(response.Result.Emoji);
+                    break;
             }
 
-            ulong channelId = message.ChannelId;
-            ulong messageId = message.Id;
-
-            bool someRemained = await _roleBindingsService.RemoveBindingsAsync(channelId, messageId, emoji.Name,
-                roles.Select(r => r.Id).ToHashSet());
-
-            DiscordEmoji thumbsUp = DiscordEmoji.FromName(ctx.Client, ":+1:");
-            await ctx.Message.CreateReactionAsync(thumbsUp);
-
-            if (!someRemained)
-            {
-                try
-                {
-                    // await message.DeleteReactionsEmojiAsync(emoji);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "Couldn't add reaction for emoji: {EmojiName} on {Url}",
-                        emoji.Name, url);
-                }
-            }
+            await ctx.FollowUpAsync(
+                new DiscordFollowupMessageBuilder().WithContent("Successfully " + action + "ed role binding"));
+        }
+        catch (BadRequestException)
+        {
+            await ctx.FollowUpAsync(
+                new DiscordFollowupMessageBuilder().WithContent("Cannot use provided emote."));
+        }
+        catch (Exception e)
+        {
+            await ctx.FollowUpAsync(
+                new DiscordFollowupMessageBuilder().WithContent("Error occured. Refer to log for more info."));
+            _logger.LogError(e, "Error occured during command {Action} bind of roles to message", action);
         }
     }
-    */
 }
