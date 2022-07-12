@@ -44,7 +44,7 @@ public class TriggerRemindersJobProvider : IJob
         _reminderManager = reminderManager;
     }
 
-    public string Name => "reminders-trigger";
+    public string Name { get; } = "reminders-trigger";
 
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
