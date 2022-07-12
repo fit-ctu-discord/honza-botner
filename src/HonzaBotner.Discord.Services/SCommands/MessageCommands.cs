@@ -5,6 +5,8 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
+using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Services.Contract;
@@ -28,7 +30,7 @@ public class MessageCommands : ApplicationCommandModule
     public async Task SendMessage(
         InteractionContext ctx,
         [Option("channel", "target channel for the message")] DiscordChannel channel,
-        [Option("messageLink", "Link to the message with new content")] string link,
+        [Option("new_message", "Link to the message with new content")] string link,
         [Option("mention", "Should all mentions be included?")] bool mention = false)
     {
         DiscordMessage? messageToSend = await DiscordHelper.FindMessageFromLink(ctx.Guild, link);
@@ -60,8 +62,8 @@ public class MessageCommands : ApplicationCommandModule
     [SlashCommand("edit", "Edit previously sent text message authored by this bot.")]
     public async Task EditMessage(
         InteractionContext ctx,
-        [Option("originalLink", "Link to message you want to edit")] string originalUrl,
-        [Option("newLink", "Link to the message with new content")] string newUrl,
+        [Option("old_message", "Link to the message you want to edit")] string originalUrl,
+        [Option("new_message", "Link to a message with new content")] string newUrl,
         [Option("mention", "Should all mentions be included?")] bool mention = false)
     {
         DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(ctx.Guild, originalUrl);
@@ -97,40 +99,50 @@ public class MessageCommands : ApplicationCommandModule
         }
     }
 
-    // TODO: From here further down
-
-    [Command("react")]
-    [Description("Reacts to a message as this bot.")]
-    public async Task ReactToMessage(CommandContext ctx,
-        [Description("URL of the message.")] string url,
-        [Description("Emojis to react with.")] params DiscordEmoji[] emojis)
+    [SlashCommand("react", "Reacts to a message as this bot.")]
+    public async Task ReactToMessageAsync(
+        InteractionContext ctx,
+        [Option("message", "Link to the message")] string url
+        )
     {
         DiscordGuild guild = ctx.Guild;
         DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(guild, url);
 
         if (oldMessage == null)
         {
-            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
+            await ctx.CreateResponseAsync("Could not find message to react to.");
             return;
         }
 
-        foreach (DiscordEmoji emoji in emojis)
+        await ctx.CreateResponseAsync("React to this message with reactions you want to add");
+        var reactionCatch = await ctx.GetOriginalResponseAsync();
+        var interactivity = ctx.Client.GetInteractivity();
+        var response = await interactivity
+            .WaitForReactionAsync(reactionCatch, ctx.User, TimeSpan.FromMinutes(2));
+
+        while (!response.TimedOut)
         {
             try
             {
-                await oldMessage.CreateReactionAsync(emoji);
+                await oldMessage.CreateReactionAsync(response.Result.Emoji);
+                await ctx.EditResponseAsync(
+                    new DiscordWebhookBuilder()
+                        .WithContent("Reacted with " + response.Result.Emoji + "\nReact with more to add more"));
             }
-            catch (Exception e)
+            catch (BadRequestException)
             {
-                _logger.LogWarning(e, "Couldn't react with emoji {Emoji}", emoji);
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":bug:"));
-                return;
+                await ctx.EditResponseAsync(
+                    new DiscordWebhookBuilder()
+                        .WithContent("Bot cannot react with provided emoji. Is it universal/from this server?"));
             }
+
+            response = await interactivity.WaitForReactionAsync(reactionCatch, ctx.User, TimeSpan.FromMinutes(2));
         }
 
-        await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("No more reactions added"));
     }
 
+    /* TODO
     [Group("bind")]
     [Description("Module used for binding roles to emoji reaction")]
     [ModuleLifespan(ModuleLifespan.Transient)]
@@ -217,4 +229,5 @@ public class MessageCommands : ApplicationCommandModule
             }
         }
     }
+    */
 }
