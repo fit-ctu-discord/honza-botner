@@ -44,7 +44,7 @@ public class StandUpJobProvider : IJob
     /// [] - normal
     /// []! - critical
     /// </summary>
-    private static readonly Regex Regex = new(@"^ *\[ *(?<State>\S*) *\] *(?<Priority>[!])?", RegexOptions.Multiline);
+    private static readonly Regex Regex = new(@"^\s*\[\s*(?<State>\S*)\s*\]\s*(?<Priority>[!])?");
 
     private static readonly List<string> OkList = new() { "check", "done", "ok", "✅" };
 
@@ -81,8 +81,14 @@ public class StandUpJobProvider : IJob
 
             foreach (DiscordMessage msg in messageList.Where(msg => msg.Timestamp.Date == yesterday))
             {
-                foreach (Match match in Regex.Matches(msg.Content))
+                foreach (string line in msg.Content.Split('\n'))
                 {
+                    var match = Regex.Match(line);
+                    if (!match.Success)
+                    {
+                        continue;
+                    }
+
                     string state = match.Groups["State"].ToString();
                     string priority = match.Groups["Priority"].ToString();
 
