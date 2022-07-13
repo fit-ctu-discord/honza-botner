@@ -104,8 +104,7 @@ public class PollCommands : ApplicationCommandModule
         {
             DiscordRole modRole = (await _guildProvider.GetCurrentGuildAsync()).GetRole(_options.ModRoleId);
 
-            // I am sorry, due to DSharpPlus' caching logic, this mess is necessary
-            AbcPoll poll = new (await (await ctx.Client.GetChannelAsync(ctx.Channel.Id)).GetMessageAsync(originalMessage.Id));
+            AbcPoll poll = new (originalMessage);
 
             if (poll.AuthorMention != ctx.Member?.Mention && !(ctx.Member?.Roles.Contains(modRole) ?? false))
             {

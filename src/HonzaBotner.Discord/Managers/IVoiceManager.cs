@@ -13,7 +13,7 @@ public interface IVoiceManager
         bool? isPublic = null
     );
 
-    Task<bool> EditVoiceChannelAsync(DiscordMember user, string? name, int? limit, bool? isPublic);
+    Task<bool> EditVoiceChannelAsync(DiscordMember member, string? name, int? limit, bool? isPublic);
 
     Task DeleteUnusedVoiceChannelAsync(DiscordChannel channel);
 
