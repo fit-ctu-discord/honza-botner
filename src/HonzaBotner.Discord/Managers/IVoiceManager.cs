@@ -9,11 +9,11 @@ public interface IVoiceManager
         DiscordChannel channelToCloneFrom,
         DiscordMember user,
         string? name = null,
-        int? limit = null,
+        long? limit = null,
         bool? isPublic = null
     );
 
-    Task<bool> EditVoiceChannelAsync(DiscordMember member, string? name, int? limit, bool? isPublic);
+    Task<bool> EditVoiceChannelAsync(DiscordMember member, string? name, long? limit, bool? isPublic);
 
     Task DeleteUnusedVoiceChannelAsync(DiscordChannel channel);
 

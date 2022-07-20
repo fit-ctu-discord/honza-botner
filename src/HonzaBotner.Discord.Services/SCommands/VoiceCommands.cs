@@ -8,15 +8,15 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.SCommands;
 
+[SlashCommandGroup("voice", "Commands to customize own voice channels")]
 public class VoiceCommands : ApplicationCommandModule
 {
-
     private readonly IVoiceManager _voiceManager;
     private readonly CustomVoiceOptions _voiceConfig;
-    private readonly ILogger<Commands.VoiceCommands> _logger;
+    private readonly ILogger<VoiceCommands> _logger;
 
     public VoiceCommands(IVoiceManager voiceManager, IOptions<CustomVoiceOptions> options,
-        ILogger<Commands.VoiceCommands> logger)
+        ILogger<VoiceCommands> logger)
     {
         _voiceManager = voiceManager;
         _voiceConfig = options.Value;
@@ -29,9 +29,8 @@ public class VoiceCommands : ApplicationCommandModule
         [MaximumLength(100)]
         [Option("name", "Name of the channel.")] string name,
         [Minimum(0), Maximum(99)]
-        [Option("limit", "Limit amount of people allowed to join.")] int limit = 0,
-        [Option("public", "Should the channel be publicly accessible?")] bool isPublic = false
-    )
+        [Option("limit", "Limit amount of people allowed to join.")] long limit = 0,
+        [Option("public", "Should the channel be publicly accessible?")] bool isPublic = false)
     {
         try
         {
@@ -51,7 +50,7 @@ public class VoiceCommands : ApplicationCommandModule
         InteractionContext ctx,
         [MaximumLength(100)] [Option("name", "Change name")] string? name = null,
         [Minimum(0), Maximum(99)]
-        [Option("limit", "Change limit of people")] int? limit = null,
+        [Option("limit", "Change limit of people")] long? limit = null,
         [Option("public", "Change whether the channel appears to everyone")] bool? isPublic = null
     )
     {
