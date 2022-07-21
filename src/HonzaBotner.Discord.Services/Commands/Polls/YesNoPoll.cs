@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using DSharpPlus.Entities;
 
-namespace HonzaBotner.Discord.Services.SCommands.Polls;
+namespace HonzaBotner.Discord.Services.Commands.Polls;
 
 public class YesNoPoll : Poll
 {

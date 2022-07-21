@@ -1,8 +1,6 @@
 using System;
 using DSharpPlus;
-using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
@@ -13,7 +11,6 @@ namespace HonzaBotner.Discord;
 public class DiscordWrapper
 {
     public DiscordClient Client { get; }
-    public CommandsNextExtension Commands { get; }
     public InteractivityExtension Interactivity { get; }
     public SlashCommandsExtension SlashCommands { get; }
 
@@ -29,12 +26,6 @@ public class DiscordWrapper
         };
 
         Client = new DiscordClient(config);
-
-        CommandsNextConfiguration cConfig = new()
-        {
-            Services = services, StringPrefixes = optionsConfig.Prefixes, EnableDms = true
-        };
-        Commands = Client.UseCommandsNext(cConfig);
 
         InteractivityConfiguration iConfig = new()
         {

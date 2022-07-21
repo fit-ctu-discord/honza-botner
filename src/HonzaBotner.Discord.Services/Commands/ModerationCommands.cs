@@ -11,7 +11,7 @@ using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Logging;
 
-namespace HonzaBotner.Discord.Services.SCommands;
+namespace HonzaBotner.Discord.Services.Commands;
 
 [SlashCommandGroup("moderation", "Punish members of your server or show/edit their history")]
 [SlashCommandPermissions(Permissions.BanMembers)]

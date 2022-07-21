@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="DSharpPlus" />
-    <PackageReference Include="DSharpPlus.CommandsNext" />
     <PackageReference Include="DSharpPlus.Interactivity" />
     <PackageReference Include="DSharpPlus.SlashCommands" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />

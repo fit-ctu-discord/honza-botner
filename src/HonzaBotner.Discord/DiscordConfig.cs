@@ -6,6 +6,5 @@ public class DiscordConfig
 
     public string? Token { get; set; }
     public ulong? GuildId { get; set; }
-    public string[] Prefixes { get; set; } = null!;
     public ulong LogChannelId { get; set; }
 }

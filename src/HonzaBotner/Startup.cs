@@ -1,9 +1,9 @@
-using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
 using HonzaBotner.Discord.EventHandler;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services;
+using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Discord.Services.EventHandlers;
 using HonzaBotner.Discord.Services.Jobs;
 using HonzaBotner.Discord.Services.Managers;
@@ -56,22 +56,7 @@ public class Startup
             // Discord
             .AddDiscordOptions(Configuration)
             .AddCommandOptions(Configuration)
-            .AddDiscordBot(config =>
-                {
-                    //config.RegisterCommands<AuthorizeCommands>();
-                    config.RegisterCommands<BotCommands>();
-                    config.RegisterCommands<ChannelCommands>();
-                    config.RegisterCommands<EmoteCommands>();
-                    config.RegisterCommands<FunCommands>();
-                    config.RegisterCommands<MemberCommands>();
-                    config.RegisterCommands<MessageCommands>();
-                    config.RegisterCommands<PinCommands>();
-                    config.RegisterCommands<PollCommands>();
-                    config.RegisterCommands<ReminderCommands>();
-                    config.RegisterCommands<TestCommands>();
-                    config.RegisterCommands<VoiceCommands>();
-                    config.RegisterCommands<WarningCommands>();
-                }, reactions =>
+            .AddDiscordBot( reactions =>
                 {
                     reactions
                         .AddEventHandler<BoosterHandler>()
@@ -88,16 +73,16 @@ public class Startup
                         ;
                 }, slash =>
                 {
-                    slash.RegisterCommands<Discord.Services.SCommands.BotCommands>(guildId);
-                    slash.RegisterCommands<Discord.Services.SCommands.EmoteCommands>(guildId);
-                    slash.RegisterCommands<Discord.Services.SCommands.FunCommands>(guildId);
-                    slash.RegisterCommands<Discord.Services.SCommands.MemberCommands>(guildId);
-                    slash.RegisterCommands<Discord.Services.SCommands.MessageCommands>(guildId);
-                    slash.RegisterCommands<Discord.Services.SCommands.ModerationCommands>(guildId);
-                    slash.RegisterCommands<Discord.Services.SCommands.PinCommands>(guildId);
-                    slash.RegisterCommands<Discord.Services.SCommands.PollCommands>(guildId);
-                    slash.RegisterCommands<Discord.Services.SCommands.ReminderCommands>(guildId);
-                    slash.RegisterCommands<Discord.Services.SCommands.VoiceCommands>(guildId);
+                    slash.RegisterCommands<BotCommands>(guildId);
+                    slash.RegisterCommands<EmoteCommands>(guildId);
+                    slash.RegisterCommands<FunCommands>(guildId);
+                    slash.RegisterCommands<MemberCommands>(guildId);
+                    slash.RegisterCommands<MessageCommands>(guildId);
+                    slash.RegisterCommands<ModerationCommands>(guildId);
+                    slash.RegisterCommands<PinCommands>(guildId);
+                    slash.RegisterCommands<PollCommands>(guildId);
+                    slash.RegisterCommands<ReminderCommands>(guildId);
+                    slash.RegisterCommands<VoiceCommands>(guildId);
                 }
             )
 

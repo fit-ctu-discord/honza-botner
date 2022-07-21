@@ -6,7 +6,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Services.Extensions;
 
-namespace HonzaBotner.Discord.Services.SCommands.Polls;
+namespace HonzaBotner.Discord.Services.Commands.Polls;
 
 public class AbcPoll : Poll
 {

@@ -1,67 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
+using DSharpPlus.SlashCommands;
 using HonzaBotner.Discord.Services.Extensions;
-using HonzaBotner.Discord.Services.Attributes;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
-using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Commands;
 
-[Group("emotes")]
-[Aliases("emote", "emojis", "emoji")]
-[Description(
-    "Commands to display stats about emote usage. You can also use additional switches `animated` and `nonanimated`.")]
-[ModuleLifespan(ModuleLifespan.Transient)]
-[RequireMod]
-[RequireGuild]
-public class EmoteCommands : BaseCommandModule
+public class EmoteCommands : ApplicationCommandModule
 {
-    private readonly IEmojiCounterService _emojiCounterService;
-    private readonly ILogger<EmoteCommands> _logger;
 
-    public EmoteCommands(IEmojiCounterService emojiCounterService, ILogger<EmoteCommands> logger)
+    private readonly IEmojiCounterService _emojiCounterService;
+
+    public EmoteCommands(IEmojiCounterService emojiCounterService)
     {
         _emojiCounterService = emojiCounterService;
-        _logger = logger;
     }
 
-    [GroupCommand]
-    [Command("perday")]
-    [Aliases("daily")]
-    [Description("Displays per day usage of emotes.")]
-    public Task PerDayCommand(CommandContext ctx, params string[] parameters)
+    [SlashCommand("emotes", "Display statistics about emotes on server")]
+    [SlashCommandPermissions(Permissions.ManageEmojis)]
+    public async Task EmoteStatsCommandAsync(
+        InteractionContext ctx,
+        [Choice("perDay", 0)]
+        [Choice("total", 1)]
+        [Option("display", "Show displayed per day or total? Defaults perDay")] long showTotal = 0,
+        [Choice("all", 0)]
+        [Choice("animated", 1)]
+        [Choice("still", 2)]
+        [Option("Type", "What type of emojis to show? Defaults all")] long type = 0)
     {
-        return Display(ctx, false, parameters, emoji => emoji.UsagePerDay);
-    }
-
-    [Command("total")]
-    [Aliases("all")]
-    [Description("Displays total usage of emotes.")]
-    public Task TotalCommand(CommandContext ctx, params string[] parameters)
-    {
-        return Display(ctx, true, parameters, emoji => emoji.Used);
-    }
-
-    private async Task Display<TKey>(CommandContext ctx, bool total, string[] parameters,
-        Func<CountedEmoji, TKey> comparer)
-    {
-        GetFlags(parameters, out bool animated, out bool nonAnimated);
-        bool all = animated == nonAnimated;
+        bool total = showTotal == 1;
+        await ctx.DeferAsync();
 
         IEnumerable<CountedEmoji> results = await _emojiCounterService.ListAsync();
-        IOrderedEnumerable<CountedEmoji> orderedResults = results.OrderByDescending(comparer);
+        IOrderedEnumerable<CountedEmoji> orderedResults = total
+            ? results.OrderByDescending(emoji => emoji.Used)
+            : results.OrderByDescending(emoji => emoji.UsagePerDay);
 
-        StringBuilder builder = new();
-        builder.Append("\n");
+        StringBuilder builder = new("\n");
 
         int emojisAppended = 0;
         //const int chunkSize = 30;
@@ -75,7 +57,7 @@ public class EmoteCommands : BaseCommandModule
                 continue;
             }
 
-            if (!(emoji.IsAnimated == animated || all))
+            if (emoji.IsAnimated && type == 2)
             {
                 continue;
             }
@@ -95,6 +77,8 @@ public class EmoteCommands : BaseCommandModule
             emojisAppended++;
         }
 
+        await ctx.DeleteResponseAsync();
+
         if (emojisAppended > 0)
         {
             InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
@@ -108,26 +92,6 @@ public class EmoteCommands : BaseCommandModule
             };
             IEnumerable<Page> pages = interactivity.GeneratePages(builder.ToString(), embedBuilder, 12);
             await ctx.Channel.SendPaginatedMessageAsync(ctx.Member, pages);
-        }
-    }
-
-    private void GetFlags(string[] parameters, out bool animated, out bool nonAnimated)
-    {
-        animated = nonAnimated = false;
-        foreach (string parameter in parameters)
-        {
-            switch (parameter)
-            {
-                case "animated":
-                    animated = true;
-                    break;
-                case "nonanimated":
-                    nonAnimated = true;
-                    break;
-                default:
-                    _logger.LogInformation("Unknown flag was used in emoji print: {Parameter}", parameter);
-                    break;
-            }
         }
     }
 }

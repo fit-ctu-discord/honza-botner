@@ -1,21 +1,19 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord.Services.SCommands.Polls;
+using DSharpPlus.SlashCommands;
+using HonzaBotner.Discord.Services.Commands.Polls;
+using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Commands;
 
-[Group("poll")]
-[Description("Commands to create polls.")]
-[RequireGuild]
-public class PollCommands : BaseCommandModule
+[SlashCommandGroup("poll", "Create different polls")]
+public class PollCommands : ApplicationCommandModule
 {
     private const string PollErrorMessage =
         "Poll build failed. Make sure the question has less than 256 characters and each option has less than 1024 characters.";
@@ -32,59 +30,31 @@ public class PollCommands : BaseCommandModule
         _guildProvider = guildProvider;
     }
 
-    [GroupCommand]
-    [Description("Creates either yes/no or ABC poll.")]
-    [Priority(1)]
-    public async Task PollCommandAsync(
-        CommandContext ctx,
-        [Description("Options for the pool.")] params string[] options
-    )
-    {
-        switch (options.Length)
-        {
-            case 0:
-                await PollHelpAsync(ctx);
-                break;
-            case 1:
-                await CreateDefaultPollAsync(ctx, options.First());
-                break;
-            default:
-                await CreateDefaultPollAsync(ctx, options.First(), options.Skip(1).ToList());
-                break;
-        }
-    }
-
-    [Command("yesno")]
-    [Description("Creates a yesno pool.")]
-    [Priority(2)]
+    [SlashCommand("yesno", "Create poll with yes/no answers.")]
     public async Task YesNoPollCommandAsync(
-        CommandContext ctx,
-        [RemainingText, Description("Poll's question.")]
-        string question
+        InteractionContext ctx,
+        [Option("question", "Question/query you want to vote about.")] string question
     )
     {
         await CreateDefaultPollAsync(ctx, question);
     }
 
-    [Command("abc")]
-    [Description("Creates an abc pool.")]
-    [Priority(2)]
+    [SlashCommand("abc", "Create poll with custom answers")]
     public async Task AbcPollCommandAsync(
-        CommandContext ctx,
-        [Description("Poll's question.")] string question,
-        [Description("Poll's options.")] params string[] answers
+        InteractionContext ctx,
+        [Option("question", "Question/query you want to vote about.")]
+        string question,
+        [Option("answers", "Answers separated by ','")]
+        string answers
     )
     {
-        if (answers.Length > 0)
-        {
-            await CreateDefaultPollAsync(ctx, question, answers.ToList());
-            return;
-        }
-
-        await ctx.RespondAsync("You must add answers to the ABC poll.");
+        await CreateDefaultPollAsync(ctx, question,
+            answers.Split(',')
+                .Select(answer => answer.Trim().RemoveDiscordMentions())
+                .Where(answer => answer != "").ToList());
     }
 
-    private async Task CreateDefaultPollAsync(CommandContext ctx, string question, List<string>? answers = null)
+    private async Task CreateDefaultPollAsync(InteractionContext ctx, string question, List<string>? answers = null)
     {
         try
         {
@@ -93,59 +63,40 @@ public class PollCommands : BaseCommandModule
                 : new AbcPoll(ctx.Member.Mention, question, answers);
 
             await poll.PostAsync(ctx.Client, ctx.Channel);
-            await ctx.Message.DeleteAsync();
+            await ctx.CreateResponseAsync("Poll created", true);
         }
         catch (PollException e)
         {
-            await ctx.RespondAsync(e.Message);
+            await ctx.CreateResponseAsync(e.Message, true);
         }
         catch (Exception e)
         {
-            await ctx.RespondAsync(PollErrorMessage);
+            await ctx.CreateResponseAsync(PollErrorMessage, true);
             _logger.LogWarning(e, "Failed to create new Poll");
         }
     }
 
-    private static async Task PollHelpAsync(CommandContext ctx)
-    {
-        DiscordEmbed embed = new DiscordEmbedBuilder()
-            .WithTitle("Polls")
-            .WithDescription("Create unique polls using `::poll` command." +
-                             " You can also add options to existing polls using `::poll add`." +
-                             "\n\nBot currently supports following formats:")
-            .AddField("YesNo Poll :+1:",
-                "Ask simple questions with binary answers. Bot will add :+1: and :-1: as answer options." +
-                "\nUsage: `::poll yesno Is this feature cool?`")
-            .AddField("Abc Poll :regional_indicator_a:",
-                "Basic options not enough? You can include your own answers." +
-                "\nUsage: `::poll abc \"Which is the best?\" \"Dogs\" \"Cats\" \"Progtest\"`" +
-                "\nQuotation marks (\") are required in this command")
-            .AddField("Editing existing poll",
-                "To add additional options to already existing **abc** poll that you've created, " +
-                "use subcommand 'add'. You have to send this command as a reply to the original poll." +
-                "\nUsage: `::poll add \"Marast!\" \"Moodle\"`\n`\"`'s are again necessary")
-            .WithColor(DiscordColor.Yellow)
-            .Build();
-        await ctx.RespondAsync(embed);
-    }
 
-    [Command("add")]
-    [Description("Adds options to an existing abc poll. You need to reference it via reply.")]
-    [Priority(2)]
+    [SlashCommand("add-answers", "Add answers to polls created by you")]
     public async Task AddPollOptionAsync(
-        CommandContext ctx,
-        [Description("Additional options.")] params string[] options
+        InteractionContext ctx,
+        [Option("poll", "Link to original poll (Right click -> Copy Message Link).")] string link,
+        [Option("answers", "Answers separated by ','")] string answers
     )
     {
-        DiscordMessage? originalMessage = ctx.Message.ReferencedMessage;
+        DiscordMessage? originalMessage = await DiscordHelper.FindMessageFromLink(ctx.Guild, link);
+        List<string> options = answers.Split(',')
+            .Select(answer => answer.Trim().RemoveDiscordMentions())
+            .Where(answer => answer != "").ToList();
 
         if (originalMessage is null
-            || options.Length == 0
+            || options.Count == 0
             || !originalMessage.Author.IsCurrent
             || (originalMessage.Embeds?.Count.Equals(0) ?? true)
             || !(originalMessage.Embeds[0].Footer?.Text.Equals("AbcPoll") ?? false))
         {
-            await PollHelpAsync(ctx);
+            await ctx.CreateResponseAsync(
+                "Original message is unreachable or it is not AbcPoll created by this bot.", true);
             return;
         }
 
@@ -153,26 +104,26 @@ public class PollCommands : BaseCommandModule
         {
             DiscordRole modRole = (await _guildProvider.GetCurrentGuildAsync()).GetRole(_options.ModRoleId);
 
-            // I am sorry, due to DSharpPlus' caching logic, this mess is necessary
-            AbcPoll poll = new (await (await ctx.Client.GetChannelAsync(ctx.Channel.Id)).GetMessageAsync(ctx.Message.ReferencedMessage.Id));
+            AbcPoll poll = new (originalMessage);
 
             if (poll.AuthorMention != ctx.Member?.Mention && !(ctx.Member?.Roles.Contains(modRole) ?? false))
             {
-                await ctx.RespondAsync("You are not authorized to edit this poll");
+                await ctx.CreateResponseAsync("You are not authorized to edit this poll.", true);
                 return;
             }
 
             await poll.AddOptionsAsync(ctx.Client, options);
-            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+            await ctx.CreateResponseAsync("Added new options to the poll.");
         }
         catch (PollException e)
         {
-            await ctx.RespondAsync(e.Message);
+            await ctx.CreateResponseAsync(e.Message, true);
         }
         catch (Exception e)
         {
-            await ctx.RespondAsync(PollErrorMessage);
+            await ctx.CreateResponseAsync(PollErrorMessage, true);
             _logger.LogWarning(e, "Failed to add options to abc poll");
         }
     }
+
 }

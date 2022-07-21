@@ -1,220 +1,146 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Chronic.Core.System;
 using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using HonzaBotner.Discord.Services.Attributes;
+using DSharpPlus.SlashCommands;
 using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Commands;
 
-[Group("pin")]
-[Description("Commands to manage pins on server")]
-[RequireGuild]
-[RequireMod]
-public class PinCommands : BaseCommandModule
+public class PinCommands : ApplicationCommandModule
 {
-    [Group("delete")]
-    [Aliases("erase", "remove")]
-    [Description("Deletes pins on this server or in specific channel.")]
-    public class DeletePins : BaseCommandModule
+    private readonly ILogger<PinCommands> _logger;
+    private readonly PinOptions _pinOptions;
+    private readonly DiscordWrapper _discordWrapper;
+    private readonly IReadOnlyDictionary<ulong, int> _roleToScore;
+
+    public PinCommands(
+        ILogger<PinCommands> logger,
+        IOptions<PinOptions> options,
+        DiscordWrapper wrapper
+    )
     {
-        private readonly ILogger<DeletePins> _logger;
-        private readonly PinOptions _pinOptions;
-        private readonly DiscordWrapper _discordWrapper;
+        _logger = logger;
+        _pinOptions = options.Value;
+        _discordWrapper = wrapper;
+        _roleToScore = GetRoleToScore();
+    }
 
-        public DeletePins(
-            ILogger<DeletePins> logger,
-            IOptions<PinOptions> options,
-            DiscordWrapper wrapper
-        )
+    [SlashCommand("delete-pins", "Unpins messages pinned with temporary pins")]
+    [SlashCommandPermissions(Permissions.ManageChannels)]
+    public async Task DeleteAllAsync(
+        InteractionContext ctx,
+        [Option("everywhere", "Do it everywhere or just in this channel? Default: false")]
+        bool everywhere = false)
+    {
+        string customId = "unpin" + ctx.User.Id + ctx.Channel.Id;
+        await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder()
+            .WithContent("Do you really want to unpin messages in this " + (everywhere ? "server?" : "channel?"))
+            .AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, customId, "Do it!"))
+            .AsEphemeral(true));
+
+        var interactivity = ctx.Client.GetInteractivity();
+        var result = await interactivity.WaitForButtonAsync(await ctx.GetOriginalResponseAsync(), customId,
+            TimeSpan.FromSeconds(30));
+
+        if (result.TimedOut) return;
+
+        var permanentPinEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.PermanentPinName);
+        var lockPinEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.LockEmojiName);
+        var channelTasks = new List<Task>();
+
+        ctx.Guild.Channels.ForEach(pair =>
         {
-            _logger = logger;
-            _pinOptions = options.Value;
-            _discordWrapper = wrapper;
-        }
+            if (pair.Value.Type is ChannelType.Category or ChannelType.Group or ChannelType.Stage or ChannelType.Unknown or ChannelType.Voice) return;
+            if (!everywhere && pair.Key != ctx.Channel.Id) return;
+            channelTasks.Add(DeletePinsInChannelAsync(pair.Value, permanentPinEmoji, lockPinEmoji));
+        });
 
-        [Command("all")]
-        [Description("Unpins all messages in all text channels on this server.")]
-        public async Task DeleteAllAsync(CommandContext ctx)
+        await Task.WhenAll(channelTasks);
+        await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Messages successfully unpinned"));
+    }
+
+    private async Task DeletePinsInChannelAsync(
+        DiscordChannel channel,
+        DiscordEmoji permanentEmoji,
+        DiscordEmoji lockEmoji)
+    {
+        IReadOnlyList<DiscordMessage> messages = await channel.GetPinnedMessagesAsync();
+        foreach (DiscordMessage message in messages)
         {
-            var emoji = DiscordEmoji.FromName(ctx.Client, ":ok_hand:");
-            DiscordMessage reactMessage = await ctx.Channel.SendMessageAsync(
-                "To approve deleting all temporary pings on this server, " +
-                $"react with {emoji} within 15 seconds."
-            );
+            int score = 0;
+            IReadOnlyList<DiscordUser> reactions =
+                await message.GetReactionsAsync(permanentEmoji, _pinOptions.Threshold);
 
-            await reactMessage.CreateReactionAsync(emoji);
-            InteractivityResult<MessageReactionAddEventArgs> result =
-                await reactMessage.WaitForReactionAsync(ctx.User, emoji, TimeSpan.FromSeconds(15));
+            if (reactions.Count >= _pinOptions.Threshold) continue;
 
-            if (result.TimedOut) return;
-
-            await ctx.TriggerTypingAsync();
-
-            var permanentPinEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.PermanentPinName);
-            var lockPinEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.LockEmojiName);
-            IReadOnlyDictionary<ulong, int> roleToScore = GetRoleToScore();
-            var channelTasks = new List<Task>();
-
-            foreach (DiscordChannel channel in ctx.Guild.Channels.Values)
+            foreach (DiscordUser user in reactions)
             {
-                if (channel.Type is not ChannelType.Text && channel.Type is not ChannelType.News)
+                int maxRoleScore = 1;
+
+                DiscordMember? member = await channel.Guild.GetMemberAsync(user.Id);
+                if (member is not null)
                 {
-                    continue;
-                }
-
-                channelTasks.Add(DeletePinsInChannelAsync(channel, permanentPinEmoji, lockPinEmoji, roleToScore));
-            }
-
-            await Task.WhenAll(channelTasks);
-
-            try
-            {
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(_discordWrapper.Client, ":+1:"));
-                await ctx.RespondAsync("Removed all temporary pins");
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Could not add reaction or respond to {Message}", ctx.Message);
-            }
-        }
-
-        [GroupCommand]
-        [Command("channel")]
-        [Description("Unpins messages in specified text channel.")]
-        public async Task DeleteInChannelAsync(CommandContext ctx, DiscordChannel channel)
-        {
-            DiscordEmoji emoji = DiscordEmoji.FromName(ctx.Client, ":ok_hand:");
-            DiscordMessage reactMessage = await ctx.Channel.SendMessageAsync(
-                $"To approve deleting all pings in channel {channel.Mention}, " +
-                $"react with {emoji} within 15 seconds."
-            );
-
-            await reactMessage.CreateReactionAsync(emoji);
-            InteractivityResult<MessageReactionAddEventArgs> result =
-                await reactMessage.WaitForReactionAsync(ctx.User, emoji, TimeSpan.FromSeconds(15));
-
-            if (result.TimedOut) return;
-
-            if (channel.Type is not ChannelType.Text && channel.Type is not ChannelType.News)
-            {
-                await ctx.RespondAsync("You can use this command only on text channels");
-                return;
-            }
-
-            var permanentPinEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.PermanentPinName);
-            var lockPinEmoji = DiscordEmoji.FromName(_discordWrapper.Client, _pinOptions.LockEmojiName);
-            IReadOnlyDictionary<ulong, int> roleToScore = GetRoleToScore();
-
-            await DeletePinsInChannelAsync(channel, permanentPinEmoji, lockPinEmoji, roleToScore);
-
-
-            try
-            {
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(_discordWrapper.Client, ":+1:"));
-                await ctx.RespondAsync($"Removed temporary pins in the channel");
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Could not add reaction or respond to {Message}", ctx.Message);
-            }
-        }
-
-        private async Task DeletePinsInChannelAsync(
-            DiscordChannel channel,
-            DiscordEmoji permanentEmoji,
-            DiscordEmoji lockEmoji,
-            IReadOnlyDictionary<ulong, int> roleToScore
-        )
-        {
-            IReadOnlyList<DiscordMessage> messages = await channel.GetPinnedMessagesAsync();
-            foreach (DiscordMessage message in messages)
-            {
-                int score = 0;
-                IReadOnlyList<DiscordUser> reactions =
-                    await message.GetReactionsAsync(permanentEmoji, _pinOptions.Threshold);
-
-                if (reactions.Count == _pinOptions.Threshold) continue;
-
-                foreach (DiscordUser user in reactions)
-                {
-                    int maxRoleScore = 1;
-
-                    DiscordMember? member = null;
-                    try
-                    {
-                        member = await channel.Guild.GetMemberAsync(user.Id);
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogInformation(e, "Could not initialize Guild member {MemberId}", user.Id);
-                    }
-
-                    if (member == null) continue;
-
                     foreach (DiscordRole role in member.Roles)
                     {
-                        if (!roleToScore.ContainsKey(role.Id))
+                        if (!_roleToScore.ContainsKey(role.Id))
                         {
                             continue;
                         }
 
-                        if (maxRoleScore < roleToScore[role.Id])
+                        if (maxRoleScore < _roleToScore[role.Id])
                         {
-                            maxRoleScore = roleToScore[role.Id];
+                            maxRoleScore = _roleToScore[role.Id];
                         }
                     }
-
-                    score += maxRoleScore;
                 }
 
-                // Do not delete anything.
-                if (score >= _pinOptions.Threshold)
-                {
-                    continue;
-                }
-
-                try
-                {
-                    await message.CreateReactionAsync(lockEmoji);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e,
-                        "Could not create a lock emoji reaction for message {Message} in channel {Channel}",
-                        message.Id,
-                        channel.Id
-                    );
-                    await message.UnpinAsync();
-                }
+                score += maxRoleScore;
             }
-        }
 
-        private IReadOnlyDictionary<ulong, int> GetRoleToScore()
-        {
-            var roleToScore = new Dictionary<ulong, int>();
-            foreach ((string? key, int value) in _pinOptions.RoleToWeightMapping)
+            // Do not delete anything.
+            if (score >= _pinOptions.Threshold)
             {
-                try
-                {
-                    ulong roleId = ulong.Parse(key);
-                    roleToScore.Add(roleId, value);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "Failed to parse role id {Key}", key);
-                }
+                continue;
             }
 
-            return roleToScore;
+            try
+            {
+                await message.CreateReactionAsync(lockEmoji);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e,
+                    "Could not create a lock emoji reaction for message {Message} in channel {Channel}",
+                    message.Id,
+                    channel.Id
+                );
+                await message.UnpinAsync();
+            }
         }
+    }
+
+    private IReadOnlyDictionary<ulong, int> GetRoleToScore()
+    {
+        var roleToScore = new Dictionary<ulong, int>();
+        foreach ((string? key, int value) in _pinOptions.RoleToWeightMapping)
+        {
+            try
+            {
+                ulong roleId = ulong.Parse(key);
+                roleToScore.Add(roleId, value);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to parse role id {Key}", key);
+            }
+        }
+
+        return roleToScore;
     }
 }
