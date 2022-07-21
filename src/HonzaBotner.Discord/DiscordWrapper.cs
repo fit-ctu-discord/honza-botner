@@ -38,7 +38,7 @@ public class DiscordWrapper
 
         InteractivityConfiguration iConfig = new()
         {
-            PollBehaviour = PollBehaviour.KeepEmojis, Timeout = TimeSpan.FromSeconds(30)
+            Timeout = TimeSpan.FromMinutes(2), AckPaginationButtons = true
         };
         Interactivity = Client.UseInteractivity(iConfig);
 

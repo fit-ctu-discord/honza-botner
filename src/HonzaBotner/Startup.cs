@@ -11,7 +11,6 @@ using HonzaBotner.Discord.Services.Utils;
 using HonzaBotner.Discord.Utils;
 using HonzaBotner.Scheduler;
 using HonzaBotner.Services;
-using HonzaBotner.Services.Contract;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -94,6 +93,7 @@ public class Startup
                     slash.RegisterCommands<Discord.Services.SCommands.FunCommands>(guildId);
                     slash.RegisterCommands<Discord.Services.SCommands.MemberCommands>(guildId);
                     slash.RegisterCommands<Discord.Services.SCommands.MessageCommands>(guildId);
+                    slash.RegisterCommands<Discord.Services.SCommands.ModerationCommands>(guildId);
                     slash.RegisterCommands<Discord.Services.SCommands.PollCommands>(guildId);
                     slash.RegisterCommands<Discord.Services.SCommands.ReminderCommands>(guildId);
                     slash.RegisterCommands<Discord.Services.SCommands.VoiceCommands>(guildId);
