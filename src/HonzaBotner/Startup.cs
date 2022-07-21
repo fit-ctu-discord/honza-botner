@@ -94,6 +94,7 @@ public class Startup
                     slash.RegisterCommands<Discord.Services.SCommands.MemberCommands>(guildId);
                     slash.RegisterCommands<Discord.Services.SCommands.MessageCommands>(guildId);
                     slash.RegisterCommands<Discord.Services.SCommands.ModerationCommands>(guildId);
+                    slash.RegisterCommands<Discord.Services.SCommands.PinCommands>(guildId);
                     slash.RegisterCommands<Discord.Services.SCommands.PollCommands>(guildId);
                     slash.RegisterCommands<Discord.Services.SCommands.ReminderCommands>(guildId);
                     slash.RegisterCommands<Discord.Services.SCommands.VoiceCommands>(guildId);
