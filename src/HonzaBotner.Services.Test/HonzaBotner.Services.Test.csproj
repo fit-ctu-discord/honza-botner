@@ -18,7 +18,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HonzaBotner.Discord.Services\HonzaBotner.Discord.Services.csproj" />
       <ProjectReference Include="..\HonzaBotner.Scheduler\HonzaBotner.Scheduler.csproj" />
       <ProjectReference Include="..\HonzaBotner.Services.Contract\HonzaBotner.Services.Contract.csproj" />
       <ProjectReference Include="..\HonzaBotner.Services\HonzaBotner.Services.csproj" />

@@ -27,4 +27,5 @@ public class HonzaBotnerDbContext : DbContext
     public DbSet<RoleBinding> RoleBindings { get; set; }
     public DbSet<Warning> Warnings { get; set; }
     public DbSet<Reminder> Reminders { get; set; }
+    public DbSet<StandUpStat> StandUpStats { get; set; }
 }

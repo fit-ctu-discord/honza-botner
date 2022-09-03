@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Services.Helpers;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Scheduler.Contract;
+using HonzaBotner.Services.Contract;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -20,17 +22,24 @@ public class StandUpJobProvider : IJob
 
     private readonly DiscordWrapper _discord;
 
-    private readonly CommonCommandOptions _commonOptions;
+    private readonly StandUpOptions _standUpOptions;
+    private readonly ButtonOptions _buttonOptions;
+
+    private readonly IStandUpStatsService _statsService;
 
     public StandUpJobProvider(
         ILogger<StandUpJobProvider> logger,
         DiscordWrapper discord,
-        IOptions<CommonCommandOptions> commonOptions
+        IOptions<StandUpOptions> standUpOptions,
+        IStandUpStatsService statsService,
+        IOptions<ButtonOptions> buttonOptions
     )
     {
         _logger = logger;
         _discord = discord;
-        _commonOptions = commonOptions.Value;
+        _standUpOptions = standUpOptions.Value;
+        _statsService = statsService;
+        _buttonOptions = buttonOptions.Value;
     }
 
     /// <summary>
@@ -44,7 +53,8 @@ public class StandUpJobProvider : IJob
     /// [] - normal
     /// []! - critical
     /// </summary>
-    private static readonly Regex Regex = new(@"^ *\[ *(?<State>\S*) *\] *(?<Priority>[!])?", RegexOptions.Multiline);
+    private static readonly Regex TaskRegex = new(@"^ *\[ *(?<State>\S*) *\] *(?<Priority>[!])?",
+        RegexOptions.Multiline);
 
     private static readonly List<string> OkList = new() { "check", "done", "ok", "✅", "x" };
 
@@ -52,24 +62,23 @@ public class StandUpJobProvider : IJob
 
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        var today = DateTime.Today; // Fix one point in time.
-        DateTime yesterday = today.AddDays(-1);
+        DateTime yesterday = DateTime.Today.AddDays(-1);
 
         try
         {
-            DiscordChannel channel = await _discord.Client.GetChannelAsync(_commonOptions.StandUpChannelId);
+            DiscordChannel channel = await _discord.Client.GetChannelAsync(_standUpOptions.StandUpChannelId);
 
             var ok = new StandUpStats();
             var fail = new StandUpStats();
 
-            List<DiscordMessage> messageList = new();
-            messageList.AddRange(await channel.GetMessagesAsync());
+            List<DiscordMessage> messageList = (await channel.GetMessagesAsync())
+                .Where(msg => !msg.Author.IsBot).ToList();
 
             while (messageList.LastOrDefault()?.Timestamp.Date == yesterday)
             {
                 int messagesCount = messageList.Count;
                 messageList.AddRange(
-                    await channel.GetMessagesBeforeAsync(messageList.Last().Id)
+                    (await channel.GetMessagesBeforeAsync(messageList.Last().Id)).Where(msg => !msg.Author.IsBot)
                 );
 
                 // No new data.
@@ -79,34 +88,58 @@ public class StandUpJobProvider : IJob
                 }
             }
 
-            foreach (DiscordMessage msg in messageList.Where(msg => msg.Timestamp.Date == yesterday))
+            foreach (var authorGrouped in messageList.Where(msg => msg.Timestamp.Date == yesterday)
+                         .GroupBy(msg => msg.Author.Id))
             {
-                foreach (Match match in Regex.Matches(msg.Content))
-                {
-                    string state = match.Groups["State"].ToString();
-                    string priority = match.Groups["Priority"].ToString();
+                int total = 0;
+                int completed = 0;
 
-                    if (OkList.Any(s => state.Contains(s)))
+                foreach (var msg in authorGrouped)
+                {
+
+                    foreach (Match match in TaskRegex.Matches(msg.Content))
                     {
-                        ok.Increment(priority);
+                        total++;
+                        string state = match.Groups["State"].Value;
+                        string priority = match.Groups["Priority"].Value;
+
+                        if (OkList.Any(s => state.Contains(s)))
+                        {
+                            completed++;
+                            ok.Increment(priority);
+                        }
+                        else
+                        {
+                            fail.Increment(priority);
+                        }
                     }
-                    else
-                    {
-                        fail.Increment(priority);
-                    }
+                }
+
+                // Update DB.
+                if (total != 0)
+                {
+                    await _statsService.UpdateStats(authorGrouped.Key, completed, total);
                 }
             }
 
-            await channel.SendMessageAsync($@"
-Stand-up time, <@&{_commonOptions.StandUpRoleId}>!
+            // Send stats message to channel.
+            DiscordMessageBuilder message = new DiscordMessageBuilder().WithContent($@"
+Stand-up time, <@&{_standUpOptions.StandUpRoleId}>!
 
-Results from <t:{((DateTimeOffset)today.AddDays(-1)).ToUnixTimeSeconds()}:D>:
+Results from <t:{((DateTimeOffset)yesterday).ToUnixTimeSeconds()}:D>:
 ```
 all:        {ok.Add(fail)}
 completed:  {ok}
 failed:     {fail}
 ```
 ");
+            if (_buttonOptions.StandUpStatsId is not null)
+            {
+                message.AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, _buttonOptions.StandUpStatsId,
+                    "Get your stats", false, new DiscordComponentEmoji(DiscordEmoji.FromUnicode("🐸"))));
+            }
+
+            await message.SendAsync(channel);
         }
         catch (Exception e)
         {

@@ -17,7 +17,7 @@ namespace HonzaBotner.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "6.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -86,6 +86,41 @@ namespace HonzaBotner.Migrations
                     b.HasKey("Emoji", "ChannelId", "MessageId", "RoleId");
 
                     b.ToTable("RoleBindings");
+                });
+
+            modelBuilder.Entity("HonzaBotner.Database.StandUpStat", b =>
+                {
+                    b.Property<decimal>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<int>("Freezes")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LastDayCompleted")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("LastDayOfStreak")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("LastDayTasks")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LongestStreak")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Streak")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalCompleted")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalTasks")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("StandUpStats");
                 });
 
             modelBuilder.Entity("HonzaBotner.Database.Verification", b =>
