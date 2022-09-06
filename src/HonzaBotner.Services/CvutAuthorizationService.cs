@@ -5,13 +5,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using HonzaBotner.Database;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System.Linq;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
@@ -132,10 +130,6 @@ public class CvutAuthorizationService : IAuthorizationService
             .AnyAsync(v => v.UserId == userId);
     }
 
-    private string GetQueryString(NameValueCollection queryCollection)
-        => string.Join('&',
-            queryCollection.AllKeys.Select(k => $"{k}={HttpUtility.UrlEncode(queryCollection[k])}"));
-
     public async Task<string> GetAccessTokenAsync(string code, string redirectUri)
     {
         const string tokenUri = "https://auth.fit.cvut.cz/oauth/token";
@@ -147,7 +141,7 @@ public class CvutAuthorizationService : IAuthorizationService
             { "grant_type", "authorization_code" }, { "code", code }, { "redirect_uri", redirectUri }
         };
 
-        UriBuilder uriBuilder = new(tokenUri) { Query = GetQueryString(queryCollection) };
+        UriBuilder uriBuilder = new(tokenUri) { Query = queryCollection.GetQueryString() };
 
         HttpRequestMessage requestMessage = new()
         {
@@ -188,5 +182,38 @@ public class CvutAuthorizationService : IAuthorizationService
 
         return user.RootElement.GetProperty("user_name").GetString()
                ?? throw new InvalidOperationException("Couldn't load information about user");
+    }
+
+    public async Task<string> GetServiceTokenAsync(string scope)
+    {
+        const string tokenUri = "https://auth.fit.cvut.cz/oauth/oauth/token";
+
+        // TOOD(ostorc): add cache keyed by scope, with lifetime based on response
+
+        UriBuilder uriBuilder = new(tokenUri);
+
+        List<KeyValuePair<string?, string?>> contentValues = new()
+        {
+            new("grant_type", "client_credentials"),
+            new("client_id", _cvutConfig.ServiceId),
+            new("client_secret", _cvutConfig.ServiceSecret),
+            new("scope", scope)
+        };
+
+        FormUrlEncodedContent content = new(contentValues);
+
+        HttpRequestMessage requestMessage = new()
+        {
+            RequestUri = uriBuilder.Uri, Method = HttpMethod.Post, Content = content
+        };
+
+        HttpResponseMessage tokenResponse = await _client.SendAsync(requestMessage).ConfigureAwait(false);
+        tokenResponse.EnsureSuccessStatusCode();
+
+        JsonDocument response =
+            await JsonDocument.ParseAsync(await tokenResponse.Content.ReadAsStreamAsync().ConfigureAwait(false));
+
+        return response.RootElement.GetProperty("access_token").GetString()
+               ?? throw new InvalidOperationException("Couldn't get service token from CTU");
     }
 }

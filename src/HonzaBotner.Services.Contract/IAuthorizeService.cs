@@ -23,4 +23,6 @@ public interface IAuthorizationService
     Task<string> GetAccessTokenAsync(string code, string redirectUri);
 
     Task<string> GetUserNameAsync(string accessToken);
+
+    Task<string> GetServiceTokenAsync(string scope);
 }
