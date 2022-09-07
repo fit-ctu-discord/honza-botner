@@ -12,7 +12,7 @@ public class DiscordWrapper
 {
     public DiscordClient Client { get; }
     public InteractivityExtension Interactivity { get; }
-    public SlashCommandsExtension SlashCommands { get; }
+    public SlashCommandsExtension Commands { get; }
 
     public DiscordWrapper(IOptions<DiscordConfig> options, IServiceProvider services, ILoggerFactory loggerFactory)
     {
@@ -37,7 +37,7 @@ public class DiscordWrapper
         {
             Services = services
         };
-        SlashCommands = Client.UseSlashCommands(sConfig);
+        Commands = Client.UseSlashCommands(sConfig);
 
         Client.Logger.LogInformation("Starting with secret: {Token}", options.Value.Token);
     }

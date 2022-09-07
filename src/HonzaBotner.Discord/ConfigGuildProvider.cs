@@ -13,7 +13,7 @@ public class ConfigGuildProvider : IGuildProvider
 
     public ConfigGuildProvider(DiscordWrapper wrapper, IOptions<DiscordConfig> config)
     {
-        if (config.Value.GuildId == null)
+        if (config.Value.GuildId is null)
         {
             throw new InvalidOperationException("GuildId not configured");
         }

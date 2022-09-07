@@ -148,9 +148,9 @@ public class MessageCommands : ApplicationCommandModule
         InteractionContext ctx,
         [Option("message", "Link to modified message")] string url,
         [Option("roles", "Mention roles you want to (un)bind")] string roles,
-        [Choice("add", "Create new binding")]
-        [Choice("remove", "Remove existing binding")]
-        [Option("action", "add new binding or remove existing?")] string action)
+        [Choice("add", "add")]
+        [Choice("remove", "remove")]
+        [Option("action", "Add new binding or remove existing?")] string action)
     {
         DiscordMessage? message = await DiscordHelper.FindMessageFromLink(ctx.Guild, url);
         if (message == null)

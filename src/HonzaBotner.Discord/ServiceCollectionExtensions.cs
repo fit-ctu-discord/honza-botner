@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDiscordBot(
         this IServiceCollection serviceCollection,
         Action<EventHandlersListBuilder> reactionConfig,
-        Action<SlashCommandsExtension> slashConfig)
+        Action<SlashCommandsExtension> commandsConfig)
     {
         serviceCollection.AddHostedService<DiscordWorker>();
         serviceCollection.AddSingleton<IDiscordBot, DiscordBot>();
@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddTransient<IGuildProvider, ConfigGuildProvider>();
         serviceCollection.AddTransient<EventHandler.EventHandler>();
 
-        serviceCollection.AddSingleton(new SlashCommandsConfigurator(slashConfig));
+        serviceCollection.AddSingleton(new CommandsConfigurator(commandsConfig));
 
         EventHandlersListBuilder builder = new(serviceCollection);
         reactionConfig(builder);

@@ -38,7 +38,7 @@ public class PinCommands : ApplicationCommandModule
         [Option("everywhere", "Do it everywhere or just in this channel? Default: false")]
         bool everywhere = false)
     {
-        string customId = "unpin" + ctx.User.Id + ctx.Channel.Id;
+        string customId = $"unpin + {ctx.User.Id} + {ctx.Channel.Id}";
         await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder()
             .WithContent("Do you really want to unpin messages in this " + (everywhere ? "server?" : "channel?"))
             .AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, customId, "Do it!"))

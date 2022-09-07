@@ -3,9 +3,9 @@ using DSharpPlus.SlashCommands;
 
 namespace HonzaBotner.Discord;
 
-public class SlashCommandsConfigurator
+public class CommandsConfigurator
 {
-    public SlashCommandsConfigurator(Action<SlashCommandsExtension> config) => Config = config;
+    public CommandsConfigurator(Action<SlashCommandsExtension> config) => Config = config;
 
     public Action<SlashCommandsExtension> Config { get; }
 }

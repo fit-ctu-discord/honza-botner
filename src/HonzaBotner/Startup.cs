@@ -71,18 +71,18 @@ public class Startup
                         .AddEventHandler<VoiceHandler>()
                         .AddEventHandler<BadgeRoleHandler>()
                         ;
-                }, slash =>
+                }, commands =>
                 {
-                    slash.RegisterCommands<BotCommands>(guildId);
-                    slash.RegisterCommands<EmoteCommands>(guildId);
-                    slash.RegisterCommands<FunCommands>(guildId);
-                    slash.RegisterCommands<MemberCommands>(guildId);
-                    slash.RegisterCommands<MessageCommands>(guildId);
-                    slash.RegisterCommands<ModerationCommands>(guildId);
-                    slash.RegisterCommands<PinCommands>(guildId);
-                    slash.RegisterCommands<PollCommands>(guildId);
-                    slash.RegisterCommands<ReminderCommands>(guildId);
-                    slash.RegisterCommands<VoiceCommands>(guildId);
+                    commands.RegisterCommands<BotCommands>();
+                    commands.RegisterCommands<EmoteCommands>(guildId);
+                    commands.RegisterCommands<FunCommands>();
+                    commands.RegisterCommands<MemberCommands>(guildId);
+                    commands.RegisterCommands<MessageCommands>(guildId);
+                    commands.RegisterCommands<ModerationCommands>(guildId);
+                    commands.RegisterCommands<PinCommands>(guildId);
+                    commands.RegisterCommands<PollCommands>(guildId);
+                    commands.RegisterCommands<ReminderCommands>(guildId);
+                    commands.RegisterCommands<VoiceCommands>(guildId);
                 }
             )
 

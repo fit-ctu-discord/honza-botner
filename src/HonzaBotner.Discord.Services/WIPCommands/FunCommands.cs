@@ -30,8 +30,8 @@ public class FunCommands : ApplicationCommandModule
         }
         Random random = new();
         var text = new StringBuilder("I picked: ");
-        int winNumber = random.Next(answers.Length);
-        string winner = answers[winNumber];
+        var winNumber = random.Next(answers.Length);
+        var winner = answers[winNumber];
         text.Append("`" + winner + "`");
         if (answers.Length > 1)
         {

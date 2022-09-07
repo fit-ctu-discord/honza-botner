@@ -39,7 +39,7 @@ public class ModerationCommands : ApplicationCommandModule
             .AsEphemeral(true);
         await ctx.CreateResponseAsync(InteractionResponseType.Modal, response);
 
-        int numberOfWarnings = await _warningService.GetNumberOfWarnings(ctx.TargetUser.Id);
+        var numberOfWarnings = await _warningService.GetNumberOfWarnings(ctx.TargetUser.Id);
 
         var interactivity = ctx.Client.GetInteractivity();
         var modalReason = await interactivity.WaitForModalAsync(modalId, TimeSpan.FromMinutes(10));

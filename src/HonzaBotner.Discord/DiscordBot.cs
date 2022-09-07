@@ -17,22 +17,22 @@ internal class DiscordBot : IDiscordBot
 {
     private readonly DiscordWrapper _discordWrapper;
     private readonly EventHandler.EventHandler _eventHandler;
-    private readonly SlashCommandsConfigurator _slashConfigurator;
+    private readonly CommandsConfigurator _commandsConfigurator;
     private readonly IVoiceManager _voiceManager;
     private readonly DiscordConfig _discordOptions;
 
     private DiscordClient Client => _discordWrapper.Client;
-    private SlashCommandsExtension SCommands => _discordWrapper.SlashCommands;
+    private SlashCommandsExtension Commands => _discordWrapper.Commands;
 
     public DiscordBot(DiscordWrapper discordWrapper,
         EventHandler.EventHandler eventHandler,
-        SlashCommandsConfigurator slashConfigurator,
+        CommandsConfigurator commandsConfigurator,
         IVoiceManager voiceManager,
         IOptions<DiscordConfig> discordOptions)
     {
         _discordWrapper = discordWrapper;
         _eventHandler = eventHandler;
-        _slashConfigurator = slashConfigurator;
+        _commandsConfigurator = commandsConfigurator;
         _voiceManager = voiceManager;
         _discordOptions = discordOptions.Value;
     }
@@ -44,11 +44,11 @@ internal class DiscordBot : IDiscordBot
         Client.ClientErrored += Client_ClientError;
         Client.GuildDownloadCompleted += Client_GuildDownloadCompleted;
 
-        SCommands.SlashCommandExecuted += SCommands_SlashCommandExecuted;
-        SCommands.SlashCommandErrored += SCommands_SlashCommandErrored;
-        SCommands.ContextMenuExecuted += SCommands_ContextMenuExecuted;
-        SCommands.ContextMenuErrored += SCommands_ContextMenuErrored;
-        SCommands.AutocompleteErrored += SCommands_AutocompleteErrored;
+        Commands.SlashCommandExecuted += Commands_CommandExecuted;
+        Commands.SlashCommandErrored += Commands_CommandErrored;
+        Commands.ContextMenuExecuted += Commands_ContextMenuExecuted;
+        Commands.ContextMenuErrored += Commands_ContextMenuErrored;
+        Commands.AutocompleteErrored += Commands_AutocompleteErrored;
 
         Client.ComponentInteractionCreated += Client_ComponentInteractionCreated;
         Client.MessageReactionAdded += Client_MessageReactionAdded;
@@ -57,7 +57,7 @@ internal class DiscordBot : IDiscordBot
         Client.GuildMemberUpdated += Client_GuildMemberUpdated;
         Client.ChannelCreated += Client_ChannelCreated;
 
-        _slashConfigurator.Config(SCommands);
+        _commandsConfigurator.Config(Commands);
 
         await Client.ConnectAsync();
         await Task.Delay(-1, cancellationToken);
@@ -96,26 +96,30 @@ internal class DiscordBot : IDiscordBot
         e.Handled = true;
     }
 
-    private Task SCommands_SlashCommandExecuted(SlashCommandsExtension e, SlashCommandExecutedEventArgs args)
+    private Task Commands_CommandExecuted(SlashCommandsExtension e, SlashCommandExecutedEventArgs args)
     {
         e.Client.Logger.LogDebug("Executed {Command} by {Author}", args.Context.CommandName, args.Context.Member.DisplayName);
         return Task.CompletedTask;
     }
 
-    private Task SCommands_SlashCommandErrored(SlashCommandsExtension e, SlashCommandErrorEventArgs args)
+    private Task Commands_CommandErrored(SlashCommandsExtension e, SlashCommandErrorEventArgs args)
     {
         e.Client.Logger.LogError(args.Exception, "Exception occured while executing {Command}", args.Context.CommandName);
         return Task.CompletedTask;
     }
-    private Task SCommands_ContextMenuExecuted(SlashCommandsExtension e, ContextMenuExecutedEventArgs args){ return Task.CompletedTask; }
 
-    private Task SCommands_ContextMenuErrored(SlashCommandsExtension e, ContextMenuErrorEventArgs args)
+    private Task Commands_ContextMenuExecuted(SlashCommandsExtension e, ContextMenuExecutedEventArgs args)
+    {
+        return Task.CompletedTask;
+    }
+
+    private Task Commands_ContextMenuErrored(SlashCommandsExtension e, ContextMenuErrorEventArgs args)
     {
         e.Client.Logger.LogError(args.Exception, "Exception occured while executing context menu {ContextMenu}", args.Context.CommandName);
         return Task.CompletedTask;
     }
 
-    private Task SCommands_AutocompleteErrored(SlashCommandsExtension e, AutocompleteErrorEventArgs args)
+    private Task Commands_AutocompleteErrored(SlashCommandsExtension e, AutocompleteErrorEventArgs args)
     {
         e.Client.Logger.LogError(args.Exception, "Autocomplete failed while looking into option {OptionName}", args.Context.FocusedOption.Name);
         return Task.CompletedTask;

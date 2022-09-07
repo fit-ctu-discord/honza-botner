@@ -64,8 +64,8 @@ public class VoiceManager : IVoiceManager
         }
     }
 
-    public async Task<bool> EditVoiceChannelAsync(DiscordMember member, string? newName = null, long? limit = 0,
-        bool? isPublic = false)
+    public async Task<bool> EditVoiceChannelAsync(DiscordMember member, string? newName = null, long? limit = null,
+        bool? isPublic = null)
     {
         if (member.VoiceState?.Channel == null || member.VoiceState?.Channel.Id == _voiceConfig.ClickChannelId)
         {
@@ -153,7 +153,7 @@ public class VoiceManager : IVoiceManager
             }
         });
 
-        if (isPublic != null)
+        if (isPublic is not null)
         {
             if (isPublic == true)
             {

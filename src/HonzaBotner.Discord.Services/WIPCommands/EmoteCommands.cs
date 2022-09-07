@@ -18,6 +18,16 @@ public class EmoteCommands : ApplicationCommandModule
 
     private readonly IEmojiCounterService _emojiCounterService;
 
+    public enum DisplayTypes
+    {
+        [ChoiceName("all")]
+        All,
+        [ChoiceName("animated")]
+        Animated,
+        [ChoiceName("still")]
+        Still
+    }
+
     public EmoteCommands(IEmojiCounterService emojiCounterService)
     {
         _emojiCounterService = emojiCounterService;
@@ -30,10 +40,7 @@ public class EmoteCommands : ApplicationCommandModule
         [Choice("perDay", 0)]
         [Choice("total", 1)]
         [Option("display", "Show displayed per day or total? Defaults perDay")] long showTotal = 0,
-        [Choice("all", 0)]
-        [Choice("animated", 1)]
-        [Choice("still", 2)]
-        [Option("Type", "What type of emojis to show? Defaults all")] long type = 0)
+        [Option("Type", "What type of emojis to show? Defaults all")] DisplayTypes type = DisplayTypes.All)
     {
         bool total = showTotal == 1;
         await ctx.DeferAsync();
@@ -57,7 +64,12 @@ public class EmoteCommands : ApplicationCommandModule
                 continue;
             }
 
-            if (emoji.IsAnimated && type == 2)
+            if (emoji.IsAnimated && type == DisplayTypes.Still)
+            {
+                continue;
+            }
+
+            if (!emoji.IsAnimated && type == DisplayTypes.Animated)
             {
                 continue;
             }
@@ -77,8 +89,6 @@ public class EmoteCommands : ApplicationCommandModule
             emojisAppended++;
         }
 
-        await ctx.DeleteResponseAsync();
-
         if (emojisAppended > 0)
         {
             InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
@@ -91,7 +101,12 @@ public class EmoteCommands : ApplicationCommandModule
                 Title = "Statistika používání custom emotes"
             };
             IEnumerable<Page> pages = interactivity.GeneratePages(builder.ToString(), embedBuilder, 12);
+            await ctx.CreateResponseAsync("Done", true);
             await ctx.Channel.SendPaginatedMessageAsync(ctx.Member, pages);
+        }
+        else
+        {
+            await ctx.CreateResponseAsync("No emojis to show", true);
         }
     }
 }
