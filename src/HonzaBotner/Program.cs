@@ -21,7 +21,5 @@ public class Program
                     builder.AddUserSecrets<Program>();
                 }
             })
-            .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
-            .UseDefaultServiceProvider(options => // Temp solution, SlashCommand module doesn't handle scoped services well
-                options.ValidateScopes = false);
+            .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
 }

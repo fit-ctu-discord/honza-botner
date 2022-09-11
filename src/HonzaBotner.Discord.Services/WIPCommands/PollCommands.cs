@@ -78,7 +78,7 @@ public class PollCommands : ApplicationCommandModule
 
 
     [SlashCommand("add-answers", "Add answers to polls created by you")]
-    public async Task AddPollOptionAsync(
+    public async Task AddPollOptionCommandAsync(
         InteractionContext ctx,
         [Option("poll", "Link to original poll (Right click -> Copy Message Link).")] string link,
         [Option("answers", "Answers separated by ','")] string answers

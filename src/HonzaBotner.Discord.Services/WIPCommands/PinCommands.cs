@@ -33,7 +33,7 @@ public class PinCommands : ApplicationCommandModule
 
     [SlashCommand("delete-pins", "Unpins messages pinned with temporary pins")]
     [SlashCommandPermissions(Permissions.ManageChannels)]
-    public async Task DeleteAllAsync(
+    public async Task DeleteAllPinsCommandAsync(
         InteractionContext ctx,
         [Option("everywhere", "Do it everywhere or just in this channel? Default: false")]
         bool everywhere = false)

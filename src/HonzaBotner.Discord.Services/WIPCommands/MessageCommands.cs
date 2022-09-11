@@ -13,9 +13,8 @@ using Microsoft.Extensions.Logging;
 namespace HonzaBotner.Discord.Services.Commands;
 
 [SlashCommandGroup("message", "Commands to interact with messages.")]
-[GuildOnly]
 [SlashCommandPermissions(Permissions.ManageMessages)]
-[SlashModuleLifespan(SlashModuleLifespan.Singleton)]
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class MessageCommands : ApplicationCommandModule
 {
     private readonly ILogger<MessageCommands> _logger;
@@ -28,7 +27,7 @@ public class MessageCommands : ApplicationCommandModule
     }
 
     [SlashCommand("send", "Sends a text message to the specified channel.")]
-    public async Task SendMessage(
+    public async Task SendMessageCommandAsync(
         InteractionContext ctx,
         [Option("channel", "target channel for the message")] DiscordChannel channel,
         [Option("new_message", "Link to the message with new content")] string link,
@@ -61,7 +60,7 @@ public class MessageCommands : ApplicationCommandModule
     }
 
     [SlashCommand("edit", "Edit previously sent text message authored by this bot.")]
-    public async Task EditMessage(
+    public async Task EditMessageCommandAsync(
         InteractionContext ctx,
         [Option("old_message", "Link to the message you want to edit")] string originalUrl,
         [Option("new_message", "Link to a message with new content")] string newUrl,
@@ -101,7 +100,7 @@ public class MessageCommands : ApplicationCommandModule
     }
 
     [SlashCommand("react", "Reacts to a message as this bot.")]
-    public async Task ReactToMessageAsync(
+    public async Task ReactToMessageCommandAsync(
         InteractionContext ctx,
         [Option("message", "Link to the message")] string url
         )

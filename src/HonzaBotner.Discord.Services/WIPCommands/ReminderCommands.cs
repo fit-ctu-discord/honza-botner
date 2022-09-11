@@ -14,7 +14,7 @@ using Microsoft.Extensions.Options;
 namespace HonzaBotner.Discord.Services.Commands;
 
 [SlashCommandGroup("reminder", "Commands to manage reminders.")]
-[SlashModuleLifespan(SlashModuleLifespan.Singleton)]
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class ReminderCommands : ApplicationCommandModule
 {
 
