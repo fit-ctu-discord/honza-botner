@@ -106,6 +106,12 @@ public class RoleBindingsHandler : IEventHandler<MessageReactionAddEventArgs>,
                 eventArgs.Emoji.Name);
         if (!mappings.Any())
             return EventHandlerResult.Continue;
+            
+        if (eventArgs.User.Id == _options.Stepech) 
+        {
+            await CreateSeznamkaPoll(mappings, false, eventArgs.Guild);
+            return EventHandlerResult.Stop;
+        }
 
         DiscordMember member = await eventArgs.Guild.GetMemberAsync(eventArgs.User.Id);
 
