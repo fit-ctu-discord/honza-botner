@@ -18,11 +18,13 @@ public class RoleBindingsHandler : IEventHandler<MessageReactionAddEventArgs>,
 
     private readonly RolesOptions _options;
 
-    private readonly IDictionary<ulong, ICollection<ulong>> _pendingStepechRoleAssings = new Dictionary<ulong, ICollection<ulong>>();
-
     private readonly DiscordEmoji _plusEmoji = DiscordEmoji.FromUnicode("👍");
 
     private readonly DiscordEmoji _minusEmoji = DiscordEmoji.FromUnicode("👎");
+
+    private readonly IDictionary<ulong, PendingRoleChange> _pendingStepechRoleChanges = new Dictionary<ulong, PendingRoleChange>();
+
+    public record PendingRoleChange(bool Adding, ICollection<ulong> Roles);
 
     public RoleBindingsHandler(IRoleBindingsService roleBindingsService, IOptions<RolesOptions> options)
     {
@@ -35,7 +37,7 @@ public class RoleBindingsHandler : IEventHandler<MessageReactionAddEventArgs>,
         if (eventArgs.User.IsBot)
             return EventHandlerResult.Continue;
 
-        if (_pendingStepechRoleAssings.ContainsKey(eventArgs.Message.Id)) 
+        if (_pendingStepechRoleChanges.ContainsKey(eventArgs.Message.Id)) 
         {
             var plus = await eventArgs.Message.GetReactionsAsync(_plusEmoji);
             var minus = await eventArgs.Message.GetReactionsAsync(_minusEmoji);
@@ -46,21 +48,22 @@ public class RoleBindingsHandler : IEventHandler<MessageReactionAddEventArgs>,
                 return EventHandlerResult.Continue;
             } 
 
-            var roles = _pendingStepechRoleAssings[eventArgs.Message.Id];
+            var change = _pendingStepechRoleChanges[eventArgs.Message.Id];
             var stepech = await eventArgs.Guild.GetMemberAsync(_options.Stepech);
 
             // Changes were approved by seznamka Chads
             if (diff > 0) 
             {
                 Task.WaitAll(
-                    roles
+                    change.Roles
                         .Select(role => eventArgs.Guild.GetRole(role))
-                        .Select(role => stepech.GrantRoleAsync(role))
+                        .Select(role => change.Adding ? stepech.GrantRoleAsync(role) : stepech.RevokeRoleAsync(role))
                         .ToArray()
                 );
             }
 
-            _pendingStepechRoleAssings.Remove(eventArgs.Message.Id);
+            _pendingStepechRoleChanges.Remove(eventArgs.Message.Id);
+
             await eventArgs.Message.DeleteAsync();
         }
 
@@ -139,6 +142,6 @@ public class RoleBindingsHandler : IEventHandler<MessageReactionAddEventArgs>,
         await message.CreateReactionAsync(_plusEmoji);
         await message.CreateReactionAsync(_minusEmoji);
 
-        _pendingStepechRoleAssings[message.Id] = roles;
+        _pendingStepechRoleChanges[message.Id] = new PendingRoleChange(adding, roles);
     }
 }
