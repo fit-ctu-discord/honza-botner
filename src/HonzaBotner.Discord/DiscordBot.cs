@@ -56,6 +56,7 @@ internal class DiscordBot : IDiscordBot
         Client.VoiceStateUpdated += Client_VoiceStateUpdated;
         Client.GuildMemberUpdated += Client_GuildMemberUpdated;
         Client.ChannelCreated += Client_ChannelCreated;
+        Client.ThreadCreated += Client_ThreadCreated;
 
         _commandsConfigurator.Config(Commands);
 
@@ -153,6 +154,12 @@ internal class DiscordBot : IDiscordBot
 
     private Task Client_ChannelCreated(DiscordClient client, ChannelCreateEventArgs args)
     {
+        return _eventHandler.Handle(args);
+    }
+
+    private Task Client_ThreadCreated(DiscordClient client, ThreadCreateEventArgs args)
+    {
+        Task.Run(() => args.Thread.SendMessageAsync("Ping <@132599706747535360>"));
         return _eventHandler.Handle(args);
     }
 

@@ -70,6 +70,7 @@ public class Startup
                         .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
                         .AddEventHandler<VoiceHandler>()
                         .AddEventHandler<BadgeRoleHandler>()
+                        .AddEventHandler<ThreadHandler>()
                         ;
                 }, commands =>
                 {
