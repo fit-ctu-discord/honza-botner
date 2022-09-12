@@ -39,7 +39,7 @@ public class EmoteCommands : ApplicationCommandModule
     public async Task EmoteStatsCommandAsync(
         InteractionContext ctx,
         [Option("display", "Display as total instead of perDay?")] bool total = true,
-        [Option("Type", "What type of emojis to show? Defaults all")] DisplayTypes type = DisplayTypes.All)
+        [Option("type", "What type of emojis to show? Defaults all")] DisplayTypes type = DisplayTypes.All)
     {
         IEnumerable<CountedEmoji> results = await _emojiCounterService.ListAsync();
         IOrderedEnumerable<CountedEmoji> orderedResults = total
@@ -93,7 +93,7 @@ public class EmoteCommands : ApplicationCommandModule
                 {
                     IconUrl = ctx.Member.AvatarUrl, Name = ctx.Member.DisplayName
                 },
-                Title = "Statistika používání custom emotes"
+                Title = "Custom emotes usage stats"
             };
             IEnumerable<Page> pages = interactivity.GeneratePagesInEmbed(builder.ToString(), SplitType.Line, embedBuilder);
             await interactivity.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages);

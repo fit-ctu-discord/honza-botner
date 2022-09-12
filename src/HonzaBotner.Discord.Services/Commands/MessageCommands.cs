@@ -62,8 +62,8 @@ public class MessageCommands : ApplicationCommandModule
     [SlashCommand("edit", "Edit previously sent text message authored by this bot.")]
     public async Task EditMessageCommandAsync(
         InteractionContext ctx,
-        [Option("old_message", "Link to the message you want to edit")] string originalUrl,
-        [Option("new_message", "Link to a message with new content")] string newUrl,
+        [Option("old-message", "Link to the message you want to edit")] string originalUrl,
+        [Option("new-message", "Link to a message with new content")] string newUrl,
         [Option("mention", "Should all mentions be included?")] bool mention = false)
     {
         DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(ctx.Guild, originalUrl);

@@ -63,11 +63,11 @@ public class ModerationCommands : ApplicationCommandModule
         try
         {
             string messageForUser =
-                $"Na *studentském FIT Discordu* v kanále _#{ctx.Channel.Name}_ vám bylo uděleno **varování**. (warning id: {warningId})" +
+                $"You were **warned** on *student FIT Discord server* in channel _#{ctx.Channel.Name}_ (warning id: {warningId})" +
                 $"\n\n" +
-                $"Důvod:\n{modalReason.Result.Values[reasonId]}" +
+                $"Reason:\n{modalReason.Result.Values[reasonId]}" +
                 "\n\n" +
-                $"Toto je vaše **{numberOfWarnings + 1}. varování**, #beGood.";
+                $"This is your **{numberOfWarnings + 1}. warning**, #beGood.";
 
             await ctx.TargetMember.SendMessageAsync(messageForUser.RemoveDiscordMentions(ctx.Guild));
         }
@@ -112,7 +112,7 @@ public class ModerationCommands : ApplicationCommandModule
         }
         else
         {
-            await ctx.CreateResponseAsync($"**Varování {warning.Id}** pro uživatele <@{warning.UserId}>:\n" +
+            await ctx.CreateResponseAsync($"**Warning {warning.Id}** for user <@{warning.UserId}>:\n" +
                                           $"{warning.Reason.RemoveDiscordMentions(ctx.Guild)}");
         }
     }
