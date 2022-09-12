@@ -46,7 +46,6 @@ internal class DiscordBot : IDiscordBot
 
         Commands.SlashCommandExecuted += Commands_CommandExecuted;
         Commands.SlashCommandErrored += Commands_CommandErrored;
-        Commands.ContextMenuExecuted += Commands_ContextMenuExecuted;
         Commands.ContextMenuErrored += Commands_ContextMenuErrored;
         Commands.AutocompleteErrored += Commands_AutocompleteErrored;
 
@@ -88,7 +87,7 @@ internal class DiscordBot : IDiscordBot
     {
         sender.Logger.LogError(e.Exception, "Exception occured");
 
-        if (_discordOptions.GuildId == null)
+        if (_discordOptions.GuildId is null)
             return;
 
         DiscordGuild guild = await sender.GetGuildAsync(_discordOptions.GuildId.Value);
@@ -103,29 +102,27 @@ internal class DiscordBot : IDiscordBot
         return Task.CompletedTask;
     }
 
-    private Task Commands_CommandErrored(SlashCommandsExtension e, SlashCommandErrorEventArgs args)
+    private async Task Commands_CommandErrored(SlashCommandsExtension e, SlashCommandErrorEventArgs args)
     {
         e.Client.Logger.LogError(args.Exception, "Exception occured while executing {Command}", args.Context.CommandName);
-        return Task.CompletedTask;
+        await ReportException(args.Context.Guild, $"SlashCommand {args.Context.CommandName}", args.Exception);
+        args.Handled = true;
     }
 
-    private Task Commands_ContextMenuExecuted(SlashCommandsExtension e, ContextMenuExecutedEventArgs args)
-    {
-        return Task.CompletedTask;
-    }
-
-    private Task Commands_ContextMenuErrored(SlashCommandsExtension e, ContextMenuErrorEventArgs args)
+    private async Task Commands_ContextMenuErrored(SlashCommandsExtension e, ContextMenuErrorEventArgs args)
     {
         e.Client.Logger.LogError(args.Exception, "Exception occured while executing context menu {ContextMenu}", args.Context.CommandName);
-        return Task.CompletedTask;
+        await ReportException(args.Context.Guild, $"ContextMenu {args.Context.CommandName}", args.Exception);
+        args.Handled = true;
     }
 
-    private Task Commands_AutocompleteErrored(SlashCommandsExtension e, AutocompleteErrorEventArgs args)
+    private async Task Commands_AutocompleteErrored(SlashCommandsExtension e, AutocompleteErrorEventArgs args)
     {
         e.Client.Logger.LogError(args.Exception, "Autocomplete failed while looking into option {OptionName}", args.Context.FocusedOption.Name);
-        return Task.CompletedTask;
+        await ReportException(args.Context.Guild, $"Command Autocomplete for option {args.Context.FocusedOption.Name}",
+            args.Exception);
+        args.Handled = true;
     }
-
 
     private Task Client_ComponentInteractionCreated(DiscordClient client, ComponentInteractionCreateEventArgs args)
     {
