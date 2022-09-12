@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ public class FunCommands : ApplicationCommandModule
     [SlashCommand("choose", "Pick one of provided options")]
     public async Task ChooseCommandAsync(
         InteractionContext ctx,
-        [Option("options", "Options to choose from")]
+        [Option("options", "Options to choose from. Default delimiter: ,")]
         string options,
         [Option("delimiter", "Character that separates options. Default: \",\"")]
         [MinimumLength(1), MaximumLength(1)]
@@ -21,7 +22,7 @@ public class FunCommands : ApplicationCommandModule
         )
     {
         var answers = options.Split(delimiter, StringSplitOptions.TrimEntries & StringSplitOptions.RemoveEmptyEntries)
-            .Select(option => option.Trim().RemoveDiscordMentions())
+            .Select(option => option.Trim().RemoveDiscordMentions(ctx.Guild))
             .Where(option => option != "").ToArray();
         if (answers.Length == 0)
         {

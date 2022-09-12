@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -15,7 +16,6 @@ using Microsoft.Extensions.Options;
 namespace HonzaBotner.Discord.Services.Commands;
 
 [SlashCommandGroup("member", "member commands")]
-[GuildOnly]
 [SlashCommandPermissions(Permissions.ModerateMembers)]
 public class MemberCommands : ApplicationCommandModule
 {
@@ -61,9 +61,9 @@ public class MemberCommands : ApplicationCommandModule
 
         private async Task AnnounceMemberInfoAsync(InteractionContext ctx, Verification? databaseRecord)
         {
-            if (databaseRecord == null)
+            if (databaseRecord is null)
             {
-                await ctx.CreateResponseAsync("No member record for provided name");
+                await ctx.CreateResponseAsync("No member record for provided name", true);
                 return;
             }
 
@@ -74,7 +74,8 @@ public class MemberCommands : ApplicationCommandModule
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "Couldn't get member {MemberId}", databaseRecord.UserId);
+                _logger.LogWarning(e, "Couldn't get member {MemberId} or he doesn't accept DMs",
+                    databaseRecord.UserId);
             }
 
             await ctx.CreateResponseAsync(databaseRecord.ToString());
@@ -124,12 +125,13 @@ public class MemberCommands : ApplicationCommandModule
 
         private async Task EraseMemberAsync(InteractionContext ctx, Verification? databaseRecord)
         {
-            await ctx.DeferAsync();
             if (databaseRecord == null)
             {
                 await ctx.CreateResponseAsync("No member record to erase.");
                 return;
             }
+
+            await ctx.DeferAsync();
 
             try
             {
@@ -137,23 +139,21 @@ public class MemberCommands : ApplicationCommandModule
                 await _dbContext.SaveChangesAsync();
                 DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
                 DiscordMember member = await guild.GetMemberAsync(databaseRecord.UserId);
-                await member.RemoveAsync("This user was kicked due to being purged from the database.");
-                await ctx.CreateResponseAsync("Member has been erased.");
-                return;
+                await member.RemoveAsync("User purged from database.");
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Member has been erased."));
             }
             catch (UnauthorizedException e)
             {
                 _logger.LogWarning(e, "Erasing of member failed due to lack of permissions");
-                await ctx.CreateResponseAsync("User was purged but not kicked due to insufficient permissions\n" +
-                                       "Please remove verified role manually to prevent unexpected behaviour.");
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                    .WithContent("User was purged but not kicked due to insufficient permissions\n" +
+                                 "Please remove verified role manually to prevent unexpected behaviour."));
             }
             catch (Exception e)
             {
-                await ctx.Channel.SendMessageAsync("Member erase failed.");
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Member erase failed."));
                 _logger.LogWarning(e, "Member erase failed");
             }
-
-            await ctx.CreateResponseAsync("Failed to erase member. More information in the log.");
         }
     }
 
@@ -168,13 +168,14 @@ public class MemberCommands : ApplicationCommandModule
         }
 
         [SlashCommand("all", "Counts all members and all authenticated members.")]
-        public async Task CountAllCommandAsync(InteractionContext ctx)
+        public async Task CountAllCommandAsync(InteractionContext ctx,
+            [Option("ephemeral", "Hide response? Default false")] bool ephemeral = false)
         {
             DiscordGuild guild = ctx.Guild;
             DiscordRole authenticatedRole = guild.GetRole(_commonCommandOptions.AuthenticatedRoleId);
 
             int authenticatedCount = guild.Members.Count(member => member.Value.Roles.Contains(authenticatedRole));
-            await ctx.CreateResponseAsync($"Authenticated: {authenticatedCount}, All: {ctx.Guild.Members.Count.ToString()}");
+            await ctx.CreateResponseAsync($"Authenticated: {authenticatedCount}, All: {ctx.Guild.Members.Count.ToString()}", ephemeral);
         }
 
         [SlashCommand("here", "Counts all members who can see this channel")]
@@ -191,12 +192,13 @@ public class MemberCommands : ApplicationCommandModule
             [Option("roles", "Roles to look for - write as a mention")] string roles,
             [Choice("and", "and")]
             [Choice("or", "or")]
-            [Option("search-type", "Look for members with all those roles/some. Default: and")] string type = "and")
+            [Option("search-type", "Look for members with all those roles/some. Default: and")] string type = "and",
+            [Option("ephemeral", "Hide response? Default false")] bool ephemeral = false)
         {
             int count = 0;
             DiscordGuild guild = ctx.Guild;
 
-            await ctx.DeferAsync();
+            await ctx.DeferAsync(ephemeral);
 
             foreach ((_, DiscordMember member) in guild.Members)
             {
@@ -209,7 +211,7 @@ public class MemberCommands : ApplicationCommandModule
                 }
             }
 
-            await ctx.Channel.SendMessageAsync(count.ToString());
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(count.ToString()));
         }
     }
 }

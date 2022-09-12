@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
-using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 
 namespace HonzaBotner.Discord.Services.Commands;
 
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class EmoteCommands : ApplicationCommandModule
 {
 
@@ -37,14 +38,9 @@ public class EmoteCommands : ApplicationCommandModule
     [SlashCommandPermissions(Permissions.ManageEmojis)]
     public async Task EmoteStatsCommandAsync(
         InteractionContext ctx,
-        [Choice("perDay", 0)]
-        [Choice("total", 1)]
-        [Option("display", "Show displayed per day or total? Defaults perDay")] long showTotal = 0,
+        [Option("display", "Display as total instead of perDay?")] bool total = true,
         [Option("Type", "What type of emojis to show? Defaults all")] DisplayTypes type = DisplayTypes.All)
     {
-        bool total = showTotal == 1;
-        await ctx.DeferAsync();
-
         IEnumerable<CountedEmoji> results = await _emojiCounterService.ListAsync();
         IOrderedEnumerable<CountedEmoji> orderedResults = total
             ? results.OrderByDescending(emoji => emoji.Used)
@@ -53,7 +49,6 @@ public class EmoteCommands : ApplicationCommandModule
         StringBuilder builder = new("\n");
 
         int emojisAppended = 0;
-        //const int chunkSize = 30;
 
         IReadOnlyDictionary<ulong, DiscordEmoji> emojis = ctx.Guild.Emojis;
 
@@ -100,13 +95,12 @@ public class EmoteCommands : ApplicationCommandModule
                 },
                 Title = "Statistika používání custom emotes"
             };
-            IEnumerable<Page> pages = interactivity.GeneratePages(builder.ToString(), embedBuilder, 12);
-            await ctx.CreateResponseAsync("Done", true);
-            await ctx.Channel.SendPaginatedMessageAsync(ctx.Member, pages);
+            IEnumerable<Page> pages = interactivity.GeneratePagesInEmbed(builder.ToString(), SplitType.Line, embedBuilder);
+            await interactivity.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages);
         }
         else
         {
-            await ctx.CreateResponseAsync("No emojis to show", true);
+            await ctx.CreateResponseAsync("No emotes to show", true);
         }
     }
 }

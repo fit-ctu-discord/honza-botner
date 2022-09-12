@@ -35,7 +35,7 @@ public class PinCommands : ApplicationCommandModule
     [SlashCommandPermissions(Permissions.ManageChannels)]
     public async Task DeleteAllPinsCommandAsync(
         InteractionContext ctx,
-        [Option("everywhere", "Do it everywhere or just in this channel? Default: false")]
+        [Option("everywhere", "Do it everywhere instead just in this channel? Default: false")]
         bool everywhere = false)
     {
         string customId = $"unpin + {ctx.User.Id} + {ctx.Channel.Id}";

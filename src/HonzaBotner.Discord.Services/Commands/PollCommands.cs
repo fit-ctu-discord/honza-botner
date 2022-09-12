@@ -44,13 +44,16 @@ public class PollCommands : ApplicationCommandModule
         InteractionContext ctx,
         [Option("question", "Question/query you want to vote about.")]
         string question,
-        [Option("answers", "Answers separated by ','")]
-        string answers
+        [Option("answers", "Answers separated by delimiter. Default delimiter: ,")]
+        string answers,
+        [Option("delimiter", "Character to separate options. Default: ,")]
+        [MinimumLength(1), MaximumLength(1)]
+        string delimiter = ","
     )
     {
         await CreateDefaultPollAsync(ctx, question,
-            answers.Split(',')
-                .Select(answer => answer.Trim().RemoveDiscordMentions())
+            answers.Split(delimiter)
+                .Select(answer => answer.Trim().RemoveDiscordMentions(ctx.Guild))
                 .Where(answer => answer != "").ToList());
     }
 
@@ -81,12 +84,15 @@ public class PollCommands : ApplicationCommandModule
     public async Task AddPollOptionCommandAsync(
         InteractionContext ctx,
         [Option("poll", "Link to original poll (Right click -> Copy Message Link).")] string link,
-        [Option("answers", "Answers separated by ','")] string answers
+        [Option("answers", "Answers separated by delimiter. Default delimiter: ,")] string answers,
+        [Option("delimiter", "Character to separate options. Default: ,")]
+        [MinimumLength(1), MaximumLength(1)]
+        string delimiter = ","
     )
     {
         DiscordMessage? originalMessage = await DiscordHelper.FindMessageFromLink(ctx.Guild, link);
-        List<string> options = answers.Split(',')
-            .Select(answer => answer.Trim().RemoveDiscordMentions())
+        List<string> options = answers.Split(delimiter)
+            .Select(answer => answer.Trim().RemoveDiscordMentions(ctx.Guild))
             .Where(answer => answer != "").ToList();
 
         if (originalMessage is null

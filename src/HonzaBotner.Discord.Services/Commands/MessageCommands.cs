@@ -29,9 +29,9 @@ public class MessageCommands : ApplicationCommandModule
     [SlashCommand("send", "Sends a text message to the specified channel.")]
     public async Task SendMessageCommandAsync(
         InteractionContext ctx,
-        [Option("channel", "target channel for the message")] DiscordChannel channel,
-        [Option("new_message", "Link to the message with new content")] string link,
-        [Option("mention", "Should all mentions be included?")] bool mention = false)
+        [Option("channel", "Target channel for the message")] DiscordChannel channel,
+        [Option("new-message", "Link to the message with content you want sent")] string link,
+        [Option("mention", "Should the message include mentions? Default: false")] bool mention = false)
     {
         DiscordMessage? messageToSend = await DiscordHelper.FindMessageFromLink(ctx.Guild, link);
 

@@ -35,8 +35,7 @@ public class ModerationCommands : ApplicationCommandModule
         var response = new DiscordInteractionResponseBuilder()
             .WithTitle($"New Warning for {ctx.TargetMember.DisplayName}")
             .WithCustomId(modalId)
-            .AddComponents(new TextInputComponent("Reason:", reasonId, required: true))
-            .AsEphemeral(true);
+            .AddComponents(new TextInputComponent("Reason:", reasonId, required: true));
         await ctx.CreateResponseAsync(InteractionResponseType.Modal, response);
 
         var numberOfWarnings = await _warningService.GetNumberOfWarnings(ctx.TargetUser.Id);
@@ -45,7 +44,7 @@ public class ModerationCommands : ApplicationCommandModule
         var modalReason = await interactivity.WaitForModalAsync(modalId, TimeSpan.FromMinutes(10));
         if (modalReason.TimedOut)
         {
-            await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Response timed out").AsEphemeral(true));
+            await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Response timed out"));
             return;
         }
 
@@ -123,7 +122,7 @@ public class ModerationCommands : ApplicationCommandModule
         InteractionContext ctx,
         [Option("user", "List entries only for this user")] DiscordUser? user = null)
     {
-        List<Warning> allWarnings = user == null
+        List<Warning> allWarnings = user is null
             ? await _warningService.GetAllWarningsAsync()
             : await _warningService.GetWarningsAsync(user.Id);
         var interactivity = ctx.Client.GetInteractivity();
@@ -148,7 +147,7 @@ public class ModerationCommands : ApplicationCommandModule
         bool success = await _warningService.DeleteWarningAsync((int)entryId);
         if (success)
         {
-            await ctx.CreateResponseAsync($"Deleted entry {entryId}", true);
+            await ctx.CreateResponseAsync($"Deleted entry {entryId}");
         }
         else
         {
