@@ -55,7 +55,7 @@ To be able to run the bot locally you need to setup some configs.
 in [`secrets.json`][secrets] the other secrets are not needed for your average
 development needs.
 - Change `Discord.GuildId` in `appsettings.Development.json` to the id of your
-test guild
+test guild.
 - Change `CustomVoiceOptions.ClickChannelId` in `appsettings.Development.json` to
 an id of a voice channel in your test guild
 
