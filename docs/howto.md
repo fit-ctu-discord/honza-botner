@@ -57,7 +57,7 @@ development needs.
 - Change `Discord.GuildId` in `appsettings.Development.json` to the id of your
 test guild.
 - Change `CustomVoiceOptions.ClickChannelId` in `appsettings.Development.json` to
-an id of a voice channel in your test guild
+an id of a voice channel in your test guild.
 
 ## Database and migrations
 
