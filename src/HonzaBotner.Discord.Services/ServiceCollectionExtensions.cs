@@ -17,7 +17,6 @@ public static class ServiceCollectionExtensions
         services.Configure<ReminderOptions>(configuration.GetSection(ReminderOptions.ConfigName));
         services.Configure<ButtonOptions>(configuration.GetSection(ButtonOptions.ConfigName));
         services.Configure<BadgeRoleOptions>(configuration.GetSection(BadgeRoleOptions.ConfigName));
-        services.Configure<RolesOptions>(configuration.GetSection(RolesOptions.ConfigName));
 
         services.AddTransient<DiscordEmbedPublisher>();
 
