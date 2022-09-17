@@ -56,7 +56,7 @@ public class ModerationCommands : ApplicationCommandModule
             _logger.LogWarning("Couldn't add a warning for {Member} with {Reason}",
                 ctx.TargetMember.DisplayName, modalReason.Result.Values[reasonId]);
             await ctx.FollowUpAsync(
-                new DiscordFollowupMessageBuilder().WithContent("Warning was not issued due to error"));
+                new DiscordFollowupMessageBuilder().WithContent("Warning was not issued due to error").AsEphemeral());
             return;
         }
 

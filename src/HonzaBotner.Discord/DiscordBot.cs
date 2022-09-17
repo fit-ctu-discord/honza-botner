@@ -107,6 +107,7 @@ internal class DiscordBot : IDiscordBot
         e.Client.Logger.LogError(args.Exception, "Exception occured while executing {Command}", args.Context.CommandName);
         await ReportException(args.Context.Guild, $"SlashCommand {args.Context.CommandName}", args.Exception);
         args.Handled = true;
+        await args.Context.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Something failed").AsEphemeral());
     }
 
     private async Task Commands_ContextMenuErrored(SlashCommandsExtension e, ContextMenuErrorEventArgs args)
@@ -114,6 +115,7 @@ internal class DiscordBot : IDiscordBot
         e.Client.Logger.LogError(args.Exception, "Exception occured while executing context menu {ContextMenu}", args.Context.CommandName);
         await ReportException(args.Context.Guild, $"ContextMenu {args.Context.CommandName}", args.Exception);
         args.Handled = true;
+        await args.Context.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Something failed").AsEphemeral());
     }
 
     private async Task Commands_AutocompleteErrored(SlashCommandsExtension e, AutocompleteErrorEventArgs args)
