@@ -45,7 +45,7 @@ public class NewsConfigService : INewsConfigService
                 Source = configDto.Source,
                 Active = configDto.Active,
                 Channels = configDto.Channels,
-                LastFetched = configDto.LastFetched,
+                LastFetched = configDto.LastFetched.SetKindUtc(),
                 NewsProviderType = configDto.NewsProvider.ToString(),
                 PublisherType = configDto.Publisher.ToString()
             };
@@ -58,7 +58,7 @@ public class NewsConfigService : INewsConfigService
             config.Source = configDto.Source;
             config.Active = configDto.Active;
             config.Channels = configDto.Channels;
-            config.LastFetched = configDto.LastFetched;
+            config.LastFetched = configDto.LastFetched.SetKindUtc();
             config.NewsProviderType = configDto.NewsProvider.ToString();
             config.PublisherType = configDto.Publisher.ToString();
         }
@@ -90,7 +90,7 @@ public class NewsConfigService : INewsConfigService
     {
         NewsConfig config = await GetConfig(id);
 
-        config.LastFetched = date;
+        config.LastFetched = date.SetKindUtc();
 
         await _context.SaveChangesAsync();
     }

@@ -15,7 +15,11 @@ public class NewsConfig
 
     public ulong[] Channels
     {
-        get => ChannelsData.Split(";").Select(ulong.Parse).ToArray();
+        get
+        {
+            if (ChannelsData == string.Empty) return Array.Empty<ulong>();
+            return ChannelsData.Split(";").Select(ulong.Parse).ToArray();
+        }
         set => ChannelsData = string.Join(';', value);
     }
 

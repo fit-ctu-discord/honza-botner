@@ -24,7 +24,9 @@ public class DiscordEmbedPublisher : IPublisherService
 
         // Just to be safe
         if (str.Length < limit)
+        {
             return str;
+        }
 
         StringBuilder sb = new(str.Substring(0, limit - 1 - andMore.Length));
         sb.Append(andMore);
