@@ -19,7 +19,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
-
 namespace HonzaBotner;
 
 public class Startup
@@ -58,6 +57,7 @@ public class Startup
             .AddDiscordBot(config =>
                 {
                     //config.RegisterCommands<AuthorizeCommands>();
+                    config.RegisterCommands<NewsManagementCommands>();
                     config.RegisterCommands<BotCommands>();
                     config.RegisterCommands<ChannelCommands>();
                     config.RegisterCommands<EmoteCommands>();
@@ -95,11 +95,13 @@ public class Startup
             .AddTransient<IVoiceManager, VoiceManager>()
             .AddTransient<IReminderManager, ReminderManager>()
             .AddTransient<IButtonManager, ButtonManager>()
+            .AddScoped<NewsJobProvider>()
             ;
 
         services.AddScheduler(5000)
             .AddScopedCronJob<TriggerRemindersJobProvider>()
-            .AddScopedCronJob<StandUpJobProvider>();
+            .AddScopedCronJob<StandUpJobProvider>()
+            ;
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
