@@ -4,7 +4,6 @@ using HonzaBotner.Discord;
 using HonzaBotner.Discord.EventHandler;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services;
-using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Discord.Services.EventHandlers;
 using HonzaBotner.Discord.Services.Jobs;
 using HonzaBotner.Discord.Services.Managers;
@@ -84,6 +83,7 @@ public class Startup
                     commands.RegisterCommands<PollCommands>(guildId);
                     commands.RegisterCommands<ReminderCommands>(guildId);
                     commands.RegisterCommands<VoiceCommands>(guildId);
+                    commands.RegisterCommands<NewsManagementCommands>(guildId);
                 }
             )
 

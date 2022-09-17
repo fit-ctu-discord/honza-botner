@@ -3,22 +3,19 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord.Services.Attributes;
+using DSharpPlus.SlashCommands;
 using HonzaBotner.Discord.Services.Jobs;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 
 namespace HonzaBotner.Discord.Services.Commands;
 
-[Group("news")]
-[Description("Commands to interact with members.")]
-[ModuleLifespan(ModuleLifespan.Transient)]
-[RequireMod]
-
-public class NewsManagementCommands : BaseCommandModule
+[SlashCommandGroup("news", "Commands to work with news.")]
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
+[SlashCommandPermissions(Permissions.ModerateMembers)]
+public class NewsManagementCommands : ApplicationCommandModule
 {
     private readonly INewsConfigService _configService;
     private readonly NewsJobProvider _newsJobProvider;
@@ -29,9 +26,8 @@ public class NewsManagementCommands : BaseCommandModule
         _newsJobProvider = newsJobProvider;
     }
 
-    [Command("list")]
-    [GroupCommand]
-    public async Task ListConfig(CommandContext context)
+    [SlashCommand("list", "List all news configs")]
+    public async Task ListConfig(InteractionContext context)
     {
         IList<NewsConfig> configs = await _configService.ListConfigsAsync(false).ConfigureAwait(false);
 
@@ -48,9 +44,9 @@ public class NewsManagementCommands : BaseCommandModule
     }
 
 
-    [Command("Detail")]
-    [Description("Gets detail of one config")]
-    public async Task DetailConfig(CommandContext context, int id)
+    [SlashCommand("detail", "Gets detail of one config")]
+    public async Task DetailConfig(InteractionContext context,
+        [Option("id", "Id of News config")] int id)
     {
         NewsConfig config = await _configService.GetById(id);
 
@@ -66,24 +62,28 @@ public class NewsManagementCommands : BaseCommandModule
 
         builder.WithTimestamp(DateTime.Now);
 
-        await context.RespondAsync(builder.Build());
+        await context.CreateResponseAsync(builder.Build());
     }
 
     private static string GetActiveEmoji(NewsConfig config) => config.Active ? ":white_check_mark:" : "❌";
 
-    [Command("toggle")]
-    [Description("Toggles if one configuration for news source is active or not")]
-    public async Task ToggleConfig(CommandContext context, int id)
+    [SlashCommand("toggle", "Toggles if one configuration for news source is active or not")]
+    public async Task ToggleConfig(InteractionContext context,
+        [Option("id", "Id of News config")] int id)
     {
         bool currentState = await _configService.ToggleConfig(id);
 
         string prefix = currentState ? "" : "in";
 
-        await context.RespondAsync($"News config with id [{id}] set to be {prefix}active");
+        await context.CreateResponseAsync($"News config with id [{id}] set to be {prefix}active");
     }
 
-    [Command("add")]
-    public async Task AddConfig(CommandContext context, string name, string source, params DiscordChannel[] channels)
+    [SlashCommand("add", "Add new news configuration")]
+    public async Task AddConfig(InteractionContext context,
+        [Option("name", "Name of the news config")] string name,
+        [Option("source", "Source identification")] string source,
+        [Option("channels", "Channels where news will be published")]
+        params DiscordChannel[] channels)
     {
         NewsConfig config = new(default, name, source, DateTime.MinValue, NewsProviderType.Courses, PublisherType.DiscordEmbed,
             true, channels.Select(ch => ch.Id).ToArray());
@@ -91,9 +91,11 @@ public class NewsManagementCommands : BaseCommandModule
         await _configService.AddOrUpdate(config);
     }
 
-    [Command("edit-channels")]
-    [Description("Set channels for one config")]
-    public async Task EditChannelsConfig(CommandContext context, int id, params DiscordChannel[] channels)
+    [SlashCommand("edit-channels", "Set channels for one config")]
+    public async Task EditChannelsConfig(InteractionContext context,
+        [Option("id", "Id of News config")] int id,
+        [Option("channels", "Channels where news will be published")]
+        params DiscordChannel[] channels)
     {
         NewsConfig config = await _configService.GetById(id);
 
@@ -102,9 +104,9 @@ public class NewsManagementCommands : BaseCommandModule
         await _configService.AddOrUpdate(config);
     }
 
-    [Command("edit-last-run")]
-    [Description("Set last run time for one config")]
-    public async Task EditLastRunConfig(CommandContext context, int id, DateTime lastRun)
+    [SlashCommand("edit-last-run", "Set last run time for one config")]
+    public async Task EditLastRunConfig(InteractionContext context,
+        [Option("id", "Id of News config")] int id, DateTime lastRun)
     {
         NewsConfig config = await _configService.GetById(id);
 
@@ -113,11 +115,10 @@ public class NewsManagementCommands : BaseCommandModule
         await _configService.AddOrUpdate(config);
     }
 
-    [Command("run-once")]
-    public async Task RunOnce(CommandContext context)
+    [SlashCommand("run-once", "Fetch news once")]
+    public async Task RunOnce(InteractionContext context)
     {
-        await context.TriggerTypingAsync();
         await _newsJobProvider.ExecuteAsync(default);
-        await context.RespondAsync("News job - done");
+        await context.CreateResponseAsync("News job - done");
     }
 }
