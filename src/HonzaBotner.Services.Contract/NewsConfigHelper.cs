@@ -28,9 +28,6 @@ public static class NewsConfigHelper
 
     public static T StringToEnum<T>(string value) where T : struct
     {
-        Console.WriteLine();
-        Console.WriteLine(value);
-        Console.WriteLine();
         if (Enum.TryParse(value, true, out T result))
             return result;
 
