@@ -1,3 +1,4 @@
+using HonzaBotner.Discord.Services.Commands;
 using HonzaBotner.Database;
 using HonzaBotner.Discord;
 using HonzaBotner.Discord.EventHandler;
@@ -19,7 +20,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
-
 namespace HonzaBotner;
 
 public class Startup
@@ -98,7 +98,9 @@ public class Startup
 
         services.AddScheduler(5000)
             .AddScopedCronJob<TriggerRemindersJobProvider>()
-            .AddScopedCronJob<StandUpJobProvider>();
+            .AddScopedCronJob<StandUpJobProvider>()
+            .AddScopedCronJob<NewsJobProvider>()
+            ;
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
