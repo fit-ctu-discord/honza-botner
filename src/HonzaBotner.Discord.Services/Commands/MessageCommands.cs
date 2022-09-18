@@ -108,7 +108,7 @@ public class MessageCommands : ApplicationCommandModule
         DiscordGuild guild = ctx.Guild;
         DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(guild, url);
 
-        if (oldMessage == null)
+        if (oldMessage is null)
         {
             await ctx.CreateResponseAsync("Could not find message to react to.");
             return;
@@ -134,6 +134,11 @@ public class MessageCommands : ApplicationCommandModule
                 await ctx.EditResponseAsync(
                     new DiscordWebhookBuilder()
                         .WithContent("Bot cannot react with provided emoji. Is it universal/from this server?"));
+            }
+            catch (UnauthorizedException)
+            {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Too many reactions"));
+                return;
             }
 
             response = await interactivity.WaitForReactionAsync(reactionCatch, ctx.User, TimeSpan.FromMinutes(2));

@@ -40,6 +40,6 @@ public class DiscordWrapper
         };
         Commands = Client.UseSlashCommands(sConfig);
 
-        Client.Logger.LogInformation("Starting with secret: {Token}", options.Value.Token);
+        Client.Logger.LogInformation("Starting Bot");
     }
 }
