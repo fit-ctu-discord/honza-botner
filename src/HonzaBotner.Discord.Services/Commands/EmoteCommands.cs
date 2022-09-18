@@ -38,7 +38,7 @@ public class EmoteCommands : ApplicationCommandModule
     [SlashCommandPermissions(Permissions.ManageEmojis)]
     public async Task EmoteStatsCommandAsync(
         InteractionContext ctx,
-        [Option("display", "Display as total instead of perDay?")] bool total = true,
+        [Option("display", "Display as total instead of perDay?")] bool total = false,
         [Option("type", "What type of emojis to show? Defaults all")] DisplayTypes type = DisplayTypes.All)
     {
         IEnumerable<CountedEmoji> results = await _emojiCounterService.ListAsync();

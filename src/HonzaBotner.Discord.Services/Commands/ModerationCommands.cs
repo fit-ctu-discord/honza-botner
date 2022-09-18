@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
@@ -130,10 +131,21 @@ public class ModerationCommands : ApplicationCommandModule
 
         List<(string, string)> embedFields = allWarnings.ConvertAll(warning =>
         {
-            string target = ctx.Guild.GetMemberAsync(warning.UserId).Result?.DisplayName ?? warning.UserId.ToString();
-            string issuer = ctx.Guild.GetMemberAsync(warning.IssuerId).Result?.DisplayName ??
-                            warning.IssuerId.ToString();
-            return ($"#{warning.Id}\t{target}\t{warning.IssuedAt}\t{issuer}", warning.Reason);
+            DiscordMember? target = null;
+            DiscordMember? issuer = null;
+            try
+            {
+                issuer = ctx.Guild.GetMemberAsync(warning.IssuerId).Result;
+                target = ctx.Guild.GetMemberAsync(warning.UserId).Result;
+            }
+            catch (NotFoundException)
+            {
+            }
+
+            return ($"#{warning.Id}\t" +
+                    $"{target?.DisplayName ?? warning.UserId.ToString()}\t" +
+                    $"{warning.IssuedAt}\t" +
+                    $"{issuer?.DisplayName ?? warning.IssuerId.ToString()}", warning.Reason);
         });
 
         if (!embedFields.Any())
