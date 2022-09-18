@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -134,6 +135,12 @@ public class ModerationCommands : ApplicationCommandModule
                             warning.IssuerId.ToString();
             return ($"#{warning.Id}\t{target}\t{warning.IssuedAt}\t{issuer}", warning.Reason);
         });
+
+        if (!embedFields.Any())
+        {
+            await ctx.CreateResponseAsync("No moderation entries");
+            return;
+        }
 
         IEnumerable<Page> pages = interactivity.GeneratePages(embedFields, pageRows: 12);
         await interactivity.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages);

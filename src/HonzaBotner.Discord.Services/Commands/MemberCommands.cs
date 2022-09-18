@@ -17,10 +17,12 @@ namespace HonzaBotner.Discord.Services.Commands;
 
 [SlashCommandGroup("member", "member commands")]
 [SlashCommandPermissions(Permissions.ModerateMembers)]
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class MemberCommands : ApplicationCommandModule
 {
 
     [SlashCommandGroup("info", "Provides info about a member.")]
+    [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
     public class MemberCommandsInfo : ApplicationCommandModule
     {
 
@@ -83,6 +85,7 @@ public class MemberCommands : ApplicationCommandModule
     }
 
     [SlashCommandGroup("delete", "Erases database record of the member.")]
+    [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
     public class MemberCommandsDelete : ApplicationCommandModule
     {
         private readonly HonzaBotnerDbContext _dbContext;
@@ -158,6 +161,7 @@ public class MemberCommands : ApplicationCommandModule
     }
 
     [SlashCommandGroup("count", "Counts members by provided roles.")]
+    [SlashModuleLifespan(SlashModuleLifespan.Scoped)]
     public class MemberCommandsCount : ApplicationCommandModule
     {
         private readonly CommonCommandOptions _commonCommandOptions;

@@ -46,7 +46,7 @@ public class FunCommands : ApplicationCommandModule
         }
         else
         {
-            text.Append("\nAre you bipolar or why was this necessary?!");
+            text.Append("\nPlease seperate the options by `,`");
         }
 
         await ctx.CreateResponseAsync(text.ToString());
