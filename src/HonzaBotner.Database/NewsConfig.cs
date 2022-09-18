@@ -5,7 +5,6 @@ namespace HonzaBotner.Database;
 
 public class NewsConfig
 {
-
     public int Id { get; set; }
 
     public string Name { get; set; }

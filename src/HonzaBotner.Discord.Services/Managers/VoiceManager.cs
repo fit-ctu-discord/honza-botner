@@ -117,8 +117,8 @@ public class VoiceManager : IVoiceManager
     public async Task DeleteAllUnusedVoiceChannelsAsync()
     {
         DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
-        DiscordChannel customVoiceCategory = guild.GetChannel(_voiceConfig.ClickChannelId).Parent;
-        foreach (DiscordChannel discordChannel in customVoiceCategory.Children)
+        DiscordChannel? customVoiceCategory = guild.GetChannel(_voiceConfig.ClickChannelId)?.Parent;
+        foreach (DiscordChannel discordChannel in customVoiceCategory?.Children ?? Array.Empty<DiscordChannel>())
         {
             await DeleteUnusedVoiceChannelAsync(discordChannel);
         }
