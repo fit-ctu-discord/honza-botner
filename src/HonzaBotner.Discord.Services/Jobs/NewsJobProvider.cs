@@ -54,17 +54,7 @@ public class NewsJobProvider : IJob
             {
                 await publisherService.Publish(item, newsSource.Channels);
             }
-
-            try
-            {
-                await _configService.UpdateFetchDateAsync(newsSource.Id, now);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-
+            await _configService.UpdateFetchDateAsync(newsSource.Id, now);
         }
     }
 

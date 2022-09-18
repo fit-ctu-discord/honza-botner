@@ -1,9 +1,9 @@
 using System;
 using DSharpPlus;
-using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
+using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -12,8 +12,8 @@ namespace HonzaBotner.Discord;
 public class DiscordWrapper
 {
     public DiscordClient Client { get; }
-    public CommandsNextExtension Commands { get; }
     public InteractivityExtension Interactivity { get; }
+    public SlashCommandsExtension Commands { get; }
 
     public DiscordWrapper(IOptions<DiscordConfig> options, IServiceProvider services, ILoggerFactory loggerFactory)
     {
@@ -28,17 +28,17 @@ public class DiscordWrapper
 
         Client = new DiscordClient(config);
 
-        CommandsNextConfiguration cConfig = new()
-        {
-            Services = services, StringPrefixes = optionsConfig.Prefixes, EnableDms = true
-        };
-        Commands = Client.UseCommandsNext(cConfig);
-
         InteractivityConfiguration iConfig = new()
         {
-            PollBehaviour = PollBehaviour.KeepEmojis, Timeout = TimeSpan.FromSeconds(30)
+            Timeout = TimeSpan.FromMinutes(2), AckPaginationButtons = true, ResponseBehavior = InteractionResponseBehavior.Ack
         };
         Interactivity = Client.UseInteractivity(iConfig);
+
+        SlashCommandsConfiguration sConfig = new()
+        {
+            Services = services
+        };
+        Commands = Client.UseSlashCommands(sConfig);
 
         Client.Logger.LogInformation("Starting with secret: {Token}", options.Value.Token);
     }

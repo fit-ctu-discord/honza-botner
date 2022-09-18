@@ -37,6 +37,7 @@ public class Startup
         services.AddControllers();
 
         string connectionString = PsqlConnectionStringParser.GetEFConnectionString(Configuration["DATABASE_URL"]);
+        ulong? guildId = Configuration.GetSection("Discord").GetValue<ulong>("GuildId");
 
         services
             .AddDbContext<HonzaBotnerDbContext>(options =>
@@ -54,23 +55,7 @@ public class Startup
             // Discord
             .AddDiscordOptions(Configuration)
             .AddCommandOptions(Configuration)
-            .AddDiscordBot(config =>
-                {
-                    //config.RegisterCommands<AuthorizeCommands>();
-                    config.RegisterCommands<NewsManagementCommands>();
-                    config.RegisterCommands<BotCommands>();
-                    config.RegisterCommands<ChannelCommands>();
-                    config.RegisterCommands<EmoteCommands>();
-                    config.RegisterCommands<FunCommands>();
-                    config.RegisterCommands<MemberCommands>();
-                    config.RegisterCommands<MessageCommands>();
-                    config.RegisterCommands<PinCommands>();
-                    config.RegisterCommands<PollCommands>();
-                    config.RegisterCommands<ReminderCommands>();
-                    config.RegisterCommands<TestCommands>();
-                    config.RegisterCommands<VoiceCommands>();
-                    config.RegisterCommands<WarningCommands>();
-                }, reactions =>
+            .AddDiscordBot( reactions =>
                 {
                     reactions
                         .AddEventHandler<BoosterHandler>()
@@ -84,7 +69,21 @@ public class Startup
                         .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
                         .AddEventHandler<VoiceHandler>()
                         .AddEventHandler<BadgeRoleHandler>()
+                        .AddEventHandler<ThreadHandler>()
                         ;
+                }, commands =>
+                {
+                    commands.RegisterCommands<BotCommands>();
+                    commands.RegisterCommands<EmoteCommands>(guildId);
+                    commands.RegisterCommands<FunCommands>();
+                    commands.RegisterCommands<MemberCommands>(guildId);
+                    commands.RegisterCommands<MessageCommands>(guildId);
+                    commands.RegisterCommands<ModerationCommands>(guildId);
+                    commands.RegisterCommands<PinCommands>(guildId);
+                    commands.RegisterCommands<PollCommands>(guildId);
+                    commands.RegisterCommands<ReminderCommands>(guildId);
+                    commands.RegisterCommands<VoiceCommands>(guildId);
+                    commands.RegisterCommands<NewsManagementCommands>(guildId);
                 }
             )
 
@@ -95,12 +94,12 @@ public class Startup
             .AddTransient<IVoiceManager, VoiceManager>()
             .AddTransient<IReminderManager, ReminderManager>()
             .AddTransient<IButtonManager, ButtonManager>()
-            .AddScoped<NewsJobProvider>()
             ;
 
         services.AddScheduler(5000)
             .AddScopedCronJob<TriggerRemindersJobProvider>()
             .AddScopedCronJob<StandUpJobProvider>()
+            .AddScopedCronJob<NewsJobProvider>()
             ;
     }
 

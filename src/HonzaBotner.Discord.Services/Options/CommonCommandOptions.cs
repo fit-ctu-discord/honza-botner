@@ -23,6 +23,4 @@ public class CommonCommandOptions
 
     public ulong StandUpRoleId { get; set; }
     public ulong StandUpChannelId { get; set; }
-
-    public ulong[] MemberCountAllowlistIds { get; set; } = System.Array.Empty<ulong>();
 }

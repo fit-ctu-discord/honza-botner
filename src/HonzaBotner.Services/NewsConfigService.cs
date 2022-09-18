@@ -20,7 +20,7 @@ public class NewsConfigService : INewsConfigService
         _context = context;
     }
 
-    private async Task<NewsConfig> GetConfig(int id)
+    private async Task<NewsConfig> GetConfig(long id)
     {
         NewsConfig? config = await Configs.FirstOrDefaultAsync(c => c.Id == id);
 
@@ -86,7 +86,7 @@ public class NewsConfigService : INewsConfigService
             publisherType, config.Active, config.Channels);
     }
 
-    public async Task UpdateFetchDateAsync(int id, DateTime date)
+    public async Task UpdateFetchDateAsync(long id, DateTime date)
     {
         NewsConfig config = await GetConfig(id);
 
@@ -95,7 +95,7 @@ public class NewsConfigService : INewsConfigService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<bool> ToggleConfig(int id)
+    public async Task<bool> ToggleConfig(long id)
     {
         NewsConfig config = await GetConfig(id);
 
@@ -106,7 +106,7 @@ public class NewsConfigService : INewsConfigService
         return config.Active;
     }
 
-    public async Task<Dto.NewsConfig> GetById(int id)
+    public async Task<Dto.NewsConfig> GetById(long id)
     {
         NewsConfig config = await GetConfig(id);
 

@@ -11,9 +11,9 @@ public interface INewsConfigService
 
     Task<IList<NewsConfig>> ListConfigsAsync(bool onlyActive = true);
 
-    Task UpdateFetchDateAsync(int id, DateTime date);
+    Task UpdateFetchDateAsync(long id, DateTime date);
 
-    Task<bool> ToggleConfig(int id);
+    Task<bool> ToggleConfig(long id);
 
-    Task<NewsConfig> GetById(int id);
+    Task<NewsConfig> GetById(long id);
 }

@@ -10,7 +10,6 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddCommandOptions(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<CommonCommandOptions>(configuration.GetSection(CommonCommandOptions.ConfigName));
-        services.Configure<CommandAllowlistsOptions>(configuration.GetSection(CommandAllowlistsOptions.ConfigName));
         services.Configure<CustomVoiceOptions>(configuration.GetSection(CustomVoiceOptions.ConfigName));
         services.Configure<PinOptions>(configuration.GetSection(PinOptions.ConfigName));
         services.Configure<InfoOptions>(configuration.GetSection(InfoOptions.ConfigName));

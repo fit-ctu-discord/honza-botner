@@ -1,9 +1,6 @@
-﻿using System;
-using System.Linq;
+using System;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.Logging;
@@ -11,10 +8,8 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Commands;
 
-[Group("voice")]
-[Description("Commands to control (and only works in) custom voice channels.")]
-[RequireGuild]
-public class VoiceCommands : BaseCommandModule
+[SlashCommandGroup("voice", "Commands to customize own voice channels")]
+public class VoiceCommands : ApplicationCommandModule
 {
     private readonly IVoiceManager _voiceManager;
     private readonly CustomVoiceOptions _voiceConfig;
@@ -28,121 +23,60 @@ public class VoiceCommands : BaseCommandModule
         _logger = logger;
     }
 
-    [Command("add")]
-    [Aliases("new")]
-    [Description("Create new voice channel. Users has 30 seconds to join.")]
-    [Priority(2)]
-    public async Task AddVoiceChannelWithLimitAndPublic(
-        CommandContext ctx,
-        [Description("Name of the channel.")] string name,
-        [Description("Limit number of members who can join. Use 0 to set to unlimited.")]
-        int limit = 0,
-        [Description("Set voice channel public.")]
-        bool isPublic = false
-    )
-    {
-        await AddVoiceAsync(ctx, name, limit, isPublic);
-    }
-
-    [Command("add")]
-    [Priority(1)]
-    public async Task AddVoiceChannel(
-        CommandContext ctx,
-        [RemainingText, Description("Name of the channel.")]
-        string name
-    )
-    {
-        await AddVoiceAsync(ctx, name);
-    }
-
-    [Command("edit")]
-    [Aliases("rename")]
-    [Description("Edits the name (and limit and publicity) of the voice channel you are connected to.")]
-    [Priority(1)]
-    public async Task EditVoiceChannel(
-        CommandContext ctx,
-        [Description("New name of the channel.")]
-        string newName,
-        [Description("Limit number of members who can join.")]
-        int? limit = null,
-        [Description("Set to be public.")] bool? isPublic = null
-    )
-    {
-        await EditVoiceAsync(ctx, newName, limit, isPublic);
-    }
-
-    [Command("edit")]
-    [Priority(2)]
-    public async Task EditVoiceChannelWithoutName(
-        CommandContext ctx,
-        int limit,
-        bool? isPublic = null
-    )
-    {
-        await EditVoiceAsync(ctx, null, limit, isPublic);
-    }
-
-    private bool InValidChannel(DiscordChannel channel)
-    {
-        return _voiceConfig.CommandChannelsIds.Contains(channel.Id);
-    }
-
-    private async Task AddVoiceAsync(
-        CommandContext ctx,
-        string name,
-        int limit = 0,
-        bool isPublic = false
-    )
+    [SlashCommand("create", "Create new custom voice channel.")]
+    public async Task CreateCommandAsync(
+        InteractionContext ctx,
+        [MaximumLength(100)]
+        [Option("name", "Name of the channel.")] string name,
+        [Minimum(0), Maximum(99)]
+        [Option("limit", "Limit amount of people allowed to join.")] long limit = 0,
+        [Option("public", "Should the channel be publicly accessible?")] bool isPublic = false)
     {
         try
         {
-            await ctx.TriggerTypingAsync();
-            if (!InValidChannel(ctx.Channel))
-            {
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
-                return;
-            }
-
             await _voiceManager.AddNewVoiceChannelAsync(ctx.Guild.GetChannel(_voiceConfig.ClickChannelId),
                 ctx.Member, name, limit, isPublic);
-
-            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
+            await ctx.CreateResponseAsync("Channel created");
         }
         catch (Exception e)
         {
             _logger.LogWarning(e, "Couldn't add a voice channel");
+            await ctx.CreateResponseAsync("Channel creation failed", true);
         }
     }
 
-    private async Task EditVoiceAsync(
-        CommandContext ctx,
-        string? newName,
-        int? limit = 0,
-        bool? isPublic = false
+    [SlashCommand("edit", "Edit voice channel you are connected to.")]
+    public async Task EditCommandAsync(
+        InteractionContext ctx,
+        [MaximumLength(100)] [Option("name", "Change name")] string? name = null,
+        [Minimum(0), Maximum(99)]
+        [Option("limit", "Change limit of people")] long? limit = null,
+        [Option("public", "Change whether the channel appears to everyone")] bool? isPublic = null
     )
     {
+        if (name is null && limit is null && isPublic is null)
+        {
+            await ctx.CreateResponseAsync("There is nothing to edit.", true);
+            return;
+        }
+
+        bool success = false;
         try
         {
-            if (!InValidChannel(ctx.Channel))
-            {
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
-                return;
-            }
-
-            bool success = await _voiceManager.EditVoiceChannelAsync(ctx.Member, newName, limit, isPublic);
-
-            if (success)
-            {
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:"));
-            }
-            else
-            {
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:"));
-            }
+            success = await _voiceManager.EditVoiceChannelAsync(ctx.Member, name, limit, isPublic);
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Couldn't edit a voice channel");
+            _logger.LogWarning(e, "Command by {Nickname} to edit voice channel failed", ctx.Member.DisplayName);
+        }
+
+        if (success)
+        {
+            await ctx.CreateResponseAsync("Channel edited successfully");
+        }
+        else
+        {
+            await ctx.CreateResponseAsync("Failed while editing channel.", true);
         }
     }
 }

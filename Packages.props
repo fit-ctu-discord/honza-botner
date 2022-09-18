@@ -2,9 +2,9 @@
     <ItemGroup>
         <PackageReference Update="Chronic.Core" Version="0.4.0" />
         <PackageReference Update="Cronos" Version="0.7.1" />
-        <PackageReference Update="DSharpPlus" Version="4.2.0" />
-        <PackageReference Update="DSharpPlus.CommandsNext" Version="4.2.0" />
-        <PackageReference Update="DSharpPlus.Interactivity" Version="4.2.0" />
+        <PackageReference Update="DSharpPlus" Version="4.3.0-nightly-01169" />
+        <PackageReference Update="DSharpPlus.Interactivity" Version="4.3.0-nightly-01169" />
+        <PackageReference Update="DSharpPlus.SlashCommands" Version="4.3.0-nightly-01169" />
         <PackageReference Update="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.8" />
         <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.8" />
         <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="6.0.8" />
