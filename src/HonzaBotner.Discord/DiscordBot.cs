@@ -158,7 +158,6 @@ internal class DiscordBot : IDiscordBot
 
     private Task Client_ThreadCreated(DiscordClient client, ThreadCreateEventArgs args)
     {
-        Task.Run(() => args.Thread.SendMessageAsync("Ping <@132599706747535360>"));
         return _eventHandler.Handle(args);
     }
 

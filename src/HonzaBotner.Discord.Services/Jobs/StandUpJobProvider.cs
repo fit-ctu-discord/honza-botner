@@ -98,7 +98,7 @@ public class StandUpJobProvider : IJob
             }
 
             await channel.SendMessageAsync($@"
-Stand-up time, ||o prázdninách se nepinguje||!
+Stand-up time, <@&{_commonOptions.StandUpRoleId}>!
 
 Results from <t:{((DateTimeOffset)today.AddDays(-1)).ToUnixTimeSeconds()}:D>:
 ```
