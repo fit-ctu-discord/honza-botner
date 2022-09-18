@@ -60,7 +60,7 @@ public class ReminderCommands : ApplicationCommandModule
             return;
         }
 
-        DiscordMessage followup = await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("❤"));
+        DiscordMessage followup = await ctx.Channel.SendMessageAsync("❤");
 
         Reminder reminder = await _service.CreateReminderAsync(
             ctx.User.Id,
@@ -70,8 +70,7 @@ public class ReminderCommands : ApplicationCommandModule
             content.RemoveDiscordMentions(ctx.Guild)
         );
 
-        followup = await ctx.EditFollowupAsync(followup.Id,
-            new DiscordWebhookBuilder().AddEmbed(await _reminderManager.CreateReminderEmbedAsync(reminder)));
+        followup = await followup.ModifyAsync("",await _reminderManager.CreateReminderEmbedAsync(reminder));
         await followup.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.CancelEmojiName));
         await followup.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.JoinEmojiName));
         await ctx.CreateResponseAsync("Reminder created", true);

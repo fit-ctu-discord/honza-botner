@@ -1,6 +1,7 @@
 using System;
 using DSharpPlus;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
@@ -29,7 +30,7 @@ public class DiscordWrapper
 
         InteractivityConfiguration iConfig = new()
         {
-            Timeout = TimeSpan.FromMinutes(2), AckPaginationButtons = true
+            Timeout = TimeSpan.FromMinutes(2), AckPaginationButtons = true, ResponseBehavior = InteractionResponseBehavior.Ack
         };
         Interactivity = Client.UseInteractivity(iConfig);
 

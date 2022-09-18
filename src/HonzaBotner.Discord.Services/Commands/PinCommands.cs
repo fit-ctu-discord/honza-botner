@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace HonzaBotner.Discord.Services.Commands;
 
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class PinCommands : ApplicationCommandModule
 {
     private readonly ILogger<PinCommands> _logger;
@@ -40,9 +41,9 @@ public class PinCommands : ApplicationCommandModule
     {
         string customId = $"unpin + {ctx.User.Id} + {ctx.Channel.Id}";
         await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder()
-            .WithContent("Do you really want to unpin messages in this " + (everywhere ? "server?" : "channel?"))
+            .WithContent("Do you really want to unpin messages in this " + (everywhere ? "**server**?" : "**channel**?"))
             .AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, customId, "Do it!"))
-            .AsEphemeral(true));
+            .AsEphemeral());
 
         var interactivity = ctx.Client.GetInteractivity();
         var result = await interactivity.WaitForButtonAsync(await ctx.GetOriginalResponseAsync(), customId,
@@ -61,6 +62,7 @@ public class PinCommands : ApplicationCommandModule
             channelTasks.Add(DeletePinsInChannelAsync(pair.Value, permanentPinEmoji, lockPinEmoji));
         });
 
+        await ctx.Channel.TriggerTypingAsync();
         await Task.WhenAll(channelTasks);
         await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Messages successfully unpinned"));
     }

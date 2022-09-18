@@ -15,6 +15,7 @@ namespace HonzaBotner.Discord.Services.Commands;
 
 [SlashCommandGroup("moderation", "Punish members of your server or show/edit their history")]
 [SlashCommandPermissions(Permissions.BanMembers)]
+[SlashModuleLifespan(SlashModuleLifespan.Scoped)]
 public class ModerationCommands : ApplicationCommandModule
 {
     private readonly IWarningService _warningService;
@@ -81,9 +82,8 @@ public class ModerationCommands : ApplicationCommandModule
             new DiscordInteractionResponseBuilder()
                 .WithContent("Warning issued to " +
                              $"{ctx.TargetMember.Mention} with reason \"{modalReason.Result.Values[reasonId]}\"")
-                .AsEphemeral(true)
-                .AddComponents(
-                    new DiscordButtonComponent(ButtonStyle.Primary, modalId, "Announce")));
+                .AsEphemeral()
+                .AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, modalId, "Announce")));
 
         var buttonResponse = await interactivity.WaitForButtonAsync(
             await modalReason.Result.Interaction.GetOriginalResponseAsync(), TimeSpan.FromMinutes(1));

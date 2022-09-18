@@ -69,7 +69,7 @@ public class NewsManagementCommands : ApplicationCommandModule
     private static string GetActiveEmoji(NewsConfig config) => config.Active ? ":white_check_mark:" : "❌";
 
     [SlashCommand("toggle", "Toggles if one configuration for news source is active or not")]
-    public async Task ToggleConfig(InteractionContext context,
+    public async Task ToggleConfigCommandAsync(InteractionContext context,
         [Option("id", "Id of News config")] long id)
     {
         bool currentState = await _configService.ToggleConfig(id);
@@ -106,7 +106,7 @@ public class NewsManagementCommands : ApplicationCommandModule
     }
 
     [SlashCommand("edit-last-run", "Set last run time for one config")]
-    public async Task EditLastRunConfig(InteractionContext ctx,
+    public async Task EditLastRunConfigCommandAsync(InteractionContext ctx,
         [Option("id", "Id of News config")] long id,
         [Option("last-run", "Date and time of last run")] string rawDateTime)
     {
@@ -127,7 +127,7 @@ public class NewsManagementCommands : ApplicationCommandModule
     }
 
     [SlashCommand("run-once", "Fetch news once")]
-    public async Task RunOnce(InteractionContext ctx)
+    public async Task RunOnceCommandAsync(InteractionContext ctx)
     {
         await _newsJobProvider.ExecuteAsync(default);
         await ctx.CreateResponseAsync("News job - done");

@@ -44,7 +44,7 @@ internal class DiscordBot : IDiscordBot
         Client.ClientErrored += Client_ClientError;
         Client.GuildDownloadCompleted += Client_GuildDownloadCompleted;
 
-        Commands.SlashCommandExecuted += Commands_CommandExecuted;
+        Commands.SlashCommandInvoked += Commands_CommandInvoked;
         Commands.SlashCommandErrored += Commands_CommandErrored;
         Commands.ContextMenuErrored += Commands_ContextMenuErrored;
         Commands.AutocompleteErrored += Commands_AutocompleteErrored;
@@ -96,9 +96,9 @@ internal class DiscordBot : IDiscordBot
         e.Handled = true;
     }
 
-    private Task Commands_CommandExecuted(SlashCommandsExtension e, SlashCommandExecutedEventArgs args)
+    private Task Commands_CommandInvoked(SlashCommandsExtension e, SlashCommandInvokedEventArgs args)
     {
-        e.Client.Logger.LogDebug("Executed {Command} by {Author}", args.Context.CommandName, args.Context.Member.DisplayName);
+        e.Client.Logger.LogDebug("Received {Command} by {Author}", args.Context.CommandName, args.Context.Member.DisplayName);
         return Task.CompletedTask;
     }
 
@@ -107,7 +107,7 @@ internal class DiscordBot : IDiscordBot
         e.Client.Logger.LogError(args.Exception, "Exception occured while executing {Command}", args.Context.CommandName);
         await ReportException(args.Context.Guild, $"SlashCommand {args.Context.CommandName}", args.Exception);
         args.Handled = true;
-        await args.Context.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Something failed").AsEphemeral());
+        await args.Context.Channel.SendMessageAsync("Something failed");
     }
 
     private async Task Commands_ContextMenuErrored(SlashCommandsExtension e, ContextMenuErrorEventArgs args)
@@ -115,7 +115,7 @@ internal class DiscordBot : IDiscordBot
         e.Client.Logger.LogError(args.Exception, "Exception occured while executing context menu {ContextMenu}", args.Context.CommandName);
         await ReportException(args.Context.Guild, $"ContextMenu {args.Context.CommandName}", args.Exception);
         args.Handled = true;
-        await args.Context.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Something failed").AsEphemeral());
+        await args.Context.Channel.SendMessageAsync("Something failed");
     }
 
     private async Task Commands_AutocompleteErrored(SlashCommandsExtension e, AutocompleteErrorEventArgs args)
