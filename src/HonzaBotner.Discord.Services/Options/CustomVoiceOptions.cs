@@ -6,5 +6,4 @@ public class CustomVoiceOptions
 
     public ulong ClickChannelId { get; set; }
     public int RemoveAfterCommandInSeconds { get; set; }
-    public ulong[] CommandChannelsIds { get; set; } = System.Array.Empty<ulong>();
 }

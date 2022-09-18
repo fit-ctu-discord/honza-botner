@@ -19,7 +19,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
-
 namespace HonzaBotner;
 
 public class Startup
@@ -38,6 +37,7 @@ public class Startup
         services.AddControllers();
 
         string connectionString = PsqlConnectionStringParser.GetEFConnectionString(Configuration["DATABASE_URL"]);
+        ulong? guildId = Configuration.GetSection("Discord").GetValue<ulong>("GuildId");
 
         services
             .AddDbContext<HonzaBotnerDbContext>(options =>
@@ -55,22 +55,7 @@ public class Startup
             // Discord
             .AddDiscordOptions(Configuration)
             .AddCommandOptions(Configuration)
-            .AddDiscordBot(config =>
-                {
-                    //config.RegisterCommands<AuthorizeCommands>();
-                    config.RegisterCommands<BotCommands>();
-                    config.RegisterCommands<ChannelCommands>();
-                    config.RegisterCommands<EmoteCommands>();
-                    config.RegisterCommands<FunCommands>();
-                    config.RegisterCommands<MemberCommands>();
-                    config.RegisterCommands<MessageCommands>();
-                    config.RegisterCommands<PinCommands>();
-                    config.RegisterCommands<PollCommands>();
-                    config.RegisterCommands<ReminderCommands>();
-                    config.RegisterCommands<TestCommands>();
-                    config.RegisterCommands<VoiceCommands>();
-                    config.RegisterCommands<WarningCommands>();
-                }, reactions =>
+            .AddDiscordBot( reactions =>
                 {
                     reactions
                         .AddEventHandler<BoosterHandler>()
@@ -84,7 +69,21 @@ public class Startup
                         .AddEventHandler<VerificationEventHandler>(EventHandlerPriority.Urgent)
                         .AddEventHandler<VoiceHandler>()
                         .AddEventHandler<BadgeRoleHandler>()
+                        .AddEventHandler<ThreadHandler>()
                         ;
+                }, commands =>
+                {
+                    commands.RegisterCommands<BotCommands>();
+                    commands.RegisterCommands<EmoteCommands>(guildId);
+                    commands.RegisterCommands<FunCommands>();
+                    commands.RegisterCommands<MemberCommands>(guildId);
+                    commands.RegisterCommands<MessageCommands>(guildId);
+                    commands.RegisterCommands<ModerationCommands>(guildId);
+                    commands.RegisterCommands<PinCommands>(guildId);
+                    commands.RegisterCommands<PollCommands>(guildId);
+                    commands.RegisterCommands<ReminderCommands>(guildId);
+                    commands.RegisterCommands<VoiceCommands>(guildId);
+                    commands.RegisterCommands<NewsManagementCommands>(guildId);
                 }
             )
 
@@ -99,7 +98,9 @@ public class Startup
 
         services.AddScheduler(5000)
             .AddScopedCronJob<TriggerRemindersJobProvider>()
-            .AddScopedCronJob<StandUpJobProvider>();
+            .AddScopedCronJob<StandUpJobProvider>()
+            .AddScopedCronJob<NewsJobProvider>()
+            ;
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

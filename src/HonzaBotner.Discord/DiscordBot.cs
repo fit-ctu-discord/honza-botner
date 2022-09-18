@@ -1,15 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.CommandsNext.Converters;
-using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using HonzaBotner.Discord.Attributes;
+using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.EventArgs;
 using HonzaBotner.Discord.Extensions;
 using HonzaBotner.Discord.Managers;
 using Microsoft.Extensions.Logging;
@@ -21,19 +17,22 @@ internal class DiscordBot : IDiscordBot
 {
     private readonly DiscordWrapper _discordWrapper;
     private readonly EventHandler.EventHandler _eventHandler;
-    private readonly CommandConfigurator _configurator;
+    private readonly CommandsConfigurator _commandsConfigurator;
     private readonly IVoiceManager _voiceManager;
     private readonly DiscordConfig _discordOptions;
 
     private DiscordClient Client => _discordWrapper.Client;
-    private CommandsNextExtension Commands => _discordWrapper.Commands;
+    private SlashCommandsExtension Commands => _discordWrapper.Commands;
 
-    public DiscordBot(DiscordWrapper discordWrapper, EventHandler.EventHandler eventHandler,
-        CommandConfigurator configurator, IVoiceManager voiceManager, IOptions<DiscordConfig> discordOptions)
+    public DiscordBot(DiscordWrapper discordWrapper,
+        EventHandler.EventHandler eventHandler,
+        CommandsConfigurator commandsConfigurator,
+        IVoiceManager voiceManager,
+        IOptions<DiscordConfig> discordOptions)
     {
         _discordWrapper = discordWrapper;
         _eventHandler = eventHandler;
-        _configurator = configurator;
+        _commandsConfigurator = commandsConfigurator;
         _voiceManager = voiceManager;
         _discordOptions = discordOptions.Value;
     }
@@ -45,8 +44,10 @@ internal class DiscordBot : IDiscordBot
         Client.ClientErrored += Client_ClientError;
         Client.GuildDownloadCompleted += Client_GuildDownloadCompleted;
 
-        Commands.CommandExecuted += Commands_CommandExecuted;
-        Commands.CommandErrored += Commands_CommandErrored;
+        Commands.SlashCommandInvoked += Commands_CommandInvoked;
+        Commands.SlashCommandErrored += Commands_CommandErrored;
+        Commands.ContextMenuErrored += Commands_ContextMenuErrored;
+        Commands.AutocompleteErrored += Commands_AutocompleteErrored;
 
         Client.ComponentInteractionCreated += Client_ComponentInteractionCreated;
         Client.MessageReactionAdded += Client_MessageReactionAdded;
@@ -54,9 +55,9 @@ internal class DiscordBot : IDiscordBot
         Client.VoiceStateUpdated += Client_VoiceStateUpdated;
         Client.GuildMemberUpdated += Client_GuildMemberUpdated;
         Client.ChannelCreated += Client_ChannelCreated;
+        Client.ThreadCreated += Client_ThreadCreated;
 
-        _configurator.Config(Commands);
-        Commands.RegisterConverter(new EnumConverter<ActivityType>());
+        _commandsConfigurator.Config(Commands);
 
         await Client.ConnectAsync();
         await Task.Delay(-1, cancellationToken);
@@ -86,7 +87,7 @@ internal class DiscordBot : IDiscordBot
     {
         sender.Logger.LogError(e.Exception, "Exception occured");
 
-        if (_discordOptions.GuildId == null)
+        if (_discordOptions.GuildId is null)
             return;
 
         DiscordGuild guild = await sender.GetGuildAsync(_discordOptions.GuildId.Value);
@@ -95,100 +96,35 @@ internal class DiscordBot : IDiscordBot
         e.Handled = true;
     }
 
-    private Task Commands_CommandExecuted(CommandsNextExtension sender, CommandExecutionEventArgs e)
+    private Task Commands_CommandInvoked(SlashCommandsExtension e, SlashCommandInvokedEventArgs args)
     {
-        e.Context.Client.Logger.LogInformation(
-            "{Username} successfully executed '{CommandName}'", e.Context.User.Username, e.Command.QualifiedName);
+        e.Client.Logger.LogDebug("Received {Command} by {Author}", args.Context.CommandName, args.Context.Member.DisplayName);
         return Task.CompletedTask;
     }
 
-    private async Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
+    private async Task Commands_CommandErrored(SlashCommandsExtension e, SlashCommandErrorEventArgs args)
     {
-        switch (e.Exception)
-        {
-            case CommandNotFoundException:
-            case InvalidOperationException:
-            case ArgumentException:
-                {
-                    await e.Context.RespondAsync("Tento příkaz neznám.");
-                    try
-                    {
-                        CommandContext? fakeContext = Commands.CreateFakeContext(e.Context.Member,
-                            e.Context.Channel,
-                            "help", e.Context.Prefix,
-                            Commands.FindCommand("help", out string args), args
-                        );
-                        await Commands.ExecuteCommandAsync(fakeContext);
-                    }
-                    catch (NullReferenceException)
-                    {
-                        await e.Context.Channel.SendMessageAsync("Pro více info zadej příkaz na discordovém serveru");
-                    }
-
-                    break;
-                }
-            case ChecksFailedException exception:
-                {
-                    IReadOnlyList<CheckBaseAttribute> failedChecks = exception.FailedChecks;
-                    foreach (var failedCheck in failedChecks)
-                    {
-                        DiscordEmoji permissionEmoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
-                        DiscordEmoji timerEmoji = DiscordEmoji.FromName(e.Context.Client, ":alarm_clock:");
-
-                        if (failedCheck is CooldownAttribute)
-                        {
-                            if (exception.Context.Guild is not null &&
-                                (exception.Context.Member.Permissions & Permissions.ManageMessages) != 0)
-                            {
-                                await exception.Command.ExecuteAsync(exception.Context);
-                                return;
-                            }
-                        }
-
-                        DiscordEmbed embed = failedCheck switch
-                        {
-                            ICustomAttribute attribute => await attribute.BuildFailedCheckDiscordEmbed(),
-                            RequireGuildAttribute => new DiscordEmbedBuilder()
-                                .WithTitle("Příkaz nelze použít mimo server")
-                                .WithDescription($"{permissionEmoji} Příkaz lze použít jen na discord serveru.")
-                                .WithColor(DiscordColor.Red)
-                                .Build(),
-                            CooldownAttribute check => new DiscordEmbedBuilder()
-                                .WithTitle("Příkaz používáš příliš často")
-                                .WithDescription($"{timerEmoji} Příkaz můžeš opět použít až za " +
-                                                 $"{(int)check.GetRemainingCooldown(exception.Context).TotalMinutes} " +
-                                                 "minut")
-                                .WithColor(DiscordColor.Yellow)
-                                .Build(),
-                            _ => new DiscordEmbedBuilder()
-                                .WithTitle("Přístup zakázán")
-                                .WithDescription($"{permissionEmoji} Na vykonání příkazu nemáte dostatečná práva." +
-                                                 "Pokud si myslíte že ano, kontaktujte svého MODa.")
-                                .WithColor(DiscordColor.Red)
-                                .Build()
-                        };
-                        await e.Context.RespondAsync("", embed);
-                        break;
-                    }
-
-                    break;
-                }
-            default:
-                await e.Context.RespondAsync("Něco se pokazilo. Hups. :scream_cat:");
-                await ReportException(e.Context.Guild, $"Command {e.Command.QualifiedName}", e.Exception);
-                e.Context.Client.Logger.LogError(
-                    e.Exception,
-                    "{Username} tried executing '{CommandName}' but it errored: {ExceptionType}: {ExceptionMessage}",
-                    e.Context.User.Username,
-                    e.Command?.QualifiedName ?? "<unknown command>", e.Exception.GetType(),
-                    e.Exception.Message
-                );
-                break;
-        }
-
-        e.Handled = true;
+        e.Client.Logger.LogError(args.Exception, "Exception occured while executing {Command}", args.Context.CommandName);
+        await ReportException(args.Context.Guild, $"SlashCommand {args.Context.CommandName}", args.Exception);
+        args.Handled = true;
+        await args.Context.Channel.SendMessageAsync("Something failed");
     }
 
+    private async Task Commands_ContextMenuErrored(SlashCommandsExtension e, ContextMenuErrorEventArgs args)
+    {
+        e.Client.Logger.LogError(args.Exception, "Exception occured while executing context menu {ContextMenu}", args.Context.CommandName);
+        await ReportException(args.Context.Guild, $"ContextMenu {args.Context.CommandName}", args.Exception);
+        args.Handled = true;
+        await args.Context.Channel.SendMessageAsync("Something failed");
+    }
+
+    private async Task Commands_AutocompleteErrored(SlashCommandsExtension e, AutocompleteErrorEventArgs args)
+    {
+        e.Client.Logger.LogError(args.Exception, "Autocomplete failed while looking into option {OptionName}", args.Context.FocusedOption.Name);
+        await ReportException(args.Context.Guild, $"Command Autocomplete for option {args.Context.FocusedOption.Name}",
+            args.Exception);
+        args.Handled = true;
+    }
 
     private Task Client_ComponentInteractionCreated(DiscordClient client, ComponentInteractionCreateEventArgs args)
     {
@@ -217,6 +153,12 @@ internal class DiscordBot : IDiscordBot
 
     private Task Client_ChannelCreated(DiscordClient client, ChannelCreateEventArgs args)
     {
+        return _eventHandler.Handle(args);
+    }
+
+    private Task Client_ThreadCreated(DiscordClient client, ThreadCreateEventArgs args)
+    {
+        Task.Run(() => args.Thread.SendMessageAsync("Ping <@132599706747535360>"));
         return _eventHandler.Handle(args);
     }
 

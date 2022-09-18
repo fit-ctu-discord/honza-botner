@@ -27,7 +27,7 @@ public class VoiceManager : IVoiceManager
 
     public async Task AddNewVoiceChannelAsync(
         DiscordChannel channelToCloneFrom, DiscordMember member,
-        string? name, int? limit, bool? isPublic)
+        string? name, long? limit, bool? isPublic)
     {
         name = ConvertStringToValidState(name);
 
@@ -64,8 +64,8 @@ public class VoiceManager : IVoiceManager
         }
     }
 
-    public async Task<bool> EditVoiceChannelAsync(DiscordMember member, string? newName = null, int? limit = 0,
-        bool? isPublic = false)
+    public async Task<bool> EditVoiceChannelAsync(DiscordMember member, string? newName = null, long? limit = null,
+        bool? isPublic = null)
     {
         if (member.VoiceState?.Channel == null || member.VoiceState?.Channel.Id == _voiceConfig.ClickChannelId)
         {
@@ -117,8 +117,8 @@ public class VoiceManager : IVoiceManager
     public async Task DeleteAllUnusedVoiceChannelsAsync()
     {
         DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
-        DiscordChannel customVoiceCategory = guild.GetChannel(_voiceConfig.ClickChannelId).Parent;
-        foreach (DiscordChannel discordChannel in customVoiceCategory.Children)
+        DiscordChannel? customVoiceCategory = guild.GetChannel(_voiceConfig.ClickChannelId)?.Parent;
+        foreach (DiscordChannel discordChannel in customVoiceCategory?.Children ?? Array.Empty<DiscordChannel>())
         {
             await DeleteUnusedVoiceChannelAsync(discordChannel);
         }
@@ -130,7 +130,7 @@ public class VoiceManager : IVoiceManager
         return input.Trim().Length == 0 ? defaultValue : input.Substring(0, Math.Min(input.Length, 30));
     }
 
-    private async Task EditChannelAsync(bool isEdit, DiscordChannel? channel, string? name, int? limit,
+    private async Task EditChannelAsync(bool isEdit, DiscordChannel? channel, string? name, long? limit,
         bool? isPublic,
         string? userName)
     {
@@ -147,13 +147,13 @@ public class VoiceManager : IVoiceManager
                 model.Name = name ?? $"{userName ?? "FIŤÁK"}'s channel";
             }
 
-            if (limit != null)
+            if (limit is not null)
             {
-                model.Userlimit = Math.Max(Math.Min(limit.Value, 99), 0);
+                model.Userlimit = (int) Math.Max(Math.Min(limit.Value, 99), 0);
             }
         });
 
-        if (isPublic != null)
+        if (isPublic is not null)
         {
             if (isPublic == true)
             {

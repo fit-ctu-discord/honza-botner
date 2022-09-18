@@ -50,7 +50,7 @@ public static class DiscordHelper
             bool messageParseSuccess = ulong.TryParse(match.Groups[2].Value, out ulong messageId);
             if (!messageParseSuccess) return null;
 
-            return await channel.GetMessageAsync(messageId);
+            return await channel.GetMessageAsync(messageId, true);
         }
         catch
         {

@@ -5,5 +5,6 @@ namespace HonzaBotner.Discord;
 
 public interface IGuildProvider
 {
+    public ulong GuildId { get; }
     Task<DiscordGuild> GetCurrentGuildAsync();
 }
