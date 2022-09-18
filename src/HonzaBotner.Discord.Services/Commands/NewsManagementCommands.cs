@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Chronic.Core;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using HonzaBotner.Discord.Services.Jobs;
 using HonzaBotner.Services.Contract;
@@ -34,14 +37,29 @@ public class NewsManagementCommands : ApplicationCommandModule
 
         DiscordEmbedBuilder builder = new() { Title = "News List" };
         builder.WithTimestamp(DateTime.Now);
+
+        StringBuilder stringBuilder = new("\n");
+
         foreach (NewsConfig config in configs)
         {
             string active = GetActiveEmoji(config);
-            builder.AddField($"{active} {config.Name} [{config.Id}]",
-                $"Last fetched: {config.LastFetched}");
+            stringBuilder.Append($"{active} {config.Name} [{config.Id}]");
+            stringBuilder.Append($"Last fetched: {config.LastFetched}");
+            stringBuilder.AppendLine();
         }
 
-        await ctx.CreateResponseAsync(builder.Build());
+
+        var interaction = ctx.Client.GetInteractivity();
+        var pages = interaction.GeneratePagesInEmbed(stringBuilder.ToString(), SplitType.Line, builder).ToList();
+
+        if (!pages.Any())
+        {
+            await ctx.CreateResponseAsync("No configs set", true);
+            return;
+        }
+
+
+        await interaction.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages);
     }
 
 
@@ -83,9 +101,18 @@ public class NewsManagementCommands : ApplicationCommandModule
     public async Task AddConfigCommandAsync(InteractionContext ctx,
         [Option("name", "Name of the news config")] string name,
         [Option("source", "Source identification")] string source,
-        [Option("channels", "Channels where news will be published")] string channels)
+        [Option("channels", "Channels where news will be published")] string channels,
+        [Option("since", "Date and time of oldest news fetched")] string rawDateTime)
     {
-        NewsConfig config = new(default, name, source, DateTime.MinValue, NewsProviderType.Courses, PublisherType.DiscordEmbed,
+        DateTime? parsedDateTime = ParseDateTime(rawDateTime);
+
+        if (parsedDateTime is null)
+        {
+            await ctx.CreateResponseAsync("Invalid datetime format", true);
+            return;
+        }
+
+        NewsConfig config = new(default, name, source, parsedDateTime.Value, NewsProviderType.Courses, PublisherType.DiscordEmbed,
             true, ctx.ResolvedChannelMentions.Select(ch => ch.Id).ToArray());
 
         await _configService.AddOrUpdate(config);
@@ -112,7 +139,7 @@ public class NewsManagementCommands : ApplicationCommandModule
     {
         DateTime? lastRun = ParseDateTime(rawDateTime);
 
-        if (lastRun is null || lastRun <= DateTime.UtcNow)
+        if (lastRun is null)
         {
             await ctx.CreateResponseAsync("Invalid last-run format");
             return;

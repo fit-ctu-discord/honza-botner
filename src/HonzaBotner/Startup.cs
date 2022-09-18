@@ -61,7 +61,6 @@ public class Startup
                         .AddEventHandler<BoosterHandler>()
                         .AddEventHandler<EmojiCounterHandler>()
                         .AddEventHandler<HornyJailHandler>()
-                        .AddEventHandler<NewChannelHandler>()
                         .AddEventHandler<PinHandler>()
                         .AddEventHandler<ReminderReactionsHandler>()
                         .AddEventHandler<RoleBindingsHandler>(EventHandlerPriority.High)
