@@ -52,7 +52,7 @@ public class StaffVerificationEventHandler : IEventHandler<ComponentInteractionC
 
         DiscordUser user = eventArgs.User;
         DiscordMember member = await eventArgs.Guild.GetMemberAsync(user.Id);
-        var builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
+        var builder = new DiscordInteractionResponseBuilder().AsEphemeral();
 
         // Check if the button to remove staff roles was pressed.
         if (eventArgs.Id == _buttonOptions.StaffRemoveRoleId)

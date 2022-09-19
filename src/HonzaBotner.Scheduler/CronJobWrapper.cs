@@ -20,8 +20,8 @@ internal class CronJobWrapper
     public ICronJob Job { get; }
     private CronExpression Expression { get; }
 
-    public DateTime NextRunTime { get; private set; }
-    public DateTime LastRunTime { get; private set; }
+    private DateTime NextRunTime { get; set; }
+    private DateTime LastRunTime { get; set; }
 
     public void Next()
     {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,7 +20,7 @@ public class FunCommands : ApplicationCommandModule
         string delimiter = ","
         )
     {
-        var answers = options.Split(delimiter, StringSplitOptions.TrimEntries & StringSplitOptions.RemoveEmptyEntries)
+        string[] answers = options.Split(delimiter)
             .Select(option => option.Trim().RemoveDiscordMentions(ctx.Guild))
             .Where(option => option != "").ToArray();
         if (answers.Length == 0)
@@ -31,13 +30,13 @@ public class FunCommands : ApplicationCommandModule
         }
         Random random = new();
         var text = new StringBuilder("I picked: ");
-        var winNumber = random.Next(answers.Length);
-        var winner = answers[winNumber];
+        int winNumber = random.Next(answers.Length);
+        string winner = answers[winNumber];
         text.Append("`" + winner + "`");
         if (answers.Length > 1)
         {
             text.Append("\nOptions were:\n");
-            foreach (var option in answers)
+            foreach (string option in answers)
             {
                 text.Append("`" + option+ "`, ");
             }

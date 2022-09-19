@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
@@ -27,7 +26,7 @@ public class NewsConfigEnumsTest
         Type? t = Type.GetType(type);
 
         Assert.NotNull(t);
-        Assert.True(t!.IsAssignableTo(interfaceType));
+        Assert.True(t.IsAssignableTo(interfaceType));
     }
 
     public static IEnumerable<object[]> GetPublisherEnums()
@@ -48,6 +47,6 @@ public class NewsConfigEnumsTest
         Type? t = Type.GetType(type);
 
         Assert.NotNull(t);
-        Assert.True(t!.IsAssignableTo(interfaceType));
+        Assert.True(t.IsAssignableTo(interfaceType));
     }
 }

@@ -28,7 +28,7 @@ public class DiscordEmbedPublisher : IPublisherService
             return str;
         }
 
-        StringBuilder sb = new(str.Substring(0, limit - 1 - andMore.Length));
+        StringBuilder sb = new(str [ ..(limit - 1 - andMore.Length)]);
         sb.Append(andMore);
 
         return sb.ToString();
@@ -42,7 +42,7 @@ public class DiscordEmbedPublisher : IPublisherService
         {
             // Embed titles are limited to 256 characters
             Title = Limit(news.Title, 256),
-            Author = new DiscordEmbedBuilder.EmbedAuthor()
+            Author = new DiscordEmbedBuilder.EmbedAuthor
             {
                 // The author name is limited to 256 characters
                 Name = Limit(news.Author, 256)

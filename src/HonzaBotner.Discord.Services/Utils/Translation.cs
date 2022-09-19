@@ -69,11 +69,15 @@ public class Translation : ITranslation
         },
         {
             "RemoveRolesButton",
-            new() { { ITranslation.Language.Czech, "Odebrat role" }, { ITranslation.Language.English, "Remove roles" } }
+            new Dictionary<ITranslation.Language, string>
+            {
+                { ITranslation.Language.Czech, "Odebrat role" },
+                { ITranslation.Language.English, "Remove roles" }
+            }
         },
         {
             "VerifyStaff",
-            new()
+            new Dictionary<ITranslation.Language, string>
             {
                 { ITranslation.Language.Czech, "Ahoj, pro ověření rolí zaměstnance klikni na tlačítko." },
                 { ITranslation.Language.English, "Hi, click the button to verify the staff roles." }
@@ -81,7 +85,7 @@ public class Translation : ITranslation
         },
         {
             "AlreadyVerified",
-            new()
+            new Dictionary<ITranslation.Language, string>
             {
                 { ITranslation.Language.Czech, "Ahoj, už jsi ověřený.\nPro aktualizaci rolí klikni na tlačítko." },
                 {

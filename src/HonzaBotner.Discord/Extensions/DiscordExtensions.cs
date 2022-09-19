@@ -11,7 +11,7 @@ public static class DiscordExtensions
         static string Truncate(string value, int maxLength)
         {
             if (string.IsNullOrEmpty(value)) return value;
-            return value.Length <= maxLength ? value : value.Substring(0, maxLength) + "...";
+            return value.Length <= maxLength ? value : value[..maxLength] + "...";
         }
 
         await channel.SendMessageAsync(

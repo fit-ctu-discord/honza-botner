@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Html2Markdown;
 using Html2Markdown.Scheme;
-using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Services;
 
@@ -53,14 +53,12 @@ public class CoursesNewsService : INewsService
 #nullable enable
 
     private const string CoursesScope = "cvut:cpages:common:read";
-    private readonly ILogger<CoursesNewsService> _logger;
     private readonly HttpClient _client;
     private readonly IAuthorizationService _authorizationService;
 
-    public CoursesNewsService(ILogger<CoursesNewsService> logger, HttpClient client,
+    public CoursesNewsService(HttpClient client,
         IAuthorizationService authorizationService)
     {
-        _logger = logger;
         _client = client;
         _authorizationService = authorizationService;
     }
@@ -74,10 +72,7 @@ public class CoursesNewsService : INewsService
 
         NameValueCollection queryParams = new()
         {
-            //{ "access_token", accessToken },
-            // type: {  "default", "grouped", "jsonfeed" }
             { "type", "default" },
-            // courses: BI-XY,BI-YZ,...
             { "courses", source },
             { "limit", "50" },
             { "since", since.AddDays(-1).ToString("yyyy-MM-dd") }
@@ -90,7 +85,7 @@ public class CoursesNewsService : INewsService
 
         HttpRequestMessage requestMessage = new(HttpMethod.Get, uriBuilder.Uri)
         {
-            Headers = { Authorization = new("Bearer", accessToken) }
+            Headers = { Authorization = new AuthenticationHeaderValue("Bearer", accessToken) }
         };
 
         HttpResponseMessage responseMessage = await _client.SendAsync(requestMessage);

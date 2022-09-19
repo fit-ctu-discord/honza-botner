@@ -7,21 +7,6 @@ namespace HonzaBotner.Discord;
 
 public static class DiscordHelper
 {
-    public static string GetMention(ulong authorId)
-    {
-        return $"<@{authorId}>";
-    }
-
-    public static string GetChannel(ulong channelId)
-    {
-        return $"<#{channelId}>";
-    }
-
-    public static string GetMessageLink(ulong guild, ulong channel, ulong message)
-    {
-        return $"https://discordapp.com/channels/{guild}/{channel}/{message}";
-    }
-
     /// <summary>
     /// Finds DiscordMessage from Discord link to message.
     /// </summary>
@@ -32,7 +17,7 @@ public static class DiscordHelper
     {
         // Match the channel and message IDs.
         const string pattern = @"https://discord(?:app)?\.com/channels/(?:\d+)/(\d+)/(\d+)/?";
-        Regex regex = new Regex(pattern);
+        Regex regex = new(pattern);
         Match match = regex.Match(link);
 
         // Malformed message link.

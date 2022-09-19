@@ -126,12 +126,15 @@ public sealed class DiscordRoleManager : IDiscordRoleManager
         {
             bool containsRole = kosRoles.Any(role => role.StartsWith(rolePrefix));
 
-            if (containsRole)
+            if (!containsRole)
             {
-                foreach (DiscordRole role in roles[rolePrefix].Select(roleId => new DiscordRole(roleId)))
-                {
-                    discordRoles.Add(role);
-                }
+                continue;
+            }
+
+
+            foreach (DiscordRole role in roles[rolePrefix].Select(roleId => new DiscordRole(roleId)))
+            {
+                discordRoles.Add(role);
             }
         }
 
@@ -160,11 +163,11 @@ public sealed class DiscordRoleManager : IDiscordRoleManager
 
     public async Task<bool> IsUserDiscordAuthenticated(ulong userId)
     {
-        DiscordGuild _guild = await _guildProvider.GetCurrentGuildAsync();
+        DiscordGuild guild = await _guildProvider.GetCurrentGuildAsync();
 
         try
         {
-            DiscordMember member = await _guild.GetMemberAsync(userId);
+            DiscordMember member = await guild.GetMemberAsync(userId);
             if (_roleConfig.AuthenticatedRoleIds.Any(roleId => member.Roles.Select(role => role.Id).Contains(roleId)))
             {
                 return true;

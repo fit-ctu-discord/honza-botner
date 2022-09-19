@@ -6,9 +6,9 @@ namespace HonzaBotner.Controllers;
 
 public abstract class BaseController : Controller
 {
-    protected readonly IOptions<InfoOptions> _options;
+    private readonly IOptions<InfoOptions> _options;
 
-    public BaseController(IOptions<InfoOptions> options)
+    protected BaseController(IOptions<InfoOptions> options)
     {
         _options = options;
     }
@@ -17,7 +17,7 @@ public abstract class BaseController : Controller
     {
         Response.StatusCode = code;
 
-        bool success = code >= 200 && code < 300;
+        bool success = code is >= 200 and < 300;
 
         string content = string.Format(
             System.IO.File.ReadAllText("Static/auth.html"),

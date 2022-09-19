@@ -28,7 +28,7 @@ public class EmojiCounterService : IEmojiCounterService
 
         if (emoji == null)
         {
-            emoji = new Database.CountedEmoji() { Id = emojiId };
+            emoji = new Database.CountedEmoji { Id = emojiId };
             await _dbContext.CountedEmojis.AddAsync(emoji);
         }
 

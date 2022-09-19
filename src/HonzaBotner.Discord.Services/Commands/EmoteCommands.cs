@@ -59,20 +59,17 @@ public class EmoteCommands : ApplicationCommandModule
                 continue;
             }
 
-            if (emoji.IsAnimated && type == DisplayTypes.Still)
+            switch (emoji.IsAnimated)
             {
-                continue;
-            }
-
-            if (!emoji.IsAnimated && type == DisplayTypes.Animated)
-            {
-                continue;
+                case true when type == DisplayTypes.Still:
+                case false when type == DisplayTypes.Animated:
+                    continue;
             }
 
             string label = total ? "×" : "×/day";
 
             builder.Append(emoji)
-                .Append("`")
+                .Append('`')
                 .Append(
                     (total
                         ? result.Used.ToString()

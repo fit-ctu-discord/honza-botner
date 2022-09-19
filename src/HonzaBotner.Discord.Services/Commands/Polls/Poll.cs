@@ -34,13 +34,13 @@ public abstract class Poll
     {
         ExistingPollMessage = originalMessage;
         DiscordEmbed originalPoll = ExistingPollMessage.Embeds[0];
+        int startIndex = originalPoll.Description.LastIndexOf("<", StringComparison.Ordinal);
 
         // Extract original author Mention via discord's mention format <@!123456789>.
-        AuthorMention = originalPoll.Description.Substring(
-            originalPoll.Description.LastIndexOf("<", StringComparison.Ordinal)
-        );
+        AuthorMention = originalPoll.Description[startIndex..];
 
         Question = originalPoll.Title;
+        NewChoices = new List<string>();
     }
 
     public async Task PostAsync(DiscordClient client, DiscordChannel channel)

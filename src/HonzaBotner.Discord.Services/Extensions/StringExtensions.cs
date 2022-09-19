@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
@@ -36,26 +35,29 @@ public static class StringExtension
     private static async Task<string> MentionEvaluateAsync(Match match, DiscordGuild? guild)
     {
         // Invalidate ID pings, replacing them with their name (only in guilds)
-        if (guild is not null && match.Groups.TryGetValue("2", out Group? idMention) && idMention.Value != "")
+        if (guild is null || !match.Groups.TryGetValue("2", out Group? idMention) || idMention.Value == "")
         {
-            ulong snowflakeId = ulong.Parse(idMention.Value);
+            return match.Value.Replace("@",
+                "@" + char.ConvertFromUtf32(int.Parse("200b", System.Globalization.NumberStyles.HexNumber)));
+        }
 
-            if (match.Groups.TryGetValue("1", out Group? idType) && idType.Value == "&")
+        ulong snowflakeId = ulong.Parse(idMention.Value);
+
+        if (match.Groups.TryGetValue("1", out Group? idType) && idType.Value == "&")
+        {
+            DiscordRole mentionedRole = guild.GetRole(snowflakeId);
+            if (mentionedRole is not null)
+                return mentionedRole.Name.RemoveDiscordMentions();
+        }
+        else
+        {
+            try
             {
-                DiscordRole mentionedRole = guild.GetRole(snowflakeId);
-                if (mentionedRole is not null)
-                    return mentionedRole.Name.RemoveDiscordMentions();
+                DiscordMember mentionedMember = await guild.GetMemberAsync(snowflakeId);
+                return mentionedMember.DisplayName.RemoveDiscordMentions();
             }
-            else
-            {
-                try
-                {
-                    DiscordMember mentionedMember = await guild.GetMemberAsync(snowflakeId);
-                    return mentionedMember.DisplayName.RemoveDiscordMentions();
-                }
-                catch (NotFoundException)
-                {}
-            }
+            catch (NotFoundException)
+            {}
         }
 
         // Invalidate @everyone, @here, or pings which have correct ID format, but no name was found for them

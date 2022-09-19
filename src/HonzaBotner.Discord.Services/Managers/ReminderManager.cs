@@ -4,19 +4,16 @@ using DSharpPlus.Entities;
 using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Services.Contract.Dto;
-using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Managers;
 
 public class ReminderManager : IReminderManager
 {
     private readonly IGuildProvider _guildProvider;
-    private readonly ILogger<ReminderManager> _logger;
 
-    public ReminderManager(IGuildProvider guildProvider, ILogger<ReminderManager> logger)
+    public ReminderManager(IGuildProvider guildProvider)
     {
         _guildProvider = guildProvider;
-        _logger = logger;
     }
 
     public async Task<DiscordEmbed> CreateDmReminderEmbedAsync(Reminder reminder)
