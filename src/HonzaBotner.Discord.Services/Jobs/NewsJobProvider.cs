@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Jobs;
 
-[Cron("0 * * * * *")]
+[Cron("0 0 * * * *")]
 public class NewsJobProvider : IJob
 {
     public string Name { get; } = "news-publisher";
