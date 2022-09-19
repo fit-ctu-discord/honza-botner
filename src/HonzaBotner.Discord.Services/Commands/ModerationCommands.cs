@@ -33,7 +33,7 @@ public class ModerationCommands : ApplicationCommandModule
     public async Task WarnMenuAsync(ContextMenuContext ctx)
     {
         string modalId = $"warn-{ctx.User.Id}-{ctx.TargetUser.Id}";
-        string reasonId = "id-reason";
+        const string reasonId = "id-reason";
 
         var response = new DiscordInteractionResponseBuilder()
             .WithTitle($"New Warning for {ctx.TargetMember.DisplayName}")
@@ -41,7 +41,7 @@ public class ModerationCommands : ApplicationCommandModule
             .AddComponents(new TextInputComponent("Reason:", reasonId, required: true));
         await ctx.CreateResponseAsync(InteractionResponseType.Modal, response);
 
-        var numberOfWarnings = await _warningService.GetNumberOfWarnings(ctx.TargetUser.Id);
+        int numberOfWarnings = await _warningService.GetNumberOfWarnings(ctx.TargetUser.Id);
 
         var interactivity = ctx.Client.GetInteractivity();
         var modalReason = await interactivity.WaitForModalAsync(modalId, TimeSpan.FromMinutes(10));
@@ -104,9 +104,9 @@ public class ModerationCommands : ApplicationCommandModule
     [SlashCommand("show", "Show moderation entry with provided Id.")]
     public async Task ShowCommandAsync(
         InteractionContext ctx,
-        [Option("Id", "Id of the entry to show")] long entryid)
+        [Option("Id", "Id of the entry to show")] long entryId)
     {
-        Warning? warning = await _warningService.GetWarningAsync((int) entryid);
+        Warning? warning = await _warningService.GetWarningAsync((int) entryId);
 
         if (warning is null)
         {

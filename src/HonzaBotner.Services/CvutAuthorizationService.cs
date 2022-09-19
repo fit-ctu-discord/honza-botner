@@ -68,23 +68,24 @@ public class CvutAuthorizationService : IAuthorizationService
             bool verificationExists =
                 await _dbContext.Verifications.AnyAsync(v => v.UserId == userId && v.AuthId == authId);
 
-            if (verificationExists)
+            if (!verificationExists)
             {
-                bool revoked = await _roleManager.RevokeRolesPoolAsync(userId, rolesPool);
-                if (!revoked)
-                {
-                    _logger.LogWarning("Revoking roles pool {RolesPool} for {Username} (id {Id}) failed", userId,
-                        username, rolesPool);
-                    return IAuthorizationService.AuthorizeResult.Failed;
-                }
-
-                bool granted = await _roleManager.GrantRolesAsync(userId, discordRoles);
-                return granted
-                    ? IAuthorizationService.AuthorizeResult.OK
-                    : IAuthorizationService.AuthorizeResult.Failed;
+                return IAuthorizationService.AuthorizeResult.DifferentMember;
             }
 
-            return IAuthorizationService.AuthorizeResult.DifferentMember;
+            bool revoked = await _roleManager.RevokeRolesPoolAsync(userId, rolesPool);
+            if (!revoked)
+            {
+                _logger.LogWarning("Revoking roles pool {RolesPool} for {Username} (id {Id}) failed", userId,
+                    username, rolesPool);
+                return IAuthorizationService.AuthorizeResult.Failed;
+            }
+
+            bool granted = await _roleManager.GrantRolesAsync(userId, discordRoles);
+            return granted
+                ? IAuthorizationService.AuthorizeResult.OK
+                : IAuthorizationService.AuthorizeResult.Failed;
+
         }
 
         // discord xor auth -> user already verified, error
@@ -97,17 +98,18 @@ public class CvutAuthorizationService : IAuthorizationService
         {
             bool rolesGranted = await _roleManager.GrantRolesAsync(userId, discordRoles);
 
-            if (rolesGranted)
+            if (!rolesGranted)
             {
-                Verification verification = new() { AuthId = authId, UserId = userId };
-
-                await _dbContext.Verifications.AddAsync(verification);
-                await _dbContext.SaveChangesAsync();
-                await _roleManager.RevokeHostRolesAsync(userId);
-                return IAuthorizationService.AuthorizeResult.OK;
+                return IAuthorizationService.AuthorizeResult.Failed;
             }
 
-            return IAuthorizationService.AuthorizeResult.Failed;
+            Verification verification = new() { AuthId = authId, UserId = userId };
+
+            await _dbContext.Verifications.AddAsync(verification);
+            await _dbContext.SaveChangesAsync();
+            await _roleManager.RevokeHostRolesAsync(userId);
+            return IAuthorizationService.AuthorizeResult.OK;
+
         }
     }
 
@@ -192,12 +194,12 @@ public class CvutAuthorizationService : IAuthorizationService
 
         UriBuilder uriBuilder = new(tokenUri);
 
-        List<KeyValuePair<string?, string?>> contentValues = new()
+        List<KeyValuePair<string, string>> contentValues = new()
         {
-            new("grant_type", "client_credentials"),
-            new("client_id", _cvutConfig.ServiceId),
-            new("client_secret", _cvutConfig.ServiceSecret),
-            new("scope", scope)
+            new KeyValuePair<string, string>("grant_type", "client_credentials"),
+            new KeyValuePair<string, string>("client_id", _cvutConfig.ServiceId ?? string.Empty),
+            new KeyValuePair<string, string>("client_secret", _cvutConfig.ServiceSecret ?? string.Empty),
+            new KeyValuePair<string, string>("scope", scope)
         };
 
         FormUrlEncodedContent content = new(contentValues);

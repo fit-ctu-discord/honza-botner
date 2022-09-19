@@ -37,10 +37,7 @@ public class WarningService : IWarningService
         Database.Warning? warning = await _dbContext.Warnings
             .FirstOrDefaultAsync(w => w.Id == id);
 
-        if (warning == null)
-            return null;
-
-        return GetDto(warning);
+        return warning == null ? null : GetDto(warning);
     }
 
     public async Task<bool> DeleteWarningAsync(int id)

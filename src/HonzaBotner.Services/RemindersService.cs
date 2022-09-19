@@ -56,10 +56,7 @@ public class RemindersService : IRemindersService
             .Where(reminder => reminder.MessageId == messageId)
             .FirstOrDefaultAsync();
 
-        if (reminder == null)
-            return null;
-
-        return GetDto(reminder);
+        return reminder == null ? null : GetDto(reminder);
     }
 
     public async Task<List<Reminder>> GetRemindersToExecuteAsync(DateTime? dateTime)

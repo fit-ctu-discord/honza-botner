@@ -86,7 +86,7 @@ public class AuthController : BaseController
         }
     }
 
-    private bool GetRolesPool(string? value, out RolesPool rolesPool)
+    private static bool GetRolesPool(string? value, out RolesPool rolesPool)
     {
         switch (value?.ToLowerInvariant())
         {

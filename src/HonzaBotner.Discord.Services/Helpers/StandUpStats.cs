@@ -19,7 +19,7 @@ internal class StandUpStats
         }
     }
 
-    public int Sum => _normal + _must;
+    private int Sum => _normal + _must;
 
     public override string ToString()
     {

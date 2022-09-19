@@ -62,23 +62,25 @@ public static class DiscordExtensions
             string descriptionValue = description;
             if (description.Length > 250)
             {
-                descriptionValue = description.Substring(0, 250) + "...";
+                descriptionValue = description[..250] + "...";
             }
 
             embed.AddField(name, descriptionValue);
             item++;
 
-            if (item == pageRows || page * pageRows + item == items.Count)
+            if (item != pageRows && page * pageRows + item != items.Count)
             {
-                item = 0;
-                page++;
-                result.Add(
-                    new Page("",
-                        new DiscordEmbedBuilder(embed).WithFooter($"Page {page}/{pagesCount}")
-                    )
-                );
-                embed.ClearFields();
+                continue;
             }
+
+            item = 0;
+            page++;
+            result.Add(
+                new Page("",
+                    new DiscordEmbedBuilder(embed).WithFooter($"Page {page}/{pagesCount}")
+                )
+            );
+            embed.ClearFields();
         }
 
         return result;

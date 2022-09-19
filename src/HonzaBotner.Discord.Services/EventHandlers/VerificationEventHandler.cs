@@ -41,7 +41,7 @@ public class VerificationEventHandler : IEventHandler<ComponentInteractionCreate
             _translation.SetLanguage(ITranslation.Language.Czech);
         }
 
-        DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder().AsEphemeral(true);
+        DiscordInteractionResponseBuilder builder = new DiscordInteractionResponseBuilder().AsEphemeral();
         DiscordUser user = eventArgs.User;
         DiscordMember member = await eventArgs.Guild.GetMemberAsync(user.Id);
         string link = _urlProvider.GetAuthLink(user.Id, RolesPool.Auth);

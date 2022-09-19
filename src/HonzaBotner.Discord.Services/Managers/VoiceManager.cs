@@ -127,7 +127,7 @@ public class VoiceManager : IVoiceManager
     private string? ConvertStringToValidState(string? input, string? defaultValue = null)
     {
         input = Regex.Replace(input ?? "", @"\p{C}+", string.Empty);
-        return input.Trim().Length == 0 ? defaultValue : input.Substring(0, Math.Min(input.Length, 30));
+        return input.Trim().Length == 0 ? defaultValue : input[..Math.Min(input.Length, 30)];
     }
 
     private async Task EditChannelAsync(bool isEdit, DiscordChannel? channel, string? name, long? limit,

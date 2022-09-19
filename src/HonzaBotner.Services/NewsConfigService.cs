@@ -82,7 +82,7 @@ public class NewsConfigService : INewsConfigService
         Dto.PublisherType publisherType =
             NewsConfigHelper.StringToEnum<Dto.PublisherType>(config.PublisherType);
 
-        return new(config.Id, config.Name, config.Source, config.LastFetched, newsProviderType,
+        return new Dto.NewsConfig(config.Id, config.Name, config.Source, config.LastFetched, newsProviderType,
             publisherType, config.Active, config.Channels);
     }
 

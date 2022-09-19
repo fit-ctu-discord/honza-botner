@@ -17,7 +17,7 @@ public class NewsJobProvider : IJob
 {
     private const int RunOffset = -3;
 
-    public string Name { get; } = "news-publisher";
+    public string Name => "news-publisher";
 
     private readonly ILogger<NewsJobProvider> _logger;
     private readonly INewsConfigService _configService;
