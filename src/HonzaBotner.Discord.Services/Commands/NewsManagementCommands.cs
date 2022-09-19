@@ -156,8 +156,9 @@ public class NewsManagementCommands : ApplicationCommandModule
     [SlashCommand("run-once", "Fetch news once")]
     public async Task RunOnceCommandAsync(InteractionContext ctx)
     {
+        await ctx.DeferAsync();
         await _newsJobProvider.ExecuteAsync(default);
-        await ctx.CreateResponseAsync("News job - done");
+        await ctx.EditResponseAsync( new DiscordWebhookBuilder().WithContent("News job - done"));
     }
 
     private static DateTime? ParseDateTime(string datetime)
