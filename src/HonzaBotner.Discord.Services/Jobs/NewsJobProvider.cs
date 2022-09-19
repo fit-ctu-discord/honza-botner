@@ -11,9 +11,12 @@ using Microsoft.Extensions.Logging;
 
 namespace HonzaBotner.Discord.Services.Jobs;
 
-[Cron("0 * * * * *")]
+// Run every 30 minutes
+[Cron("0 */30 * * * *")]
 public class NewsJobProvider : IJob
 {
+    private const int RunOffset = -3;
+
     public string Name { get; } = "news-publisher";
 
     private readonly ILogger<NewsJobProvider> _logger;
@@ -47,7 +50,7 @@ public class NewsJobProvider : IJob
                 scope.ServiceProvider.GetRequiredService(GetType(newsSource.Publisher.ToType())) as IPublisherService
                 ?? throw new InvalidCastException("Type must be IPublisherService");
 
-            DateTime now = DateTime.Now;
+            DateTime now = DateTime.Now.AddMinutes(RunOffset);
             IAsyncEnumerable<News> news = newsService.FetchDataAsync(newsSource.Source, newsSource.LastFetched);
 
             await foreach (News item in news.WithCancellation(cancellationToken))
