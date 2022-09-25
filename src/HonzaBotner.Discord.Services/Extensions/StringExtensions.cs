@@ -26,6 +26,7 @@ public static class StringExtension
     /// <param name="value">String to process.</param>
     /// <param name="guild">Discord guild to search plain name of the mentioned user or role.</param>
     /// <returns>Sanitized string of Discord mentions.</returns>
+    [Obsolete("Use WithAllowedMention/s() instead")]
     public static string RemoveDiscordMentions(
         this string value,
         DiscordGuild? guild = null)
