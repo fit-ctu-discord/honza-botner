@@ -5,7 +5,6 @@ using Chronic.Core;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using HonzaBotner.Discord.Managers;
-using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
@@ -60,19 +59,21 @@ public class ReminderCommands : ApplicationCommandModule
             return;
         }
 
-        DiscordMessage followup = await ctx.Channel.SendMessageAsync("❤");
+        DiscordMessage reminderMessage = await ctx.Channel.SendMessageAsync("❤");
 
         Reminder reminder = await _service.CreateReminderAsync(
             ctx.User.Id,
-            followup.Id,
-            followup.ChannelId,
+            reminderMessage.Id,
+            reminderMessage.ChannelId,
             datetime.Value.ToUniversalTime(), // This is safe, as the nullability is validated above
-            content.RemoveDiscordMentions(ctx.Guild)
+            content
         );
 
-        followup = await followup.ModifyAsync("",await _reminderManager.CreateReminderEmbedAsync(reminder));
-        await followup.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.CancelEmojiName));
-        await followup.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.JoinEmojiName));
+        reminderMessage = await reminderMessage.ModifyAsync(new DiscordMessageBuilder()
+            .WithContent("")
+            .AddEmbed(await _reminderManager.CreateReminderEmbedAsync(reminder)));
+        await reminderMessage.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.CancelEmojiName));
+        await reminderMessage.CreateReactionAsync(DiscordEmoji.FromUnicode(_options.JoinEmojiName));
         await ctx.CreateResponseAsync("Reminder created", true);
     }
 

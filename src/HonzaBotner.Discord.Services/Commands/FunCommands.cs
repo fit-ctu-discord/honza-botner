@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.SlashCommands;
-using HonzaBotner.Discord.Services.Extensions;
 
 namespace HonzaBotner.Discord.Services.Commands;
 
@@ -21,8 +19,8 @@ public class FunCommands : ApplicationCommandModule
         string delimiter = ","
         )
     {
-        var answers = options.Split(delimiter, StringSplitOptions.TrimEntries & StringSplitOptions.RemoveEmptyEntries)
-            .Select(option => option.Trim().RemoveDiscordMentions(ctx.Guild))
+        var answers = options.Split(delimiter)
+            .Select(option => option.Trim())
             .Where(option => option != "").ToArray();
         if (answers.Length == 0)
         {
@@ -33,20 +31,20 @@ public class FunCommands : ApplicationCommandModule
         var text = new StringBuilder("I picked: ");
         var winNumber = random.Next(answers.Length);
         var winner = answers[winNumber];
-        text.Append("`" + winner + "`");
+        text.Append( winner);
         if (answers.Length > 1)
         {
             text.Append("\nOptions were:\n");
             foreach (var option in answers)
             {
-                text.Append("`" + option+ "`, ");
+                text.Append(option+ ", ");
             }
 
             text.Remove(text.Length - 2, 2);
         }
         else
         {
-            text.Append("\nPlease seperate the options by `,`");
+            text.Append("\nPlease separate the options by `,`");
         }
 
         await ctx.CreateResponseAsync(text.ToString());

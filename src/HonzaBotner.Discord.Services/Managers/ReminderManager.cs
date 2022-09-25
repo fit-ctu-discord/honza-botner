@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Managers;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Logging;
@@ -79,7 +78,7 @@ public class ReminderManager : IReminderManager
             .WithAuthor(
                 author?.DisplayName ?? "Unknown user",
                 iconUrl: author?.AvatarUrl)
-            .WithDescription(reminder.Content.RemoveDiscordMentions(guild) + datetime)
+            .WithDescription(reminder.Content + datetime)
             .WithColor(color);
 
         return embedBuilder.Build();

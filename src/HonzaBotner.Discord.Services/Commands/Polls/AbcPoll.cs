@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using HonzaBotner.Discord.Services.Extensions;
 
 namespace HonzaBotner.Discord.Services.Commands.Polls;
 
@@ -74,12 +73,13 @@ public class AbcPoll : Poll
             throw new PollException($"Total number of reactions on a message can't be greater than {reactionCap}");
         }
         await ExistingPollMessage
-            .ModifyAsync(Modify(client, ExistingPollMessage.Channel.Guild, ExistingPollMessage.Embeds[0], emojisToAdd));
+            .ModifyAsync(new DiscordMessageBuilder()
+                .AddEmbed(Modify(client, ExistingPollMessage.Embeds[0], emojisToAdd)));
 
         Task _ = Task.Run(async () => { await AddReactionsAsync(client, ExistingPollMessage, emojisToAdd); });
     }
 
-    private DiscordEmbed Modify(DiscordClient client, DiscordGuild guild, DiscordEmbed original, IEnumerable<string> emojisToAdd)
+    private DiscordEmbed Modify(DiscordClient client, DiscordEmbed original, IEnumerable<string> emojisToAdd)
     {
         DiscordEmbedBuilder builder = new (original);
 
@@ -89,7 +89,7 @@ public class AbcPoll : Poll
 
             builder.AddField(
                 DiscordEmoji.FromName(client, emojiName).ToString(),
-                answer.RemoveDiscordMentions(guild),
+                answer,
                 true);
         });
 
