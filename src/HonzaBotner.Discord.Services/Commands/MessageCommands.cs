@@ -6,7 +6,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
-using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Services.Contract;
 using Microsoft.Extensions.Logging;
 
@@ -35,28 +34,26 @@ public class MessageCommands : ApplicationCommandModule
     {
         DiscordMessage? messageToSend = await DiscordHelper.FindMessageFromLink(ctx.Guild, link);
 
-        if (messageToSend is not null)
+        if (messageToSend is null)
         {
-            try
-            {
-                string valueToSend = messageToSend.Content;
-                if (!mention)
-                {
-                    valueToSend = valueToSend.RemoveDiscordMentions(ctx.Guild);
-                }
-
-                await channel.SendMessageAsync(valueToSend);
-                await ctx.CreateResponseAsync("Message sent");
-            }
-            catch (Exception e)
-            {
-                _logger.LogWarning(e, "Error during sending bot message");
-                await ctx.CreateResponseAsync("Error occured during message send, see log for more information");
-            }
+            await ctx.CreateResponseAsync("Could not find linked message, does the bot have access to that channel?");
             return;
         }
 
-        await ctx.CreateResponseAsync("Could not find linked message, does the bot have access to that channel?");
+        try
+        {
+            var content = new DiscordMessageBuilder()
+                .WithContent(messageToSend.Content)
+                .WithAllowedMentions(mention ? Mentions.All : Mentions.None);
+
+            await channel.SendMessageAsync(content);
+            await ctx.CreateResponseAsync("Message sent");
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Error during sending bot message");
+            await ctx.CreateResponseAsync("Error occured during message send, see log for more information");
+        }
     }
 
     [SlashCommand("edit", "Edit previously sent text message authored by this bot.")]
@@ -64,7 +61,7 @@ public class MessageCommands : ApplicationCommandModule
         InteractionContext ctx,
         [Option("old-message", "Link to the message you want to edit")] string originalUrl,
         [Option("new-message", "Link to a message with new content")] string newUrl,
-        [Option("mention", "Should all mentions be included?")] bool mention = false)
+        [Option("mention", "Should all mentions be included? Default: false")] bool mention = false)
     {
         DiscordMessage? oldMessage = await DiscordHelper.FindMessageFromLink(ctx.Guild, originalUrl);
         DiscordMessage? newMessage = await DiscordHelper.FindMessageFromLink(ctx.Guild, newUrl);
@@ -81,15 +78,13 @@ public class MessageCommands : ApplicationCommandModule
             return;
         }
 
-        string newText = newMessage.Content;
-        if (!mention)
-        {
-            newText = newText.RemoveDiscordMentions(ctx.Guild);
-        }
+        var content = new DiscordMessageBuilder()
+            .WithContent(newMessage.Content)
+            .WithAllowedMentions(mention ? Mentions.All : Mentions.None);
 
         try
         {
-            await oldMessage.ModifyAsync(newText);
+            await oldMessage.ModifyAsync(content);
             await ctx.CreateResponseAsync("Message successfully edited.");
         }
         catch (Exception e)

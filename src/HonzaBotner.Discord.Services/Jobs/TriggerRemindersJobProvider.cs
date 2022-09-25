@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using HonzaBotner.Discord.Managers;
-using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Scheduler.Contract;
 using HonzaBotner.Services.Contract;
@@ -97,16 +96,18 @@ public class TriggerRemindersJobProvider : IJob
 
             remindedUsers = remindedUsers.Remove(remindedUsers.Length - 2, 2);
             remindedUsers.Append(" - nezapomeň" + (receivers.Count > 1 ? "te" : "") + " na "
-                                 + reminder.Content.RemoveDiscordMentions(channel.Guild));
+                                 + reminder.Content);
 
             DiscordEmbed expiredEmbed = await _reminderManager.CreateExpiredReminderEmbedAsync(reminder);
 
             // Expire old reaction message.
             await message.ModifyAsync("", expiredEmbed);
-            await new DiscordMessageBuilder()
+            var builder = new DiscordMessageBuilder()
                 .WithReply(message.Id)
                 .WithContent(remindedUsers.ToString())
-                .SendAsync(message.Channel.Guild.GetChannel(message.ChannelId));
+                .WithAllowedMentions(receivers.Select(r => new UserMention(r)).Cast<IMention>());
+
+            await channel.SendMessageAsync(builder);
         }
         catch (Exception e)
         {

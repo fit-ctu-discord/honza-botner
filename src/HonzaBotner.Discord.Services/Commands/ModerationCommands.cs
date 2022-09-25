@@ -72,7 +72,7 @@ public class ModerationCommands : ApplicationCommandModule
                 "\n\n" +
                 $"This is your **{numberOfWarnings + 1}. warning**, #beGood.";
 
-            await ctx.TargetMember.SendMessageAsync(messageForUser.RemoveDiscordMentions(ctx.Guild));
+            await ctx.TargetMember.SendMessageAsync(messageForUser);
         }
         catch (Exception e)
         {
@@ -95,8 +95,7 @@ public class ModerationCommands : ApplicationCommandModule
             await modalReason.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Announced"));
             await buttonResponse.Result.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .WithContent($"{ctx.TargetMember.Mention}" + $" was warned for \"{modalReason.Result.Values[reasonId]}\""
-                        .RemoveDiscordMentions(ctx.Guild))
+                    .WithContent($"{ctx.TargetMember.Mention}" + $" was warned for \"{modalReason.Result.Values[reasonId]}\"")
                     .AsEphemeral(false));
         }
     }
@@ -114,8 +113,7 @@ public class ModerationCommands : ApplicationCommandModule
         }
         else
         {
-            await ctx.CreateResponseAsync($"**Warning {warning.Id}** for user <@{warning.UserId}>:\n" +
-                                          $"{warning.Reason.RemoveDiscordMentions(ctx.Guild)}");
+            await ctx.CreateResponseAsync($"**Warning {warning.Id}** for user <@{warning.UserId}>:\n" + $"{warning.Reason}");
         }
     }
 
