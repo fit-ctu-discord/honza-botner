@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 
 namespace HonzaBotner.Discord.Services.Commands;
@@ -24,30 +25,38 @@ public class FunCommands : ApplicationCommandModule
             .Where(option => option != "").ToArray();
         if (answers.Length == 0)
         {
-            await ctx.CreateResponseAsync("Nope");
+            await ctx.CreateResponseAsync("Nope", true);
             return;
         }
-        Random random = new();
-        var text = new StringBuilder("I picked: ");
-        var winNumber = random.Next(answers.Length);
-        var winner = answers[winNumber];
-        text.Append( winner);
+
+        var response = new DiscordEmbedBuilder()
+            .WithAuthor(name: ctx.Member.DisplayName, iconUrl: ctx.User.AvatarUrl)
+            .WithColor(DiscordColor.DarkGreen);
+
+        Random random = Random.Shared;
+
+        var text = new StringBuilder($"I picked: {answers[random.Next(answers.Length)]}");
+        if (ctx.User.Id is 470490558713036801 or 302127992258428929)
+        {
+            response
+                .WithFooter("uwu", "https://cdn.discordapp.com/emojis/945812225208234066.png")
+                .WithColor(DiscordColor.HotPink);
+        }
+
         if (answers.Length > 1)
         {
-            text.Append("\nOptions were:\n");
-            foreach (var option in answers)
-            {
-                text.Append(option+ ", ");
-            }
-
-            text.Remove(text.Length - 2, 2);
+            text.AppendLine("\n\nOptions were:");
+            text.AppendJoin("\n", answers);
+            response.WithDescription(text.ToString());
+            await ctx.CreateResponseAsync(response.Build());
         }
         else
         {
-            text.Append("\nPlease separate the options by `,`");
+            await ctx.CreateResponseAsync(response.WithDescription(text.ToString()).Build());
+            await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
+                .WithContent("Please separate the options by `,`")
+                .AsEphemeral());
         }
-
-        await ctx.CreateResponseAsync(text.ToString());
     }
 
 }

@@ -96,6 +96,7 @@ public class ModerationCommands : ApplicationCommandModule
             await buttonResponse.Result.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
                     .WithContent($"{ctx.TargetMember.Mention}" + $" was warned for \"{modalReason.Result.Values[reasonId]}\"")
+                    .AddMention(new UserMention(ctx.TargetMember.Id))
                     .AsEphemeral(false));
         }
     }
