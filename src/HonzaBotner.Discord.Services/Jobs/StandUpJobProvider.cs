@@ -106,9 +106,7 @@ Results from <t:{((DateTimeOffset)today.AddDays(-1)).ToUnixTimeSeconds()}:D>:
 all:        {ok.Add(fail)}
 completed:  {ok}
 failed:     {fail}
-```
-")
-                .WithAllowedMention(new RoleMention(_commonOptions.StandUpRoleId));
+```");
 
             await channel.SendMessageAsync(content);
         }
