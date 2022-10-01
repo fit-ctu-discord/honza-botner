@@ -106,7 +106,7 @@ Results from <t:{((DateTimeOffset)today.AddDays(-1)).ToUnixTimeSeconds()}:D>:
 all:        {ok.Add(fail)}
 completed:  {ok}
 failed:     {fail}
-```"));
+```");
 
             await channel.SendMessageAsync(content);
         }
