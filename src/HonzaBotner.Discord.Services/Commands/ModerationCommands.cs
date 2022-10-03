@@ -47,7 +47,7 @@ public class ModerationCommands : ApplicationCommandModule
         var modalReason = await interactivity.WaitForModalAsync(modalId, TimeSpan.FromMinutes(10));
         if (modalReason.TimedOut)
         {
-            await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Response timed out"));
+            await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Response timed out").AsEphemeral());
             return;
         }
 
