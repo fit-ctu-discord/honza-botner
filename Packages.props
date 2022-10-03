@@ -23,6 +23,6 @@
         <PackageReference Update="xunit" Version="2.4.2" />
         <PackageReference Update="xunit.runner.visualstudio" Version="2.4.5" />
         <PackageReference Update="Shouldly" Version="4.1.0" />
-        <PackageReference Update="Html2Markdown" Version="5.0.2.561" />
+        <PackageReference Update="Html2Markdown" Version="5.1.0.703" />
     </ItemGroup>
 </Project>
