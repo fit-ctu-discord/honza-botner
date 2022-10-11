@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Exceptions;
 using HonzaBotner.Discord.EventHandler;
 using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.Logging;
@@ -108,7 +109,13 @@ public class PinHandler : IEventHandler<MessageReactionAddEventArgs>
         // Fast heuristic to check if threshold is passed.
         if (reactions.Count >= _pinOptions.Threshold)
         {
-            await eventArgs.Message.PinAsync();
+            try
+            {
+                await eventArgs.Message.PinAsync();
+            }
+            catch (BadRequestException) // Message can not be pinned
+            {
+            }
             return EventHandlerResult.Continue;
         }
 
@@ -163,7 +170,13 @@ public class PinHandler : IEventHandler<MessageReactionAddEventArgs>
 
         if (score >= _pinOptions.Threshold)
         {
-            await eventArgs.Message.PinAsync();
+            try
+            {
+                await eventArgs.Message.PinAsync();
+            }
+            catch (BadRequestException) // Message can not be pinned
+            {
+            }
         }
 
         return EventHandlerResult.Continue;
