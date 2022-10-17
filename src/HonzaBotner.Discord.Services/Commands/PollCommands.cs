@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using HonzaBotner.Discord.Services.Commands.Polls;
-using HonzaBotner.Discord.Services.Extensions;
 using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -51,10 +50,10 @@ public class PollCommands : ApplicationCommandModule
         string delimiter = ","
     )
     {
-        await CreateDefaultPollAsync(ctx, question,
-            answers.Split(delimiter)
-                .Select(answer => answer.Trim().RemoveDiscordMentions(ctx.Guild))
-                .Where(answer => answer != "").ToList());
+        await CreateDefaultPollAsync(ctx, question, answers.Split(delimiter)
+            .Select(answer => answer.Trim())
+            .Where(answer => answer != "")
+            .ToList());
     }
 
     private async Task CreateDefaultPollAsync(InteractionContext ctx, string question, List<string>? answers = null)
@@ -92,7 +91,7 @@ public class PollCommands : ApplicationCommandModule
     {
         DiscordMessage? originalMessage = await DiscordHelper.FindMessageFromLink(ctx.Guild, link);
         List<string> options = answers.Split(delimiter)
-            .Select(answer => answer.Trim().RemoveDiscordMentions(ctx.Guild))
+            .Select(answer => answer.Trim())
             .Where(answer => answer != "").ToList();
 
         if (originalMessage is null

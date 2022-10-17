@@ -47,7 +47,7 @@ public class ModerationCommands : ApplicationCommandModule
         var modalReason = await interactivity.WaitForModalAsync(modalId, TimeSpan.FromMinutes(10));
         if (modalReason.TimedOut)
         {
-            await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Response timed out"));
+            await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Response timed out").AsEphemeral());
             return;
         }
 
@@ -72,7 +72,7 @@ public class ModerationCommands : ApplicationCommandModule
                 "\n\n" +
                 $"This is your **{numberOfWarnings + 1}. warning**, #beGood.";
 
-            await ctx.TargetMember.SendMessageAsync(messageForUser.RemoveDiscordMentions(ctx.Guild));
+            await ctx.TargetMember.SendMessageAsync(messageForUser);
         }
         catch (Exception e)
         {
@@ -95,8 +95,8 @@ public class ModerationCommands : ApplicationCommandModule
             await modalReason.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Announced"));
             await buttonResponse.Result.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .WithContent($"{ctx.TargetMember.Mention}" + $" was warned for \"{modalReason.Result.Values[reasonId]}\""
-                        .RemoveDiscordMentions(ctx.Guild))
+                    .WithContent($"{ctx.TargetMember.Mention}" + $" was warned for \"{modalReason.Result.Values[reasonId]}\"")
+                    .AddMention(new UserMention(ctx.TargetMember.Id))
                     .AsEphemeral(false));
         }
     }
@@ -114,8 +114,7 @@ public class ModerationCommands : ApplicationCommandModule
         }
         else
         {
-            await ctx.CreateResponseAsync($"**Warning {warning.Id}** for user <@{warning.UserId}>:\n" +
-                                          $"{warning.Reason.RemoveDiscordMentions(ctx.Guild)}");
+            await ctx.CreateResponseAsync($"**Warning {warning.Id}** for user <@{warning.UserId}>:\n" + $"{warning.Reason}");
         }
     }
 
