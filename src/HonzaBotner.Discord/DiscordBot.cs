@@ -86,13 +86,7 @@ internal class DiscordBot : IDiscordBot
     private async Task Client_ClientError(DiscordClient sender, ClientErrorEventArgs e)
     {
         sender.Logger.LogError(e.Exception, "Exception occured");
-
-        if (_discordOptions.GuildId is null)
-            return;
-
-        DiscordGuild guild = await sender.GetGuildAsync(_discordOptions.GuildId.Value);
-
-        await ReportException(guild, "Client error", e.Exception);
+        await ReportException( "Client error", e.Exception);
         e.Handled = true;
     }
 
@@ -105,7 +99,7 @@ internal class DiscordBot : IDiscordBot
     private async Task Commands_CommandErrored(SlashCommandsExtension e, SlashCommandErrorEventArgs args)
     {
         e.Client.Logger.LogError(args.Exception, "Exception occured while executing {Command}", args.Context.CommandName);
-        await ReportException(args.Context.Guild, $"SlashCommand {args.Context.CommandName}", args.Exception);
+        await ReportException($"SlashCommand {args.Context.CommandName}", args.Exception);
         args.Handled = true;
         await args.Context.Channel.SendMessageAsync("Something failed");
     }
@@ -113,7 +107,7 @@ internal class DiscordBot : IDiscordBot
     private async Task Commands_ContextMenuErrored(SlashCommandsExtension e, ContextMenuErrorEventArgs args)
     {
         e.Client.Logger.LogError(args.Exception, "Exception occured while executing context menu {ContextMenu}", args.Context.CommandName);
-        await ReportException(args.Context.Guild, $"ContextMenu {args.Context.CommandName}", args.Exception);
+        await ReportException($"ContextMenu {args.Context.CommandName}", args.Exception);
         args.Handled = true;
         await args.Context.Channel.SendMessageAsync("Something failed");
     }
@@ -121,7 +115,7 @@ internal class DiscordBot : IDiscordBot
     private async Task Commands_AutocompleteErrored(SlashCommandsExtension e, AutocompleteErrorEventArgs args)
     {
         e.Client.Logger.LogError(args.Exception, "Autocomplete failed while looking into option {OptionName}", args.Context.FocusedOption.Name);
-        await ReportException(args.Context.Guild, $"Command Autocomplete for option {args.Context.FocusedOption.Name}",
+        await ReportException($"Command Autocomplete for option {args.Context.FocusedOption.Name}",
             args.Exception);
         args.Handled = true;
     }
@@ -161,7 +155,7 @@ internal class DiscordBot : IDiscordBot
         return _eventHandler.Handle(args);
     }
 
-    private async Task ReportException(DiscordGuild guild, string source, Exception exception)
+    private async Task ReportException(string source, Exception exception)
     {
         ulong logChannelId = _discordOptions.LogChannelId;
 
@@ -170,7 +164,7 @@ internal class DiscordBot : IDiscordBot
             return;
         }
 
-        DiscordChannel channel = guild.GetChannel(logChannelId);
+        DiscordChannel channel = await _discordWrapper.Client.GetChannelAsync(logChannelId);
 
         await channel.ReportException(source, exception);
     }
