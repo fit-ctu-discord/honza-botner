@@ -92,7 +92,7 @@ internal class DiscordBot : IDiscordBot
 
     private Task Commands_CommandInvoked(SlashCommandsExtension e, SlashCommandInvokedEventArgs args)
     {
-        e.Client.Logger.LogDebug("Received {Command} by {Author}", args.Context.CommandName, args.Context.Member.DisplayName);
+        e.Client.Logger.LogDebug("Received {Command} by {Author}", args.Context.CommandName, args.Context.User.Username);
         return Task.CompletedTask;
     }
 
