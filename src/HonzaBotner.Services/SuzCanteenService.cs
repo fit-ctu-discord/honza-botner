@@ -7,35 +7,49 @@ using System.Threading.Tasks;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace HonzaBotner.Services;
 
 public class SuzCanteenService: ICanteenService
 {
     private readonly HttpClient _httpClient;
+    private readonly IMemoryCache _memoryCache;
 
-    public SuzCanteenService(HttpClient httpClient)
+    public SuzCanteenService(HttpClient httpClient, IMemoryCache memoryCache)
     {
         _httpClient = httpClient;
+        _memoryCache = memoryCache;
     }
 
     public async Task<IList<CanteenDto>> ListCanteensAsync(bool onlyOpen = false, CancellationToken cancellationToken = default)
     {
-        const string url = "https://agata.suz.cvut.cz/jidelnicky/index.php";
-        string pageContent = await _httpClient.GetStringAsync(url, cancellationToken);
+        const string cacheKey = $"{nameof(SuzCanteenService)}_{nameof(ListCanteensAsync)}";
 
-        var htmlDoc = new HtmlDocument();
-        htmlDoc.LoadHtml(pageContent);
+        if (!_memoryCache.TryGetValue(cacheKey, out List<CanteenDto> canteens))
+        {
 
-        var canteens = htmlDoc.DocumentNode.SelectNodes("//ul[@id='menzy']/li/a")
-            .Select(node =>
-            {
-                int.TryParse(node.Id.Replace("podSh", ""), out int id);
-                bool open = node.SelectSingleNode($"{node.XPath}/img")
-                    .GetAttributeValue("src", "closed").Contains("Otevreno");
-                string name = node.InnerText.Trim();
-                return new CanteenDto(id, name, open);
-            });
+            const string url = "https://agata.suz.cvut.cz/jidelnicky/index.php";
+            string pageContent = await _httpClient.GetStringAsync(url, cancellationToken);
+
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(pageContent);
+
+            canteens = htmlDoc.DocumentNode.SelectNodes("//ul[@id='menzy']/li/a")
+                .Select(node =>
+                {
+                    int.TryParse(node.Id.Replace("podSh", ""), out int id);
+                    bool open = node.SelectSingleNode($"{node.XPath}/img")
+                        .GetAttributeValue("src", "closed").Contains("Otevreno");
+                    string name = node.InnerText.Trim();
+                    return new CanteenDto(id, name, open);
+                }).ToList();
+
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+
+            _memoryCache.Set(cacheKey, canteens, cacheEntryOptions);
+        }
 
         if (onlyOpen)
             return canteens.Where(c => c.Open).ToList();

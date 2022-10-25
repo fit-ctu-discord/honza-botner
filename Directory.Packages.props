@@ -27,5 +27,6 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
     <PackageVersion Include="Shouldly" Version="4.1.0" />
     <PackageVersion Include="Html2Markdown" Version="5.1.0.703" />
+    <PackageVersion Include="HtmlAgilityPack" Version="1.11.46" />
   </ItemGroup>
 </Project>
