@@ -4,7 +4,7 @@
         <PackageReference Update="Cronos" Version="0.7.1" />
         <PackageReference Update="DSharpPlus" Version="4.3.0-nightly-01185" />
         <PackageReference Update="DSharpPlus.Interactivity" Version="4.3.0-nightly-01185" />
-        <PackageReference Update="DSharpPlus.SlashCommands" Version="4.3.0-nightly-01180" />
+        <PackageReference Update="DSharpPlus.SlashCommands" Version="4.3.0-nightly-01185" />
         <PackageReference Update="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.10" />
         <PackageReference Update="Microsoft.EntityFrameworkCore" Version="6.0.10" />
         <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="6.0.10" />
