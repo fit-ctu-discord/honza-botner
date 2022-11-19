@@ -92,12 +92,11 @@ public class ModerationCommands : ApplicationCommandModule
 
         if (!buttonResponse.TimedOut)
         {
-            await modalReason.Result.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Announced"));
-            await buttonResponse.Result.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder()
+            await buttonResponse.Result.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+                new DiscordInteractionResponseBuilder().WithContent("Announced"));
+            await buttonResponse.Result.Channel.SendMessageAsync(new DiscordMessageBuilder()
                     .WithContent($"{ctx.TargetMember.Mention}" + $" was warned for \"{modalReason.Result.Values[reasonId]}\"")
-                    .AddMention(new UserMention(ctx.TargetMember.Id))
-                    .AsEphemeral(false));
+                    .WithAllowedMention(new UserMention(ctx.TargetMember.Id)));
         }
     }
 
