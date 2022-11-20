@@ -40,6 +40,7 @@ public abstract class WelcomeMessageHandler
                 new DiscordMessageBuilder()
                     .WithContent(message)
                     .WithFile(new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    .WithAllowedMention(new UserMention(eventArgs.Member))
             );
         }
         catch (Exception e)
