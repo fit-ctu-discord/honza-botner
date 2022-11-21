@@ -39,7 +39,7 @@ public abstract class WelcomeMessageHandler
             await channel.SendMessageAsync(
                 new DiscordMessageBuilder()
                     .WithContent(message)
-                    .WithFile(new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    .AddFile(new FileStream(filePath, FileMode.Open, FileAccess.Read))
                     .WithAllowedMention(new UserMention(eventArgs.Member))
             );
         }
