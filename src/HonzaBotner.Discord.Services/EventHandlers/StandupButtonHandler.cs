@@ -47,18 +47,18 @@ public class StandupButtonHandler : IEventHandler<ComponentInteractionCreateEven
             if (target.Roles.Contains(standupPingRole))
             {
                 await target.RevokeRoleAsync(standupPingRole, "Doesn't want to be pinged anymore");
-                response.Append("Successfully removed ping role");
+                response.Append("🚫 Successfully removed ping role");
             }
             else
             {
                 await target.GrantRoleAsync(standupPingRole, "Wants to be pinged");
-                response.Append("Successfully added ping role");
+                response.Append("✅ Successfully added ping role");
             }
         }
         catch (DiscordException e)
         {
             _logger.LogWarning(e, "Failed while managing standup roles.");
-            response.Append("Error occured, please contact moderators");
+            response.Append("🤖 Error occured, please contact moderators");
         }
 
         await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
