@@ -22,4 +22,6 @@ public class CommonCommandOptions
 
     public ulong StandUpRoleId { get; set; }
     public ulong StandUpChannelId { get; set; }
+
+    public ulong CryClosetChannelId { get; set; }
 }

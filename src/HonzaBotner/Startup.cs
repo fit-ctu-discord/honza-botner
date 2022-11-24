@@ -99,6 +99,7 @@ public class Startup
             .AddScopedCronJob<TriggerRemindersJobProvider>()
             .AddScopedCronJob<StandUpJobProvider>()
             .AddScopedCronJob<NewsJobProvider>()
+            .AddScopedCronJob<ModexJobProvider>()
             ;
     }
 
