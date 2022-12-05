@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using HonzaBotner.Discord.Services.Helpers;
 using HonzaBotner.Discord.Services.Options;
@@ -20,16 +21,18 @@ public class StandUpJobProvider : IJob
 
     private readonly DiscordWrapper _discord;
 
+    private readonly ButtonOptions _buttonOptions;
     private readonly CommonCommandOptions _commonOptions;
 
     public StandUpJobProvider(
         ILogger<StandUpJobProvider> logger,
         DiscordWrapper discord,
-        IOptions<CommonCommandOptions> commonOptions
-    )
+        IOptions<CommonCommandOptions> commonOptions,
+        IOptions<ButtonOptions> buttonOptions)
     {
         _logger = logger;
         _discord = discord;
+        _buttonOptions = buttonOptions.Value;
         _commonOptions = commonOptions.Value;
     }
 
@@ -97,17 +100,22 @@ public class StandUpJobProvider : IJob
                 }
             }
 
+            DiscordRole standupPingRole = channel.Guild.GetRole(_commonOptions.StandUpRoleId);
+
             var content = new DiscordMessageBuilder()
                 .WithContent($@"
-Stand-up time, <@&{_commonOptions.StandUpRoleId}>!
+Stand-up time @here!
 
 Results from <t:{((DateTimeOffset)today.AddDays(-1)).ToUnixTimeSeconds()}:D>:
 ```
 all:        {ok.Add(fail)}
 completed:  {ok}
 failed:     {fail}
-```");
-
+```
+||{standupPingRole.Mention}||")
+                .AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, _buttonOptions.StandupSwitchPingId,
+                "Switch ping", emoji:new DiscordComponentEmoji("🔔")))
+                .WithAllowedMention(new RoleMention(standupPingRole));
             await channel.SendMessageAsync(content);
         }
         catch (Exception e)
