@@ -69,6 +69,7 @@ public class Startup
                         .AddEventHandler<VoiceHandler>()
                         .AddEventHandler<BadgeRoleHandler>()
                         .AddEventHandler<ThreadHandler>()
+                        .AddEventHandler<StandupButtonHandler>()
                         ;
                 }, commands =>
                 {
