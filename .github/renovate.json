@@ -2,7 +2,9 @@
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
         "config:base",
-        "gitmoji"
+        "gitmoji",
+        "schedule:earlyMondays",
+        ":disableRateLimiting"
     ],
     "labels": ["dependencies"],
     "packageRules": [
