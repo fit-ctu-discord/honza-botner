@@ -4,6 +4,7 @@
         "config:base",
         "gitmoji"
     ],
+    "labels": ["dependencies"],
     "packageRules": [
         {
             "matchUpdateTypes": ["patch", "minor"],
