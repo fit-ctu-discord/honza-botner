@@ -1,0 +1,17 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:base",
+        "gitmoji",
+        "schedule:earlyMondays",
+        ":disableRateLimiting"
+    ],
+    "labels": ["dependencies"],
+    "packageRules": [
+        {
+            "matchUpdateTypes": ["patch", "minor"],
+            "groupName": "minor + patch dependencies"
+        }
+
+    ]
+}
