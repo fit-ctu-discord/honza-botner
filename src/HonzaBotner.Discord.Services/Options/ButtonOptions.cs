@@ -7,5 +7,6 @@ public class ButtonOptions
     public string? VerificationId { get; set; }
     public string? StaffVerificationId { get; set; }
     public string? StaffRemoveRoleId { get; set; }
+    public string? StandupSwitchPingId { get; set; }
     public ulong[]? CzechChannelsIds { get; set; }
 }
