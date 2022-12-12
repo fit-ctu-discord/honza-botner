@@ -14,7 +14,7 @@
         },
         {
             "groupName": "Github Actions",
-            "matchDatasources": [
+            "matchManagers": [
                 "github-actions"
             ]
         }
