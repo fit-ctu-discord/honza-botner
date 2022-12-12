@@ -11,7 +11,12 @@
         {
             "matchUpdateTypes": ["patch", "minor"],
             "groupName": "minor + patch dependencies"
+        },
+        {
+            "groupName": "Github Actions",
+            "matchDatasources": [
+                "github-actions"
+            ]
         }
-
     ]
 }
