@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 
@@ -59,4 +60,11 @@ public class FunCommands : ApplicationCommandModule
         }
     }
 
+    [SlashCommand("SI1", "Vent frustration from BI-SI1")]
+    public async Task SI1CommandAsync(InteractionContext ctx) {
+        var response = new DiscordInteractionResponseBuilder()
+            .WithContent("SIčka jsou mrdka");
+
+        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, response);
+    }
 }
