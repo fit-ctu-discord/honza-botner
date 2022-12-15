@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -79,7 +78,7 @@ public class BadgeRoleHandler : IEventHandler<GuildMemberUpdateEventArgs>
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "Failed while revoking single role to {MemberName}",
+                _logger.LogWarning(e, "Failed while revoking single role from {MemberName}",
                     args.Member.DisplayName);
             }
         }
