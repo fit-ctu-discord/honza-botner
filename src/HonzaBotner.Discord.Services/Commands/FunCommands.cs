@@ -63,7 +63,7 @@ public class FunCommands : ApplicationCommandModule
     [SlashCommand("SI1", "Vent frustration from BI-SI1")]
     public async Task SI1CommandAsync(InteractionContext ctx) {
         var response = new DiscordInteractionResponseBuilder()
-            .WithContent("SIčka jsou mrdka");
+            .WithContent("SIčka jsou ten nejvíc uwu předmět co kdy na FITu byl <3");
 
         await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, response);
     }
