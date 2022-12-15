@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
@@ -32,15 +33,20 @@ public class BadgeRoleHandler : IEventHandler<GuildMemberUpdateEventArgs>
 
     private async Task CheckAddedRoles(GuildMemberUpdateEventArgs args)
     {
-        DiscordRole addedRole = args.RolesAfter.First(role => !args.RolesBefore.Contains(role));
-
-        // Has the new role some badge and has user some of the trigger roles?
-        if (_options.PairedRoles.ContainsKey(addedRole.Id.ToString())
-            && args.RolesBefore.Select(role => role.Id).Any(roleId => _options.TriggerRoles.Contains(roleId)))
+        // Is any of the current roles trigger role
+        // and does the member have a badge role
+        // and does not the member already have a badge
+        if (_options.TriggerRoles.Any(role => args.RolesAfter.Select(roleA => roleA.Id).Contains(role))
+            && _options.PairedRoles.Keys.Any(role => args.RolesAfter.Select(roleA => roleA.Id.ToString()).Contains(role))
+            && !_options.PairedRoles.Values.Any(role => args.RolesAfter.Select(roleA => roleA.Id).Contains(role)))
         {
             try
             {
-                DiscordRole grantedRole = args.Guild.GetRole(_options.PairedRoles[addedRole.Id.ToString()]);
+                DiscordRole grantedRole = args.Guild.GetRole(
+                    _options.PairedRoles.First(
+                        roleId => args.RolesAfter.Select(role => role.Id.ToString()).Contains(roleId.Key)
+                        ).Value
+                    );
                 await args.Member.GrantRoleAsync(grantedRole);
             }
             catch (Exception e)
@@ -49,66 +55,32 @@ public class BadgeRoleHandler : IEventHandler<GuildMemberUpdateEventArgs>
                     args.Member.DisplayName);
             }
         }
-
-        // Is the new role trigger role, and is it user's first? -> Assign all badge roles
-        else if (_options.TriggerRoles.Contains(addedRole.Id) &&
-                 !args.RolesBefore.Any(role => _options.TriggerRoles.Contains(role.Id)))
-        {
-            IEnumerable<string> pendingRoleIds =
-                _options.PairedRoles.Keys.Where(id => args.RolesAfter.Select(role => role.Id.ToString()).Contains(id));
-            foreach (string roleId in pendingRoleIds)
-            {
-                try
-                {
-                    DiscordRole grantedRole = args.Guild.GetRole(_options.PairedRoles[roleId]);
-                    await args.Member.GrantRoleAsync(grantedRole);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogWarning(e, "Failed while assigning role {RoleId} to {MemberName}",
-                        roleId, args.Member.DisplayName);
-                    if (e is UnauthorizedException) continue;
-                    return;
-                }
-            }
-        }
     }
 
     private async Task CheckRemovedRoles(GuildMemberUpdateEventArgs args)
     {
-        DiscordRole removedRole = args.RolesBefore.First(role => !args.RolesAfter.Contains(role));
-        if (_options.PairedRoles.ContainsKey(removedRole.Id.ToString()))
+        // Is NOT any of the current roles trigger role
+        // or does the member have NOT a badge role
+        // and does not the member have a badge
+        if ((
+                !_options.TriggerRoles.Any(role => args.RolesAfter.Select(roleA => roleA.Id).Contains(role))
+                || !_options.PairedRoles.Keys.Any(role => args.RolesAfter.Select(roleA => roleA.Id.ToString()).Contains(role))
+                )
+            && !_options.PairedRoles.Values.Any(role => args.RolesAfter.Select(roleA => roleA.Id).Contains(role)))
         {
             try
             {
-                DiscordRole revokedRole = args.Guild.GetRole(_options.PairedRoles[removedRole.Id.ToString()]);
+                DiscordRole revokedRole = args.Guild.GetRole(
+                    _options.PairedRoles.First(
+                        roleId => args.RolesAfter.Select(role => role.Id.ToString()).Contains(roleId.Key)
+                    ).Value
+                );
                 await args.Member.RevokeRoleAsync(revokedRole);
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "Failed while revoking single role from {MemberName}",
+                _logger.LogWarning(e, "Failed while revoking single role to {MemberName}",
                     args.Member.DisplayName);
-            }
-        }
-        else if (_options.TriggerRoles.Contains(removedRole.Id) &&
-                 !args.RolesAfter.Any(role => _options.TriggerRoles.Contains(role.Id)))
-        {
-            IEnumerable<string> pendingRoleIds =
-                _options.PairedRoles.Keys.Where(id => args.RolesBefore.Select(role => role.Id.ToString()).Contains(id));
-            foreach (string roleId in pendingRoleIds)
-            {
-                try
-                {
-                    DiscordRole revokedRole = args.Guild.GetRole(_options.PairedRoles[roleId]);
-                    await args.Member.RevokeRoleAsync(revokedRole);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogWarning(e, "Failed while revoking role {RoleId} to {MemberName}",
-                        roleId, args.Member.DisplayName);
-                    if (e is UnauthorizedException) continue;
-                    return;
-                }
             }
         }
     }
