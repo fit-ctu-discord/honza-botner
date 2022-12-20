@@ -1,7 +1,11 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
+using HonzaBotner.Discord.Managers;
 using HonzaBotner.Discord.Services.Options;
 using Microsoft.Extensions.Options;
 
@@ -74,5 +78,68 @@ public class BotCommands : ApplicationCommandModule
     public async Task PingCommandAsync(InteractionContext ctx)
     {
         await ctx.CreateResponseAsync($"Pong! Latency: {ctx.Client.Ping} ms");
+    }
+
+    [SlashCommandGroup("buttons", "Module used to edit button interactions on messages")]
+    [SlashCommandPermissions(Permissions.ManageMessages)]
+    public class ButtonCommands : ApplicationCommandModule
+    {
+        private readonly IButtonManager _buttonManager;
+
+        public ButtonCommands(IButtonManager manager)
+        {
+            _buttonManager = manager;
+        }
+
+        [SlashCommand("remove","Deletes all button interactions on the message")]
+        public async Task RemoveButtons(
+            InteractionContext ctx,
+            [Option("message-link", "URL  of the message")] string url)
+        {
+            DiscordGuild guild = ctx.Guild;
+            DiscordMessage? message = await DiscordHelper.FindMessageFromLink(guild, url);
+            if (message is null)
+            {
+                throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
+            }
+
+            try
+            {
+                await _buttonManager.RemoveButtonsFromMessage(message);
+            }
+            catch (UnauthorizedException)
+            {
+                await ctx.CreateResponseAsync("Error: You can only edit messages by this bot.");
+                return;
+            }
+
+            await ctx.CreateResponseAsync("Removed buttons");
+        }
+
+        [SlashCommand("setup","Marks message as verification message")]
+        public async Task SetupButtons(
+            InteractionContext ctx,
+            [Option("message-link", "URL  of the message")] string url
+        )
+        {
+            DiscordGuild guild = ctx.Guild;
+            DiscordMessage? message = await DiscordHelper.FindMessageFromLink(guild, url);
+            if (message == null)
+            {
+                throw new ArgumentOutOfRangeException($"Couldn't find message with link: {url}");
+            }
+
+            try
+            {
+                await _buttonManager.SetupVerificationButtons(message);
+            }
+            catch (UnauthorizedException)
+            {
+                await ctx.CreateResponseAsync("Error: You can only edit messages by this bot.");
+                return;
+            }
+
+            await ctx.CreateResponseAsync("Added verification buttons to the message.");
+        }
     }
 }
