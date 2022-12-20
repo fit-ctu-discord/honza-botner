@@ -8,11 +8,13 @@ using HonzaBotner.Discord.Services.Options;
 using HonzaBotner.Services.Contract;
 using HonzaBotner.Services.Contract.Dto;
 using Microsoft.Extensions.Options;
+using DiscordRole = DSharpPlus.Entities.DiscordRole;
 
 namespace HonzaBotner.Discord.Services.EventHandlers;
 
 public class ReminderReactionsHandler : IEventHandler<MessageReactionAddEventArgs>
 {
+    private readonly CommonCommandOptions _options;
     private readonly ReminderOptions _reminderOptions;
 
     private readonly IRemindersService _service;
@@ -20,11 +22,13 @@ public class ReminderReactionsHandler : IEventHandler<MessageReactionAddEventArg
     private readonly IReminderManager _reminderManager;
 
     public ReminderReactionsHandler(
+        IOptions<CommonCommandOptions> commonOptions,
         IOptions<ReminderOptions> options,
         IRemindersService service,
         IReminderManager reminderManager
     )
     {
+        _options = commonOptions.Value;
         _reminderOptions = options.Value;
         _service = service;
         _reminderManager = reminderManager;
@@ -51,13 +55,24 @@ public class ReminderReactionsHandler : IEventHandler<MessageReactionAddEventArg
         }
 
         // The owner has canceled the reminder
-        if (emoji == _reminderOptions.CancelEmojiName && arguments.User.Id == reminder.OwnerId)
+        if (emoji == _reminderOptions.CancelEmojiName)
         {
-            await _service.DeleteReminderAsync(reminder.Id);
-            await arguments.Message.ModifyAsync("",
-                await _reminderManager.CreateCanceledReminderEmbedAsync(reminder));
+            bool isMod = false;
+            if (arguments.Guild is not null)
+            {
+                DiscordRole moderatorRole = arguments.Guild.GetRole(_options.ModRoleId);
+                DiscordMember discordMember = await arguments.Guild.GetMemberAsync(arguments.User.Id);
+                isMod = discordMember.Roles.Contains(moderatorRole);
+            }
 
-            return EventHandlerResult.Stop;
+            if (reminder.OwnerId == arguments.User.Id || isMod)
+            {
+                await _service.DeleteReminderAsync(reminder.Id);
+                await arguments.Message.ModifyAsync("",
+                    await _reminderManager.CreateCanceledReminderEmbedAsync(reminder));
+
+                return EventHandlerResult.Stop;
+            }
         }
 
         // Somebody else wants to be mentioned within the reminder notification
