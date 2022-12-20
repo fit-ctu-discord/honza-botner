@@ -174,11 +174,11 @@ public class MemberCommands : ApplicationCommandModule
         public async Task CountAllCommandAsync(InteractionContext ctx,
             [Option("ephemeral", "Hide response? Default false")] bool ephemeral = false)
         {
-            DiscordGuild guild = ctx.Guild;
+            DiscordGuild guild = await ctx.Client.GetGuildAsync(ctx.Guild.Id, true);
             DiscordRole authenticatedRole = guild.GetRole(_commonCommandOptions.AuthenticatedRoleId);
 
             int authenticatedCount = guild.Members.Count(member => member.Value.Roles.Contains(authenticatedRole));
-            await ctx.CreateResponseAsync($"Authenticated: {authenticatedCount}, All: {ctx.Guild.Members.Count.ToString()}", ephemeral);
+            await ctx.CreateResponseAsync($"Authenticated: {authenticatedCount}, All: {guild.MemberCount}", ephemeral);
         }
 
         [SlashCommand("here", "Counts all members who can see this channel")]
