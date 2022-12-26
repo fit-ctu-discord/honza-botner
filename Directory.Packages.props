@@ -5,9 +5,9 @@
   <ItemGroup>
     <PackageVersion Include="Chronic.Core" Version="0.4.0" />
     <PackageVersion Include="Cronos" Version="0.7.1" />
-    <PackageVersion Include="DSharpPlus" Version="4.3.0-nightly-01223" />
-    <PackageVersion Include="DSharpPlus.Interactivity" Version="4.3.0-nightly-01223" />
-    <PackageVersion Include="DSharpPlus.SlashCommands" Version="4.3.0-nightly-01223" />
+    <PackageVersion Include="DSharpPlus" Version="4.3.0" />
+    <PackageVersion Include="DSharpPlus.Interactivity" Version="4.3.0" />
+    <PackageVersion Include="DSharpPlus.SlashCommands" Version="4.3.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="7.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.1" />
