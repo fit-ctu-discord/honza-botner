@@ -56,24 +56,6 @@ public class PinHandler : IEventHandler<MessageReactionAddEventArgs>
             return EventHandlerResult.Continue;
         }
 
-        // Unpinning the message - mod or bot.
-        if (eventArgs.Emoji.Equals(lockEmoji))
-        {
-            if (!eventArgs.Message.Pinned)
-            {
-                return EventHandlerResult.Continue;
-            }
-
-            DiscordMember member = await eventArgs.Guild.GetMemberAsync(eventArgs.User.Id);
-            if (member.Roles.Contains(eventArgs.Guild.GetRole(_options.ModRoleId)) ||
-                member.Id == eventArgs.Guild.CurrentMember.Id)
-            {
-                await eventArgs.Message.UnpinAsync();
-            }
-
-            return EventHandlerResult.Continue;
-        }
-
         // If pinned, nothing new will happen.
         if (eventArgs.Message.Pinned) return EventHandlerResult.Continue;
 
