@@ -87,7 +87,6 @@ internal class DiscordBot : IDiscordBot
     {
         sender.Logger.LogError(e.Exception, "Exception occured");
         await ReportException( "Client error", e.Exception);
-        e.Handled = true;
     }
 
     private Task Commands_CommandInvoked(SlashCommandsExtension e, SlashCommandInvokedEventArgs args)
@@ -100,7 +99,6 @@ internal class DiscordBot : IDiscordBot
     {
         e.Client.Logger.LogError(args.Exception, "Exception occured while executing {Command}", args.Context.CommandName);
         await ReportException($"SlashCommand {args.Context.CommandName}", args.Exception);
-        args.Handled = true;
         await args.Context.Channel.SendMessageAsync("Something failed");
     }
 
@@ -108,7 +106,6 @@ internal class DiscordBot : IDiscordBot
     {
         e.Client.Logger.LogError(args.Exception, "Exception occured while executing context menu {ContextMenu}", args.Context.CommandName);
         await ReportException($"ContextMenu {args.Context.CommandName}", args.Exception);
-        args.Handled = true;
         await args.Context.Channel.SendMessageAsync("Something failed");
     }
 
@@ -117,7 +114,6 @@ internal class DiscordBot : IDiscordBot
         e.Client.Logger.LogError(args.Exception, "Autocomplete failed while looking into option {OptionName}", args.Context.FocusedOption.Name);
         await ReportException($"Command Autocomplete for option {args.Context.FocusedOption.Name}",
             args.Exception);
-        args.Handled = true;
     }
 
     private Task Client_ComponentInteractionCreated(DiscordClient client, ComponentInteractionCreateEventArgs args)
