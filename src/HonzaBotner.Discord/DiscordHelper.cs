@@ -31,7 +31,7 @@ public static class DiscordHelper
     public static async Task<DiscordMessage?> FindMessageFromLink(DiscordGuild guild, string link)
     {
         // Match the channel and message IDs.
-        const string pattern = @"https://discord(?:app)?\.com/channels/(?:\d+)/(\d+)/(\d+)/?";
+        const string pattern = @"https://(?:ptb\.|canary\.)?discord(?:app)?\.com/channels/(?:\d+)/(\d+)/(\d+)/?";
         Regex regex = new Regex(pattern);
         Match match = regex.Match(link);
 
@@ -45,7 +45,11 @@ public static class DiscordHelper
 
             DiscordChannel? channel = guild.GetChannel(channelId);
 
-            if (channel.Type != ChannelType.Text) return null;
+            if (channel.Type != ChannelType.Text
+                && channel.Type != ChannelType.GuildForum
+                && channel.Type != ChannelType.NewsThread
+                && channel.Type != ChannelType.PrivateThread
+                && channel.Type != ChannelType.PublicThread) return null;
 
             bool messageParseSuccess = ulong.TryParse(match.Groups[2].Value, out ulong messageId);
             if (!messageParseSuccess) return null;
