@@ -99,7 +99,7 @@ public class CvutAuthorizationService : IAuthorizationService
 
             if (rolesGranted)
             {
-                Verification verification = new() { AuthId = authId, UserId = userId };
+                Verification verification = new() { AuthId = authId, UserId = userId, Username = person.Username };
 
                 await _dbContext.Verifications.AddAsync(verification);
                 await _dbContext.SaveChangesAsync();
