@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -49,8 +50,16 @@ public class CvutAuthorizationService : IAuthorizationService
             return IAuthorizationService.AuthorizeResult.AuthorizeFirst;
 
         bool discordIdPresent = await IsUserVerified(userId);
+        UsermapPerson? person;
+        try
+        {
+            person = await _usermapInfoService.GetUserInfoAsync(accessToken, username);
+        }
+        catch
+        {
+            return IAuthorizationService.AuthorizeResult.Failed;
+        }
 
-        UsermapPerson? person = await _usermapInfoService.GetUserInfoAsync(accessToken, username);
         if (person == null)
         {
             _logger.LogWarning("Couldn't fetch info from UserMap");
@@ -65,10 +74,10 @@ public class CvutAuthorizationService : IAuthorizationService
         // discord and auth -> update roles
         if (discordIdPresent && authPresent)
         {
-            bool verificationExists =
-                await _dbContext.Verifications.AnyAsync(v => v.UserId == userId && v.AuthId == authId);
+            Verification? verificationExists =
+                _dbContext.Verifications.FirstOrDefault(v => v.UserId == userId && v.AuthId == authId);
 
-            if (verificationExists)
+            if (verificationExists is not null)
             {
                 bool revoked = await _roleManager.RevokeRolesPoolAsync(userId, rolesPool);
                 if (!revoked)
@@ -79,6 +88,14 @@ public class CvutAuthorizationService : IAuthorizationService
                 }
 
                 bool granted = await _roleManager.GrantRolesAsync(userId, discordRoles);
+
+                if (verificationExists.Username is null)
+                {
+                    verificationExists.Username = username;
+                    _dbContext.Verifications.Update(verificationExists);
+                    await _dbContext.SaveChangesAsync();
+                }
+
                 return granted
                     ? IAuthorizationService.AuthorizeResult.OK
                     : IAuthorizationService.AuthorizeResult.Failed;
