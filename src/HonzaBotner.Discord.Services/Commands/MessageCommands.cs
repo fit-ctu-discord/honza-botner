@@ -46,8 +46,8 @@ public class MessageCommands : ApplicationCommandModule
                 .WithContent(messageToSend.Content)
                 .WithAllowedMentions(mention ? Mentions.All : Mentions.None);
 
-            await channel.SendMessageAsync(content);
-            await ctx.CreateResponseAsync("Message sent");
+            DiscordMessage snt = await channel.SendMessageAsync(content);
+            await ctx.CreateResponseAsync("Message sent\n" + snt.JumpLink);
         }
         catch (Exception e)
         {
@@ -84,8 +84,8 @@ public class MessageCommands : ApplicationCommandModule
 
         try
         {
-            await oldMessage.ModifyAsync(content);
-            await ctx.CreateResponseAsync("Message successfully edited.");
+            DiscordMessage edited = await oldMessage.ModifyAsync(content);
+            await ctx.CreateResponseAsync("Message successfully edited.\n" + edited.JumpLink);
         }
         catch (Exception e)
         {

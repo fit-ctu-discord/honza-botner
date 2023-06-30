@@ -129,21 +129,10 @@ public class ModerationCommands : ApplicationCommandModule
 
         List<(string, string)> embedFields = allWarnings.ConvertAll(warning =>
         {
-            DiscordMember? target = null;
-            DiscordMember? issuer = null;
-            try
-            {
-                issuer = ctx.Guild.GetMemberAsync(warning.IssuerId).Result;
-                target = ctx.Guild.GetMemberAsync(warning.UserId).Result;
-            }
-            catch (NotFoundException)
-            {
-            }
-
-            return ($"#{warning.Id}\t" +
-                    $"{target?.DisplayName ?? warning.UserId.ToString()}\t" +
+            return ($"#{warning.Id}\t",
+                    $"<@{warning.UserId}>\t" +
                     $"{warning.IssuedAt}\t" +
-                    $"{issuer?.DisplayName ?? warning.IssuerId.ToString()}", warning.Reason);
+                    $"<@{warning.IssuerId}>\n" + warning.Reason);
         });
 
         if (!embedFields.Any())
