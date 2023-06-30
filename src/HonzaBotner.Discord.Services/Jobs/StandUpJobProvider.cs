@@ -100,6 +100,11 @@ public class StandUpJobProvider : IJob
                 }
             }
 
+            if(ok.Add(fail).Sum == 0)
+            {
+                return;
+            }
+            
             DiscordRole standupPingRole = channel.Guild.GetRole(_commonOptions.StandUpRoleId);
 
             var content = new DiscordMessageBuilder()
