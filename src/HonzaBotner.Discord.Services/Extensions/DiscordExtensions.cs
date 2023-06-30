@@ -60,9 +60,9 @@ public static class DiscordExtensions
         foreach ((string name, string description) in items)
         {
             string descriptionValue = description;
-            if (description.Length > 250)
+            if (description.Length > 300)
             {
-                descriptionValue = description.Substring(0, 250) + "...";
+                descriptionValue = description.Substring(0, 300) + "...";
             }
 
             embed.AddField(name, descriptionValue);

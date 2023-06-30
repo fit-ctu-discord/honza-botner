@@ -9,5 +9,6 @@ internal sealed class VerificationMapper : IEntityMapper<Verification>
         builder.HasKey(v => v.UserId);
         builder.HasIndex(v => v.AuthId)
             .IsUnique(); // By default it is "IS UNIQUE IF NOT NULL"
+        builder.Property(v => v.Username).IsRequired(false);
     }
 }

@@ -4,8 +4,9 @@ on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    # a push event from the origin repo, or a PR from external repo
+    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name != 'fit-ctu-discord/honza-botner' }}
 
     steps:
     - uses: actions/checkout@v3
