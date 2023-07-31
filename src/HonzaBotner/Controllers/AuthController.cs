@@ -20,7 +20,7 @@ public class AuthController : BaseController
     private readonly ILogger<AuthController> _logger;
     private readonly IAuthorizationService _authorizationService;
     private readonly CvutConfig _cvutConfig;
-    private string RedirectUri => _cvutConfig.AppBaseUrl + "/" + nameof(Callback);
+    private string RedirectUri => _cvutConfig.AppBaseUrl + "/Auth/" + nameof(Callback);
 
     public AuthController(
         ILogger<AuthController> logger,
