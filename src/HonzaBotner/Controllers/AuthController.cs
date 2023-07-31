@@ -19,16 +19,17 @@ public class AuthController : BaseController
     private const string RolesPoolCookieName = "honza-botner-roles-pool";
     private readonly ILogger<AuthController> _logger;
     private readonly IAuthorizationService _authorizationService;
-    private string RedirectUri => Url.ActionLink(nameof(Callback))!;
+    private readonly CvutConfig _cvutConfig;
+    private string RedirectUri => _cvutConfig.AppBaseUrl + "/" + nameof(Callback);
 
     public AuthController(
         ILogger<AuthController> logger,
         IAuthorizationService authorizationService,
-        IOptions<InfoOptions> options
-    ) : base(options)
+        IOptions<InfoOptions> options, IOptions<CvutConfig> cvutConfig) : base(options)
     {
         _logger = logger;
         _authorizationService = authorizationService;
+        _cvutConfig = cvutConfig.Value;
     }
 
     [HttpGet("Authenticate/{userId}/{pool}")]
