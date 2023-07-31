@@ -120,11 +120,11 @@ public class Startup
         else
         {
             UpdateDatabase(app);
-            app.UseReverseProxyHttpsEnforcer();
+            // app.UseReverseProxyHttpsEnforcer();
             app.UseExceptionHandler("/error");
         }
 
-        app.UseHttpsRedirection();
+        // app.UseHttpsRedirection();
         app.UseRouting();
         app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
     }

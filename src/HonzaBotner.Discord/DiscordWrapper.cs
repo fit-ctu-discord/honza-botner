@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using DSharpPlus;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
@@ -23,7 +24,8 @@ public class DiscordWrapper
             LoggerFactory = loggerFactory,
             Token = optionsConfig.Token,
             TokenType = TokenType.Bot,
-            Intents = DiscordIntents.All
+            Intents = DiscordIntents.All,
+            Proxy = new WebProxy() { BypassProxyOnLocal = true }
         };
 
         Client = new DiscordClient(config);
