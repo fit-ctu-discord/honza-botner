@@ -24,7 +24,8 @@ public abstract class BaseController : Controller
             success ? string.Empty : "statement--error",
             message,
             _options.Value.RepositoryUrl,
-            _options.Value.IssueTrackerUrl
+            _options.Value.IssueTrackerUrl,
+            _options.Value.ServerName
         );
 
         return Content(content, "text/html");
