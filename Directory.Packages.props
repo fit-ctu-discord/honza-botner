@@ -8,9 +8,9 @@
     <PackageVersion Include="DSharpPlus" Version="4.4.2 " />
     <PackageVersion Include="DSharpPlus.Interactivity" Version="4.4.2 " />
     <PackageVersion Include="DSharpPlus.SlashCommands" Version="4.4.2 " />
-    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.8" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="7.0.8" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.8" />
+    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="7.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.10" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
@@ -18,13 +18,13 @@
     <PackageVersion Include="Microsoft.Extensions.Http" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="7.0.1" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.6.3" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageVersion Include="System.Collections.Immutable" Version="7.0.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
-    <PackageVersion Include="xunit" Version="2.4.2" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
+    <PackageVersion Include="xunit" Version="2.5.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.0" />
     <PackageVersion Include="Shouldly" Version="4.2.1" />
     <PackageVersion Include="Html2Markdown" Version="5.1.0.703" />
   </ItemGroup>
