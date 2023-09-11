@@ -9,7 +9,7 @@ jobs:
     if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name != 'fit-ctu-discord/honza-botner' }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v3
       with:
