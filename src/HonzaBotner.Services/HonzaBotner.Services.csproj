@@ -6,6 +6,7 @@
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="Html2Markdown" />
+    <PackageReference Include="HtmlAgilityPack" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HonzaBotner.Database\HonzaBotner.Database.csproj" />
