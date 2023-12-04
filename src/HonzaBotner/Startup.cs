@@ -70,6 +70,7 @@ public class Startup
                         // .AddEventHandler<BadgeRoleHandler>()
                         .AddEventHandler<ThreadHandler>()
                         .AddEventHandler<StandupButtonHandler>()
+                        .AddEventHandler<StickerCounterService>()
                         ;
                 }, commands =>
                 {
