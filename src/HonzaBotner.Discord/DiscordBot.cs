@@ -56,6 +56,7 @@ internal class DiscordBot : IDiscordBot
         Client.GuildMemberUpdated += Client_GuildMemberUpdated;
         Client.ChannelCreated += Client_ChannelCreated;
         Client.ThreadCreated += Client_ThreadCreated;
+        Client.MessageCreated += (_, args) => _eventHandler.Handle(args);
 
         _commandsConfigurator.Config(Commands);
 
