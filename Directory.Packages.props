@@ -26,6 +26,6 @@
     <PackageVersion Include="xunit" Version="2.6.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.4" />
     <PackageVersion Include="Shouldly" Version="4.2.1" />
-    <PackageVersion Include="Html2Markdown" Version="5.1.0.703" />
+    <PackageVersion Include="Html2Markdown" Version="6.0.0.1" />
   </ItemGroup>
 </Project>
