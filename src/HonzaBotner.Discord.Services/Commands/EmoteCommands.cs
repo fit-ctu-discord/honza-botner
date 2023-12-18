@@ -21,12 +21,14 @@ public class EmoteCommands : ApplicationCommandModule
 
     public enum DisplayTypes
     {
-        [ChoiceName("all")]
+        [ChoiceName("emotes")]
         All,
         [ChoiceName("animated")]
         Animated,
         [ChoiceName("still")]
-        Still
+        Still,
+        [ChoiceName("stickers")]
+        Stickers
     }
 
     public EmoteCommands(IEmojiCounterService emojiCounterService)
@@ -46,6 +48,16 @@ public class EmoteCommands : ApplicationCommandModule
             ? results.OrderByDescending(emoji => emoji.Used)
             : results.OrderByDescending(emoji => emoji.UsagePerDay);
 
+        if (type == DisplayTypes.Stickers) await DisplayStickersAsync(ctx, total, orderedResults);
+        else await DisplayEmotesAsync(ctx, total, type, orderedResults);
+    }
+
+    private async Task DisplayEmotesAsync(
+        InteractionContext ctx,
+        bool total,
+        DisplayTypes type,
+        IOrderedEnumerable<CountedEmoji> orderedResults)
+    {
         StringBuilder builder = new("\n");
 
         int emojisAppended = 0;
@@ -101,6 +113,55 @@ public class EmoteCommands : ApplicationCommandModule
         else
         {
             await ctx.CreateResponseAsync("No emotes to show", true);
+        }
+    }
+
+    private async Task DisplayStickersAsync(
+        InteractionContext ctx,
+        bool total,
+        IOrderedEnumerable<CountedEmoji> orderedResults)
+    {
+        StringBuilder builder = new("\n");
+
+        int stickersAppended = 0;
+
+        IReadOnlyDictionary<ulong, DiscordMessageSticker> stickers = ctx.Guild.Stickers;
+
+        foreach (CountedEmoji result in orderedResults)
+        {
+            if (!stickers.Keys.Contains(result.Id))
+            {
+                continue;
+            }
+            string label = total ? "×" : "×/day";
+
+            builder.Append(stickers[result.Id].Name)
+                .Append(" `")
+                .Append(
+                    (total ? result.Used.ToString() : $"{result.UsagePerDay:0.00}").PadLeft(10, ' '))
+                .Append(label)
+                .Append(" `\n");
+
+            stickersAppended++;
+        }
+
+        if (stickersAppended > 0)
+        {
+            InteractivityExtension? interactivity = ctx.Client.GetInteractivity();
+            DiscordEmbedBuilder embedBuilder = new()
+            {
+                Author = new DiscordEmbedBuilder.EmbedAuthor
+                {
+                    IconUrl = ctx.Member.AvatarUrl, Name = ctx.Member.DisplayName
+                },
+                Title = "Custom sticker usage stats"
+            };
+            IEnumerable<Page> pages = interactivity.GeneratePagesInEmbed(builder.ToString(), SplitType.Line, embedBuilder);
+            await interactivity.SendPaginatedResponseAsync(ctx.Interaction, false, ctx.User, pages);
+        }
+        else
+        {
+            await ctx.CreateResponseAsync("No stickers to show", true);
         }
     }
 }
