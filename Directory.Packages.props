@@ -4,7 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Chronic.Core" Version="0.4.0" />
-    <PackageVersion Include="Cronos" Version="0.7.1" />
+    <PackageVersion Include="Cronos" Version="0.8.0" />
     <PackageVersion Include="DSharpPlus" Version="4.4.6 " />
     <PackageVersion Include="DSharpPlus.Interactivity" Version="4.4.6 " />
     <PackageVersion Include="DSharpPlus.SlashCommands" Version="4.4.6 " />
