@@ -23,7 +23,7 @@ jobs:
     - name: Pack the build to tar
       run: tar -czvf botner-linux-musl-x64.tar.gz botner-linux-musl-x64
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: botner-linux-musl-x64.tar.gz
