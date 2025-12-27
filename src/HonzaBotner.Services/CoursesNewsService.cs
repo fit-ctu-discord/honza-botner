@@ -83,7 +83,7 @@ public class CoursesNewsService : INewsService
             { "since", since.AddDays(-1).ToString("yyyy-MM-dd") }
         };
 
-        UriBuilder uriBuilder = new("https://courses.fit.cvut.cz/api/v1/cpages/news")
+        UriBuilder uriBuilder = new("https://courses.fit.cvut.cz/api/v2/cpages/news")
         {
             Query = queryParams.GetQueryString()
         };
